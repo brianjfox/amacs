@@ -1,0 +1,5 @@
+# Build artifacts
+/build/
+
+# Reference assembler is fetched + built locally, not committed (see tools/setup.sh)
+/tools/merlin32/

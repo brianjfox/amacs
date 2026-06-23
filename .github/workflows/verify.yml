@@ -1,0 +1,27 @@
+name: round-trip verify
+
+# The heart of the project: the reconstructed source in src/ must reassemble
+# byte-for-byte to BIN/AMACS.OBJ. This job fails the moment that stops being
+# true, so the round-trip can never silently regress.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Merlin 32 (reference assembler)
+        run: tools/setup.sh
+
+      - name: Assemble src/amacs.s -> build/AMACS.OBJ
+        run: tools/build.sh
+
+      - name: Verify byte-for-byte against BIN/AMACS.OBJ
+        run: tools/verify.sh
