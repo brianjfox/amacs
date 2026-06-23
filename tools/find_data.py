@@ -25,15 +25,35 @@ import sys
 ORG = 0x1000
 PRINT_MESSAGE = 0x5968  # JSR PrintMessage -> inline $00-terminated string
 
-# (start, end_exclusive, name) for fixed-extent structural data.
+# (start, end_exclusive, name) for fixed-extent structural data. Extents are
+# bounded by the next routine symbol in LINK.OUTPUT and confirmed by inspecting
+# record structure / referencing code.
 STRUCTURAL = [
     (0x1027, 0x1035, "entry pointer block (CompList..C_XCharCount)"),
     (0x111D, 0x1126, "WindowOne (9-byte window descriptor record)"),
     (0x1126, 0x112F, "WindowTwo (9-byte window descriptor record)"),
     (0x112F, 0x1130, "SelectedWind (current window index)"),
+    # --- command/char/completion dispatch tables ---
+    (0x3F6D, 0x3F70, "CharIndex (3 bytes)"),
+    (0x4F84, 0x504E, "ComTab (command dispatch table)"),
+    (0x5987, 0x598C, "CompList / CompOffset / CompCount"),
+    # --- mode / key name tables ---
+    (0x54F2, 0x5528, "ModeNames (major+minor mode name strings)"),
+    (0x5528, 0x5538, "MinorNames (pointers into ModeNames)"),
+    (0x5908, 0x5944, "KeyNames (8 key codes + 8 name pointers + name strings)"),
+    # --- date / file-type tables ---
+    (0x6E79, 0x6E9D, "MonthNames (12 x 3-char month abbreviations)"),
+    (0x7640, 0x7679, "FileTypeNames (14 [type,3-char] records: TXT,BIN,DIR.. + $00)"),
+    # --- extended-key dispatch ---
     (0x7DB8, 0x7DDE, "C_XCharacters (38 extended-key chars)"),
     (0x7DDE, 0x7E2A, "C_XVectors (38 handler addresses)"),
     (0x7E2A, 0x7E2B, "C_XCharCount ($26 = 38)"),
+    # --- settable-variable tables ---
+    (0x975D, 0x9A6A, "Variables (variable-name + record table)"),
+    (0x9A6A, 0x9A6D, "VariableLink"),
+    (0x9A6D, 0x9B15, "VarList (variable records)"),
+    (0x9B15, 0x9B37, "VarDocList (variable doc strings)"),
+    # --- command-name string table to EOF ---
     (0x9B37, 0xA4F8, "CommandNames (command-name string table to EOF)"),
 ]
 

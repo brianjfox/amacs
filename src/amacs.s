@@ -6983,7 +6983,7 @@ IIcLoc             = $FBC0
                 jsr PrintMessage    ; $3F43
 ; ---- $3F46-$3F4A  data  msg: M-X ----
         dfb $CD,$AD,$D8,$A0,$00    ; $3F46  M-X .
-; ---- $3F4B-$3F7F  code ----
+; ---- $3F4B-$3F6C  code ----
                 lda #$32    ; $3F4B
                 sta CompLineHelp    ; $3F4D
                 lda #$41    ; $3F50
@@ -6998,11 +6998,9 @@ IIcLoc             = $FBC0
                 jmp CallTemp    ; $3F67
                 lda #$01    ; $3F6A
                 rts    ; $3F6C
-;
-; === CharIndex ===
-                brk    ; $3F6D
-                brk    ; $3F6E
-                brk    ; $3F6F
+; ---- $3F6D-$3F6F  data  CharIndex (3 bytes) ----
+        dfb $00,$00,$00    ; $3F6D  ...
+; ---- $3F70-$3F7F  code ----
 ;
 ; === ReadVariable ===
                 lda #$5D    ; $3F70
@@ -8405,7 +8403,7 @@ IIcLoc             = $FBC0
                 jsr PrintMessage    ; $4B6C
 ; ---- $4B6F-$4B71  data  msg: ): ----
         dfb $A9,$BA,$00    ; $4B6F  ):.
-; ---- $4B72-$51CB  code ----
+; ---- $4B72-$4F83  code ----
                 dec BufferRead    ; $4B72
                 jsr ReadLine    ; $4B75
                 php    ; $4B78
@@ -8986,151 +8984,21 @@ IIcLoc             = $FBC0
                 jsr SetLastKill    ; $4F7E
                 lda #$01    ; $4F81
                 rts    ; $4F83
-;
-; === ComTab ===
-                brk    ; $4F84
-                brk    ; $4F85
-                brk    ; $4F86
-                brk    ; $4F87
-                brk    ; $4F88
-                brk    ; $4F89
-                brk    ; $4F8A
-                brk    ; $4F8B
-                brk    ; $4F8C
-                brk    ; $4F8D
-                brk    ; $4F8E
-                brk    ; $4F8F
-                brk    ; $4F90
-                brk    ; $4F91
-                brk    ; $4F92
-                brk    ; $4F93
-                brk    ; $4F94
-                brk    ; $4F95
-                rol CV    ; $4F96
-                brk    ; $4F98
-                brk    ; $4F99
-                ror    ; $4F9A
-                asl FlushLibs,x    ; $4F9B
-                adc (CV)    ; $4F9E
-                cmp: WindowTop,x    ; $4FA0
-                brk    ; $4FA3
-                jmp WindowBot    ; $4FA4
-                brk    ; $4FA7
-                beq $4FCD    ; $4FA8
-                brk    ; $4FAA
-                brk    ; $4FAB
-                brk    ; $4FAC
-                brk    ; $4FAD
-                brk    ; $4FAE
-                brk    ; $4FAF
-                brk    ; $4FB0
-                brk    ; $4FB1
-                ror $1F4F,x    ; $4FB2
-        dfb $3F        ; $4FB5  (data/65C02-bit)
-                brk    ; $4FB6
-                brk    ; $4FB7
-        dfb $82        ; $4FB8  (data/65C02-bit)
-                bpl $4FBB    ; $4FB9
-                brk    ; $4FBB
-                dec $94,x    ; $4FBC
-                brk    ; $4FBE
-                brk    ; $4FBF
-                brk    ; $4FC0
-                brk    ; $4FC1
-                brk    ; $4FC2
-                brk    ; $4FC3
-                brk    ; $4FC4
-                brk    ; $4FC5
-        dfb $2B        ; $4FC6  (data/65C02-bit)
-                bit $00    ; $4FC7
-                brk    ; $4FC9
-                brk    ; $4FCA
-                brk    ; $4FCB
-                brk    ; $4FCC
-                brk    ; $4FCD
-                adc $84,x    ; $4FCE
-                bmi $4FF6    ; $4FD0
-                brk    ; $4FD2
-                brk    ; $4FD3
-                brk    ; $4FD4
-                brk    ; $4FD5
-                brk    ; $4FD6
-                brk    ; $4FD7
-                brk    ; $4FD8
-                brk    ; $4FD9
-                sec    ; $4FDA
-                bit $00    ; $4FDB
-                brk    ; $4FDD
-                ora ($7B),y    ; $4FDE
-                cmp ($94)    ; $4FE0
-                brk    ; $4FE2
-                brk    ; $4FE3
-                cmp ($7A)    ; $4FE4
-                cmp ($7A)    ; $4FE6
-                cmp ($7A)    ; $4FE8
-                cmp ($7A)    ; $4FEA
-                cmp ($7A)    ; $4FEC
-                cmp ($7A)    ; $4FEE
-                cmp ($7A)    ; $4FF0
-                cmp ($7A)    ; $4FF2
-                cmp ($7A)    ; $4FF4
-                cmp ($7A)    ; $4FF6
-                brk    ; $4FF8
-                brk    ; $4FF9
-                ply    ; $4FFA
-                asl GotoTop,x    ; $4FFB
-                bcs $4F8D    ; $4FFE
-                phy    ; $5000
-                inc    ; $5001
-                inx    ; $5002
-        dfb $7F        ; $5003  (data/65C02-bit)
-                brk    ; $5004
-                brk    ; $5005
-                ror $C23A    ; $5006
-                and $7D,x    ; $5009
-                rol $E7,x    ; $500B
-        dfb $37        ; $500D  (data/65C02-bit)
-                rol $173A    ; $500E
-                rol $00,x    ; $5011
-                brk    ; $5013
-                lda WindowTop,x    ; $5014
-        dfb $BB        ; $5016  (data/65C02-bit)
-                stx: $0000    ; $5017
-                cpx #$3A    ; $501A
-                stz $36,x    ; $501C
-                brk    ; $501E
-                brk    ; $501F
-                ldx $1E    ; $5020
-                inc $91    ; $5022
-                stz $C71E,x    ; $5024
-        dfb $22        ; $5027  (data/65C02-bit)
-                sbc ($17,x)    ; $5028
-                dex    ; $502A
-        dfb $63        ; $502B  (data/65C02-bit)
-                brk    ; $502C
-                brk    ; $502D
-                rts    ; $502E
-                rol $4C,x    ; $502F
-                and $92,x    ; $5031
-                sta MetaX    ; $5033
-                brk    ; $5036
-                brk    ; $5037
-                brk    ; $5038
-                brk    ; $5039
-                and $3C22,y    ; $503A
-                and DownPara,y    ; $503D
-                brk    ; $5040
-                brk    ; $5041
-                brk    ; $5042
-                brk    ; $5043
-                brk    ; $5044
-                brk    ; $5045
-                lsr $3B17,x    ; $5046
-        dfb $17        ; $5049  (data/65C02-bit)
-        dfb $B7        ; $504A  (data/65C02-bit)
-        dfb $1B        ; $504B  (data/65C02-bit)
-        dfb $C2        ; $504C  (data/65C02-bit)
-        dfb $1B        ; $504D  (data/65C02-bit)
+; ---- $4F84-$504D  data  ComTab (command dispatch table) ----
+        dfb $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00    ; $4F84  ................
+        dfb $00,$00,$26,$25,$00,$00,$6A,$1E,$BB,$92,$72,$25,$DD,$22,$00,$00    ; $4F94  ..&%..j.;.r%]"..
+        dfb $4C,$23,$00,$00,$F0,$23,$00,$00,$00,$00,$00,$00,$00,$00,$7E,$4F    ; $4FA4  L#..p#........~O
+        dfb $1F,$3F,$00,$00,$82,$10,$00,$00,$D6,$94,$00,$00,$00,$00,$00,$00    ; $4FB4  .?......V.......
+        dfb $00,$00,$2B,$24,$00,$00,$00,$00,$00,$00,$75,$84,$30,$24,$00,$00    ; $4FC4  ..+$......u.0$..
+        dfb $00,$00,$00,$00,$00,$00,$38,$24,$00,$00,$11,$7B,$D2,$94,$00,$00    ; $4FD4  ......8$...{R...
+        dfb $D2,$7A,$D2,$7A,$D2,$7A,$D2,$7A,$D2,$7A,$D2,$7A,$D2,$7A,$D2,$7A    ; $4FE4  RzRzRzRzRzRzRzRz
+        dfb $D2,$7A,$D2,$7A,$00,$00,$7A,$1E,$41,$1A,$B0,$8D,$5A,$1A,$E8,$7F    ; $4FF4  RzRz..z.A.0.Z.h.
+        dfb $00,$00,$6E,$3A,$C2,$35,$7D,$36,$E7,$37,$2E,$3A,$17,$36,$00,$00    ; $5004  ..n:B5}6g7.:.6..
+        dfb $B5,$22,$BB,$8E,$00,$00,$E0,$3A,$74,$36,$00,$00,$A6,$1E,$E6,$91    ; $5014  5";...`:t6..&.f.
+        dfb $9E,$1E,$C7,$22,$E1,$17,$CA,$63,$00,$00,$60,$36,$4C,$35,$92,$8D    ; $5024  ..G"a.Jc..`6L5..
+        dfb $1F,$3F,$00,$00,$00,$00,$39,$22,$3C,$39,$CF,$21,$00,$00,$00,$00    ; $5034  .?....9"<9O!....
+        dfb $00,$00,$5E,$17,$3B,$17,$B7,$1B,$C2,$1B    ; $5044  ..^.;.7.B.
+; ---- $504E-$51CB  code ----
 ;
 ; === doc:ExitSafe ===
         dfb $CF        ; $504E  (data/65C02-bit)
@@ -9341,7 +9209,7 @@ IIcLoc             = $FBC0
         dfb $A2,$A0,$E3,$E1,$EE,$A7,$F4,$A0,$E2,$E5,$A0,$EF,$F0,$E5,$EE,$E5    ; $51E6  " can't be opene
         dfb $E4,$AE,$A0,$A0,$C3,$E8,$E5,$E3,$EB,$A0,$A2,$D3,$F9,$F3,$F4,$E5    ; $51F6  d.  Check "Syste
         dfb $ED,$A0,$C6,$E9,$EC,$E5,$F3,$A0,$D0,$E1,$F4,$E8,$A2,$AE,$8D,$00    ; $5206  m Files Path"...
-; ---- $5216-$585A  code ----
+; ---- $5216-$54F1  code ----
                 jsr CloseTypeout    ; $5216
                 lda #$01    ; $5219
                 rts    ; $521B
@@ -9711,42 +9579,14 @@ IIcLoc             = $FBC0
                 sta CV    ; $54EC
                 jsr vtab    ; $54EE
                 rts    ; $54F1
-                lsr $75    ; $54F2
-                ror $6164    ; $54F4
-                adc $6E65    ; $54F7
-                stz $61,x    ; $54FA
-                cpx $6554    ; $54FC
-                sei    ; $54FF
-        dfb $F4        ; $5500  (data/65C02-bit)
-                eor $7265    ; $5501
-                jmp ($EE69)    ; $5504
-                jmp $7369    ; $5507
-                beq $54CF    ; $550A
-                bvc $556F    ; $550C
-        dfb $73        ; $550E  (data/65C02-bit)
-        dfb $63        ; $550F  (data/65C02-bit)
-                adc ($EC,x)    ; $5510
-                eor (TheBuffer_X,x)    ; $5512
-        dfb $6F        ; $5514  (data/65C02-bit)
-                sbc $6946    ; $5515
-                jmp (PBuffFile)    ; $5518
-                ror $6564    ; $551B
-                ror $43F4    ; $551E
-                adc (PhysBuffBot,x)    ; $5521
-        dfb $F3        ; $5523  (data/65C02-bit)
-        dfb $44        ; $5524  (data/65C02-bit)
-                adc BuffTop    ; $5525
-                ldy #$12    ; $5527
-                eor $16,x    ; $5529
-                eor $1A,x    ; $552B
-                eor $00,x    ; $552D
-                brk    ; $552F
-                jsr $0055    ; $5530
-                brk    ; $5533
-                brk    ; $5534
-                brk    ; $5535
-                brk    ; $5536
-                brk    ; $5537
+; ---- $54F2-$5527  data  ModeNames (major+minor mode name strings) ----
+        dfb $46,$75,$6E,$64,$61,$6D,$65,$6E,$74,$61,$EC,$54,$65,$78,$F4,$4D    ; $54F2  FundamentalTextM
+        dfb $65,$72,$6C,$69,$EE,$4C,$69,$73,$F0,$C3,$50,$61,$73,$63,$61,$EC    ; $5502  erlinLispCPascal
+        dfb $41,$74,$6F,$ED,$46,$69,$6C,$EC,$49,$6E,$64,$65,$6E,$F4,$43,$61    ; $5512  AtomFillIndentCa
+        dfb $70,$F3,$44,$65,$66,$A0    ; $5522  psDef 
+; ---- $5528-$5537  data  MinorNames (pointers into ModeNames) ----
+        dfb $12,$55,$16,$55,$1A,$55,$00,$00,$20,$55,$00,$00,$00,$00,$00,$00    ; $5528  .U.U.U.. U......
+; ---- $5538-$585A  code ----
 ;
 ; === PrintMinors ===
                 ldy #$40    ; $5538
@@ -10231,7 +10071,7 @@ IIcLoc             = $FBC0
                 jsr PrintMessage    ; $58F0
 ; ---- $58F3-$58F9  data  msg: -Arrow ----
         dfb $AD,$C1,$F2,$F2,$EF,$F7,$00    ; $58F3  -Arrow.
-; ---- $58FA-$5946  code ----
+; ---- $58FA-$5907  code ----
                 rts    ; $58FA
                 brk    ; $58FB
                 brk    ; $58FC
@@ -10241,39 +10081,15 @@ IIcLoc             = $FBC0
                 dex    ; $5904
                 bpl $58FF    ; $5905
                 rts    ; $5907
-                sta $9B89    ; $5908
-        dfb $FF        ; $590B  (data/65C02-bit)
-                adc (PageTop,x)    ; $590C
-        dfb $63        ; $590E  (data/65C02-bit)
-                stz WindowLft    ; $590F
-                eor $5926,y    ; $5911
-                and #$59    ; $5914
-        dfb $2F        ; $5916  (data/65C02-bit)
-                eor $5935,y    ; $5917
-                and $3E59,y    ; $591A
-                eor $5940,y    ; $591D
-                cmp ($E5)    ; $5920
-        dfb $F4        ; $5922  (data/65C02-bit)
-                sbc $F2,x    ; $5923
-                ror $E1D4    ; $5925
-        dfb $62        ; $5928  (data/65C02-bit)
-                cmp $F3    ; $5929
-        dfb $E3        ; $592B  (data/65C02-bit)
-                sbc ($F0,x)    ; $592C
-                adc $C4    ; $592E
-                sbc $EC    ; $5930
-                sbc $F4    ; $5932
-                adc $CC    ; $5934
-                sbc $E6    ; $5936
-                stz $D2,x    ; $5938
-                sbc #$E7    ; $593A
-                inx    ; $593C
-                stz $D5,x    ; $593D
-                bvs $5905    ; $593F
-        dfb $EF        ; $5941  (data/65C02-bit)
-        dfb $F7        ; $5942  (data/65C02-bit)
-                ror $6820    ; $5943
-        dfb $59        ; $5946  (truncated)
+; ---- $5908-$5943  data  KeyNames (8 key codes + 8 name pointers + name strings) ----
+        dfb $8D,$89,$9B,$FF,$61,$62,$63,$64,$20,$59,$26,$59,$29,$59,$2F,$59    ; $5908  ....abcd Y&Y)Y/Y
+        dfb $35,$59,$39,$59,$3E,$59,$40,$59,$D2,$E5,$F4,$F5,$F2,$6E,$D4,$E1    ; $5918  5Y9Y>Y@YReturnTa
+        dfb $62,$C5,$F3,$E3,$E1,$F0,$65,$C4,$E5,$EC,$E5,$F4,$65,$CC,$E5,$E6    ; $5928  bEscapeDeleteLef
+        dfb $74,$D2,$E9,$E7,$E8,$74,$D5,$70,$C4,$EF,$F7,$6E    ; $5938  tRightUpDown
+; ---- $5944-$5946  code ----
+;
+; === print_control ===
+                jsr PrintMessage    ; $5944
 ; ---- $5947-$594F  data  msg: Control- ----
         dfb $C3,$EF,$EE,$F4,$F2,$EF,$EC,$AD,$00    ; $5947  Control-.
 ; ---- $5950-$5956  code ----
@@ -10291,7 +10107,7 @@ IIcLoc             = $FBC0
                 jsr PrintMessage    ; $595E
 ; ---- $5961-$5966  data  msg: Space ----
         dfb $D3,$F0,$E1,$E3,$E5,$00    ; $5961  Space.
-; ---- $5967-$5F92  code ----
+; ---- $5967-$5986  code ----
                 rts    ; $5967
 ;
 ; === PrintMessage ===
@@ -10312,17 +10128,9 @@ IIcLoc             = $FBC0
                 lda $06    ; $5983
                 pha    ; $5985
                 rts    ; $5986
-;
-; === CompList ===
-        dfb $37        ; $5987  (data/65C02-bit)
-        dfb $9B        ; $5988  (data/65C02-bit)
-;
-; === CompOffset ===
-                brk    ; $5989
-                brk    ; $598A
-;
-; === CompCount ===
-                brk    ; $598B
+; ---- $5987-$598B  data  CompList / CompOffset / CompCount ----
+        dfb $37,$9B,$00,$00,$00    ; $5987  7....
+; ---- $598C-$5F92  code ----
 ;
 ; === PrintCompDoc ===
                 jsr DocRef    ; $598C
@@ -12878,7 +12686,7 @@ IIcLoc             = $FBC0
 ; ---- $6CEF-$6CFF  data  msg: Current prefix: ----
         dfb $C3,$F5,$F2,$F2,$E5,$EE,$F4,$A0,$F0,$F2,$E5,$E6,$E9,$F8,$BA,$A0    ; $6CEF  Current prefix: 
         dfb $00    ; $6CFF  .
-; ---- $6D00-$6EAA  code ----
+; ---- $6D00-$6E78  code ----
                 ldx #$00    ; $6D00
                 lda PrefixName,x    ; $6D02
                 ora #$80    ; $6D05
@@ -13095,28 +12903,11 @@ IIcLoc             = $FBC0
                 ror $6E94    ; $6E72
         dfb $97        ; $6E75  (data/65C02-bit)
                 ror $6E9A    ; $6E76
-                lsr    ; $6E79
-                adc ($EE,x)    ; $6E7A
-                lsr $65    ; $6E7C
-        dfb $E2        ; $6E7E  (data/65C02-bit)
-                eor $F261    ; $6E7F
-                eor (PhysBuffBot,x)    ; $6E82
-                sbc ($4D)    ; $6E84
-                adc ($F9,x)    ; $6E86
-                lsr    ; $6E88
-                adc $EE,x    ; $6E89
-                lsr    ; $6E8B
-                adc $EC,x    ; $6E8C
-                eor ($75,x)    ; $6E8E
-        dfb $E7        ; $6E90  (data/65C02-bit)
-        dfb $53        ; $6E91  (data/65C02-bit)
-                adc $F0    ; $6E92
-        dfb $4F        ; $6E94  (data/65C02-bit)
-        dfb $63        ; $6E95  (data/65C02-bit)
-        dfb $F4        ; $6E96  (data/65C02-bit)
-                lsr $F66F    ; $6E97
-        dfb $44        ; $6E9A  (data/65C02-bit)
-                adc $E3    ; $6E9B
+; ---- $6E79-$6E9C  data  MonthNames (12 x 3-char month abbreviations) ----
+        dfb $4A,$61,$EE,$46,$65,$E2,$4D,$61,$F2,$41,$70,$F2,$4D,$61,$F9,$4A    ; $6E79  JanFebMarAprMayJ
+        dfb $75,$EE,$4A,$75,$EC,$41,$75,$E7,$53,$65,$F0,$4F,$63,$F4,$4E,$6F    ; $6E89  unJulAugSepOctNo
+        dfb $F6,$44,$65,$E3    ; $6E99  vDec
+; ---- $6E9D-$6EAA  code ----
 ;
 ; === PrintDate ===
                 jsr $6E28    ; $6E9D
@@ -13958,7 +13749,7 @@ IIcLoc             = $FBC0
                 jsr PrintMessage    ; $7537
 ; ---- $753A-$753C  data  msg: .. ----
         dfb $8D,$8D,$00    ; $753A  ...
-; ---- $753D-$7B84  code ----
+; ---- $753D-$763F  code ----
                 rts    ; $753D
 ;
 ; === HexListing ===
@@ -14067,39 +13858,12 @@ IIcLoc             = $FBC0
                 dex    ; $763C
                 bne $7639    ; $763D
                 rts    ; $763F
-;
-; === FTypeTable ===
-                tsb $D4    ; $7640
-                cld    ; $7642
-        dfb $D4        ; $7643  (data/65C02-bit)
-                asl $C2    ; $7644
-                cmp #$CE    ; $7646
-        dfb $0F        ; $7648  (data/65C02-bit)
-                cpy $C9    ; $7649
-                cmp ($19)    ; $764B
-                cmp ($C4,x)    ; $764D
-        dfb $C2        ; $764F  (data/65C02-bit)
-                inc    ; $7650
-                cmp ($D7,x)    ; $7651
-                bne $7670    ; $7653
-                cmp ($D3,x)    ; $7655
-                bne $7648    ; $7657
-                bne $761C    ; $7659
-        dfb $D3        ; $765B  (data/65C02-bit)
-                beq $7621    ; $765C
-                cmp $F7C4    ; $765E
-                cmp #$CD    ; $7661
-        dfb $C7        ; $7663  (data/65C02-bit)
-                sed    ; $7664
-                cpy $CBCE    ; $7665
-        dfb $FC        ; $7668  (data/65C02-bit)
-        dfb $C2        ; $7669  (data/65C02-bit)
-                cmp ($D3,x)    ; $766A
-                sbc $C1D6,x    ; $766C
-                cmp ($FE)    ; $766F
-                cmp ($C5)    ; $7671
-                cpy $D3FF    ; $7673
-                cmp: $00D3,y    ; $7676
+; ---- $7640-$7678  data  FileTypeNames (14 [type,3-char] records: TXT,BIN,DIR.. + $00) ----
+        dfb $04,$D4,$D8,$D4,$06,$C2,$C9,$CE,$0F,$C4,$C9,$D2,$19,$C1,$C4,$C2    ; $7640  .TXT.BIN.DIR.ADB
+        dfb $1A,$C1,$D7,$D0,$1B,$C1,$D3,$D0,$EF,$D0,$C1,$D3,$F0,$C3,$CD,$C4    ; $7650  .AWP.ASPoPASpCMD
+        dfb $F7,$C9,$CD,$C7,$F8,$CC,$CE,$CB,$FC,$C2,$C1,$D3,$FD,$D6,$C1,$D2    ; $7660  wIMGxLNK|BAS}VAR
+        dfb $FE,$D2,$C5,$CC,$FF,$D3,$D9,$D3,$00    ; $7670  ~REL.SYS.
+; ---- $7679-$7B84  code ----
 ;
 ; === PrintType ===
                 ldy #$00    ; $7679
@@ -18357,7 +18121,7 @@ IIcLoc             = $FBC0
                 jsr PrintMessage    ; $9704
 ; ---- $9707-$9713  data  msg: ' not found. ----
         dfb $A7,$A0,$EE,$EF,$F4,$A0,$E6,$EF,$F5,$EE,$E4,$AE,$00    ; $9707  ' not found..
-; ---- $9714-$9B36  code ----
+; ---- $9714-$975C  code ----
                 jsr CloseEchoArea    ; $9714
                 jsr Beep    ; $9717
                 lda #$01    ; $971A
@@ -18396,566 +18160,74 @@ IIcLoc             = $FBC0
                 bne $974E    ; $9755
                 jsr SelectNamed    ; $9757
                 jmp VisitFile    ; $975A
-;
-; === Variables ===
-                cmp ($F5,x)    ; $975D
-        dfb $F4        ; $975F  (data/65C02-bit)
-        dfb $EF        ; $9760  (data/65C02-bit)
-                ldy #$C6    ; $9761
-                sbc #$EC    ; $9763
-                sbc $A0    ; $9765
-                cmp $F8    ; $9767
-        dfb $F4        ; $9769  (data/65C02-bit)
-                sbc $EE    ; $976A
-        dfb $F3        ; $976C  (data/65C02-bit)
-                sbc #$EF    ; $976D
-                ror $9AA5    ; $976F
-                bit $C2BB    ; $9772
-                sbc $E5    ; $9775
-                beq $9719    ; $9777
-        dfb $C2        ; $9779  (data/65C02-bit)
-                cpx $EEE9    ; $977A
-        dfb $EB        ; $977D  (data/65C02-bit)
-        dfb $F3        ; $977E  (data/65C02-bit)
-                ldy #$CD    ; $977F
-        dfb $EF        ; $9781  (data/65C02-bit)
-                cpx $E5    ; $9782
-                cpx $EEE9    ; $9784
-                adc $8D    ; $9787
-                txs    ; $9789
-        dfb $73        ; $978A  (data/65C02-bit)
-                tsx    ; $978B
-        dfb $C2        ; $978C  (data/65C02-bit)
-                sbc $E5    ; $978D
-                beq $9731    ; $978F
-                cmp ($E9)    ; $9791
-                inc $F3E7    ; $9793
-                ldy #$C2    ; $9796
-                sbc $EC    ; $9798
-                jmp ($9A91)    ; $979A
-        dfb $93        ; $979D  (data/65C02-bit)
-                tsx    ; $979E
-        dfb $C2        ; $979F  (data/65C02-bit)
-                cpx $EEE9    ; $97A0
-        dfb $EB        ; $97A3  (data/65C02-bit)
-                sbc $F2    ; $97A4
-                ldy #$D3    ; $97A6
-                beq $978F    ; $97A8
-                sbc MarkPnt    ; $97AA
-                bit #$9A    ; $97AC
-                eor $C3BA,y    ; $97AE
-                sbc ($F3,x)    ; $97B1
-                sbc $A0    ; $97B3
-                cmp ($E5)    ; $97B5
-                beq $97A5    ; $97B7
-                sbc ($E3,x)    ; $97B9
-                adc $A1    ; $97BB
-                txs    ; $97BD
-                tsb $BB    ; $97BE
-        dfb $C3        ; $97C0  (data/65C02-bit)
-                sbc ($F3,x)    ; $97C1
-                sbc $A0    ; $97C3
-        dfb $D3        ; $97C5  (data/65C02-bit)
-                sbc $E1    ; $97C6
-                sbc ($E3)    ; $97C8
-                pla    ; $97CA
-                sta $E69A,x    ; $97CB
-                tsx    ; $97CE
-        dfb $C3        ; $97CF  (data/65C02-bit)
-                cpx $E3E9    ; $97D0
-        dfb $EB        ; $97D3  (data/65C02-bit)
-                ldy #$D6    ; $97D4
-        dfb $EF        ; $97D6  (data/65C02-bit)
-                cpx $EDF5    ; $97D7
-                adc $99    ; $97DA
-                txs    ; $97DC
-        dfb $CB        ; $97DD  (data/65C02-bit)
-                tsx    ; $97DE
-        dfb $C3        ; $97DF  (data/65C02-bit)
-        dfb $EF        ; $97E0  (data/65C02-bit)
-                sbc $E5ED    ; $97E1
-                inc $A0F4    ; $97E4
-        dfb $C2        ; $97E7  (data/65C02-bit)
-                sbc $E7    ; $97E8
-                sbc #$6E    ; $97EA
-                adc $E09A,y    ; $97EC
-                lda $EFC3,y    ; $97EF
-                sbc $E5ED    ; $97F2
-                inc $A0F4    ; $97F5
-        dfb $C3        ; $97F8  (data/65C02-bit)
-        dfb $EF        ; $97F9  (data/65C02-bit)
-                cpx $EDF5    ; $97FA
-                ror $9A75    ; $97FD
-                cpy #$B9    ; $9800
-        dfb $C3        ; $9802  (data/65C02-bit)
-        dfb $EF        ; $9803  (data/65C02-bit)
-                sbc $E5ED    ; $9804
-                inc $A0F4    ; $9807
-                cmp $EE    ; $980A
-                stz $7D    ; $980C
-                txs    ; $980E
-        dfb $F7        ; $980F  (data/65C02-bit)
-                lda $EFC3,y    ; $9810
-                sbc $E9F0    ; $9813
-                cpx $F2E5    ; $9816
-                ldy #$C6    ; $9819
-                sbc #$EC    ; $981B
-                sbc $EE    ; $981D
-                sbc ($ED,x)    ; $981F
-                adc $DD    ; $9821
-                txs    ; $9823
-                lsr $C3B9,x    ; $9824
-                sbc $F2,x    ; $9827
-        dfb $F3        ; $9829  (data/65C02-bit)
-        dfb $EF        ; $982A  (data/65C02-bit)
-                sbc ($A0)    ; $982B
-        dfb $C3        ; $982D  (data/65C02-bit)
-                sbc $EE    ; $982E
-        dfb $F4        ; $9830  (data/65C02-bit)
-                sbc $F2    ; $9831
-                sbc #$EE    ; $9833
-        dfb $E7        ; $9835  (data/65C02-bit)
-                ldy #$CC    ; $9836
-                sbc #$EE    ; $9838
-                adc $71    ; $983A
-                txs    ; $983C
-        dfb $9F        ; $983D  (data/65C02-bit)
-                lda $E5C4,y    ; $983E
-                inc $E1    ; $9841
-                sbc $EC,x    ; $9843
-        dfb $F4        ; $9845  (data/65C02-bit)
-                ldy #$C6    ; $9846
-                sbc #$EC    ; $9848
-                sbc $A0    ; $984A
-        dfb $D4        ; $984C  (data/65C02-bit)
-                sbc $65F0,y    ; $984D
-                lda $4D9A,y    ; $9850
-        dfb $BB        ; $9853  (data/65C02-bit)
-                cpy $E5    ; $9854
-                inc $E1    ; $9856
-                sbc $EC,x    ; $9858
-        dfb $F4        ; $985A  (data/65C02-bit)
-                ldy #$CD    ; $985B
-                sbc ($EA,x)    ; $985D
-        dfb $EF        ; $985F  (data/65C02-bit)
-                sbc ($A0)    ; $9860
-                cmp $E4EF    ; $9862
-                adc $09    ; $9865
-        dfb $9B        ; $9867  (data/65C02-bit)
-                rts    ; $9868
-                ldx $F8C5,y    ; $9869
-                sbc #$F4    ; $986C
-                ldy #$D0    ; $986E
-                sbc ($EF)    ; $9870
-                sbc $74F0    ; $9872
-                ora $4E9B    ; $9875
-                bvc $9840    ; $9878
-                sbc #$EC    ; $987A
-                cpx $C3A0    ; $987C
-        dfb $EF        ; $987F  (data/65C02-bit)
-                cpx $EDF5    ; $9880
-                ror VarList    ; $9883
-                ply    ; $9886
-                lda $EFC7,y    ; $9887
-                sbc ($EC,x)    ; $988A
-                ldy #$C3    ; $988C
-        dfb $EF        ; $988E  (data/65C02-bit)
-                cpx $EDF5    ; $988F
-                ror $9AD1    ; $9892
-                bit $C8BC,x    ; $9895
-        dfb $C3        ; $9898  (data/65C02-bit)
-                ldy #$C1    ; $9899
-                sbc $F4,x    ; $989B
-        dfb $EF        ; $989D  (data/65C02-bit)
-                ldy #$CE    ; $989E
-                sbc $ED,x    ; $98A0
-        dfb $E2        ; $98A2  (data/65C02-bit)
-                sbc BuffData    ; $98A3
-                lda #$9A    ; $98A5
-        dfb $13        ; $98A7  (data/65C02-bit)
-                ldx $C3C8,y    ; $98A8
-                ldy #$C3    ; $98AB
-        dfb $EF        ; $98AD  (data/65C02-bit)
-                cpx $EDF5    ; $98AE
-                inc $F173    ; $98B1
-                txs    ; $98B4
-                eor $C8BD    ; $98B5
-        dfb $C3        ; $98B8  (data/65C02-bit)
-                ldy #$C3    ; $98B9
-        dfb $EF        ; $98BB  (data/65C02-bit)
-                inc $E5F4    ; $98BC
-                sed    ; $98BF
-        dfb $F4        ; $98C0  (data/65C02-bit)
-                ldy #$C2    ; $98C1
-                sbc $E7    ; $98C3
-                sbc #$6E    ; $98C5
-                lda ($9A),y    ; $98C7
-                lsr $BE    ; $98C9
-                iny    ; $98CB
-        dfb $C3        ; $98CC  (data/65C02-bit)
-                ldy #$C3    ; $98CD
-        dfb $EF        ; $98CF  (data/65C02-bit)
-                inc $E5F4    ; $98D0
-                sed    ; $98D3
-        dfb $F4        ; $98D4  (data/65C02-bit)
-                ldy #$C5    ; $98D5
-                inc $B564    ; $98D7
-                txs    ; $98DA
-                lsr $BE    ; $98DB
-                iny    ; $98DD
-        dfb $C3        ; $98DE  (data/65C02-bit)
-                ldy #$C5    ; $98DF
-        dfb $F3        ; $98E1  (data/65C02-bit)
-        dfb $E3        ; $98E2  (data/65C02-bit)
-                sbc ($F0,x)    ; $98E3
-                adc $AD    ; $98E5
-                txs    ; $98E7
-                rol $C8BE,x    ; $98E8
-        dfb $C3        ; $98EB  (data/65C02-bit)
-                ldy #$C9    ; $98EC
-                inc $F4E9    ; $98EE
-                ldy #$D3    ; $98F1
-        dfb $F4        ; $98F3  (data/65C02-bit)
-                sbc ($E9)    ; $98F4
-                inc $F567    ; $98F6
-                txs    ; $98F9
-                ror $BD    ; $98FA
-                iny    ; $98FC
-        dfb $C3        ; $98FD  (data/65C02-bit)
-                ldy #$CC    ; $98FE
-                sbc $E6    ; $9900
-        dfb $F4        ; $9902  (data/65C02-bit)
-                ldy #$CD    ; $9903
-                sbc ($F2,x)    ; $9905
-        dfb $E7        ; $9907  (data/65C02-bit)
-                sbc #$6E    ; $9908
-                sbc $839A,y    ; $990A
-                lda $C3C8,x    ; $990D
-                ldy #$D0    ; $9910
-                sbc ($E7,x)    ; $9912
-                sbc $A0    ; $9914
-                cpy $EEE9    ; $9916
-                sbc $73    ; $9919
-                sbc $369A    ; $991B
-                lda $C3C8,x    ; $991E
-                ldy #$D0    ; $9921
-                sbc ($E7,x)    ; $9923
-                sbc $A0    ; $9925
-                dec $EDF5    ; $9927
-        dfb $E2        ; $992A  (data/65C02-bit)
-                sbc BuffData    ; $992B
-                ora ($9B,x)    ; $992D
-        dfb $E3        ; $992F  (data/65C02-bit)
-                ldy $C3C8,x    ; $9930
-                ldy #$D2    ; $9933
-                sbc #$E7    ; $9935
-                inx    ; $9937
-        dfb $F4        ; $9938  (data/65C02-bit)
-                ldy #$CD    ; $9939
-                sbc ($F2,x)    ; $993B
-        dfb $E7        ; $993D  (data/65C02-bit)
-                sbc #$6E    ; $993E
-                sbc $839A,x    ; $9940
-                lda $C3C8,x    ; $9943
-                ldy #$D3    ; $9946
-                cpx $74EF    ; $9948
-                sbc $9A    ; $994B
-        dfb $FF        ; $994D  (data/65C02-bit)
-                ldy $C3C8,x    ; $994E
-                ldy #$D3    ; $9951
-                inx    ; $9953
-                sbc $E5    ; $9954
-        dfb $F4        ; $9956  (data/65C02-bit)
-                ldy #$CC    ; $9957
-                sbc #$EE    ; $9959
-                sbc $73    ; $995B
-                sbc #$9A    ; $995D
-                asl $C8BD,x    ; $995F
-        dfb $C3        ; $9962  (data/65C02-bit)
-                ldy #$D4    ; $9963
-        dfb $EF        ; $9965  (data/65C02-bit)
-                beq $9908    ; $9966
-                cpy $EEE9    ; $9968
-                adc $05    ; $996B
-        dfb $9B        ; $996D  (data/65C02-bit)
-                lda $C8BC,x    ; $996E
-                sbc $F8    ; $9971
-                ldy #$C6    ; $9973
-                sbc #$EC    ; $9975
-                sbc $A0    ; $9977
-        dfb $D3        ; $9979  (data/65C02-bit)
-                sbc #$FA    ; $997A
-                adc $11    ; $997C
-        dfb $9B        ; $997E  (data/65C02-bit)
-                ora $9B,x    ; $997F
-                cmp #$E7    ; $9981
-                inc $F2EF    ; $9983
-                sbc $A0    ; $9986
-                cmp ($EC,x)    ; $9988
-                beq $9974    ; $998A
-                sbc ($A0,x)    ; $998C
-                cpy $E2E1    ; $998E
-                sbc $EC    ; $9991
-        dfb $73        ; $9993  (data/65C02-bit)
-                cmp $999A,y    ; $9994
-                ldy $E5CB,x    ; $9997
-                sbc $C3A0,y    ; $999A
-                cpx $E3E9    ; $999D
-        dfb $6B        ; $99A0  (data/65C02-bit)
-                sta $9A,x    ; $99A1
-                ldx $CCBA    ; $99A3
-                sbc ($E2,x)    ; $99A6
-                sbc $EC    ; $99A8
-                ldy #$D3    ; $99AA
-        dfb $F4        ; $99AC  (data/65C02-bit)
-                sbc ($F2,x)    ; $99AD
-        dfb $F4        ; $99AF  (data/65C02-bit)
-                sbc $F2    ; $99B0
-        dfb $73        ; $99B2  (data/65C02-bit)
-                cmp $9A,x    ; $99B3
-                stz $BC,x    ; $99B5
-                dec $F8E5    ; $99B7
-        dfb $F4        ; $99BA  (data/65C02-bit)
-                ldy #$D3    ; $99BB
-        dfb $E3        ; $99BD  (data/65C02-bit)
-                sbc ($E5)    ; $99BE
-                sbc $EE    ; $99C0
-                ldy #$C3    ; $99C2
-        dfb $EF        ; $99C4  (data/65C02-bit)
-                inc $E5F4    ; $99C5
-                sed    ; $99C8
-        dfb $F4        ; $99C9  (data/65C02-bit)
-                ldy #$CC    ; $99CA
-                sbc #$EE    ; $99CC
-                sbc $73    ; $99CE
-                cmp $9A    ; $99D0
-                ldy $BB,x    ; $99D2
-                dec $F7E5    ; $99D4
-                ldy #$CC    ; $99D7
-                sbc #$EE    ; $99D9
-                sbc $F3    ; $99DB
-                ldy #$C1    ; $99DD
-        dfb $F4        ; $99DF  (data/65C02-bit)
-                ldy #$C5    ; $99E0
-        dfb $CF        ; $99E2  (data/65C02-bit)
-        dfb $42        ; $99E3  (data/65C02-bit)
-                cmp #$9A    ; $99E4
-        dfb $DF        ; $99E6  (data/65C02-bit)
-        dfb $BB        ; $99E7  (data/65C02-bit)
-                cmp ($E5)    ; $99E8
-        dfb $E7        ; $99EA  (data/65C02-bit)
-                sbc #$EF    ; $99EB
-                inc $D1A0    ; $99ED
-                sbc $E5,x    ; $99F0
-                sbc ($F9)    ; $99F2
-                ldy #$D3    ; $99F4
-                sbc #$FA    ; $99F6
-                adc $CD    ; $99F8
-                txs    ; $99FA
-        dfb $07        ; $99FB  (data/65C02-bit)
-                ldy $E5D3,x    ; $99FC
-                sbc ($F2,x)    ; $99FF
-        dfb $E3        ; $9A01  (data/65C02-bit)
-                inx    ; $9A02
-                ldy #$CD    ; $9A03
-        dfb $EF        ; $9A05  (data/65C02-bit)
-                inc $E5,x    ; $9A06
-                sbc $EEE5    ; $9A08
-        dfb $F4        ; $9A0B  (data/65C02-bit)
-                ldy #$CD    ; $9A0C
-                sbc ($78,x)    ; $9A0E
-                sta ($9A,x)    ; $9A10
-                tsb $D3BA    ; $9A12
-        dfb $EB        ; $9A15  (data/65C02-bit)
-                sbc #$F0    ; $9A16
-                ldy #$C3    ; $9A18
-        dfb $EF        ; $9A1A  (data/65C02-bit)
-                sbc $E5ED    ; $9A1B
-                inc $A0F4    ; $9A1E
-                cmp $EE    ; $9A21
-                stz $85    ; $9A23
-                txs    ; $9A25
-        dfb $37        ; $9A26  (data/65C02-bit)
-                tsx    ; $9A27
-        dfb $D3        ; $9A28  (data/65C02-bit)
-                sbc $F4F3,y    ; $9A29
-                sbc $ED    ; $9A2C
-                ldy #$C6    ; $9A2E
-                sbc #$EC    ; $9A30
-                sbc $F3    ; $9A32
-                ldy #$D0    ; $9A34
-                sbc ($F4,x)    ; $9A36
-                pla    ; $9A38
-                lda $689A,x    ; $9A39
-        dfb $BB        ; $9A3C  (data/65C02-bit)
-        dfb $D4        ; $9A3D  (data/65C02-bit)
-                sbc ($E1)    ; $9A3E
-                inc $F0F3    ; $9A40
-        dfb $EF        ; $9A43  (data/65C02-bit)
-        dfb $F3        ; $9A44  (data/65C02-bit)
-                sbc $A0    ; $9A45
-                bne $9A3B    ; $9A47
-                sbc $F6    ; $9A49
-                sbc #$EF    ; $9A4B
-                sbc $F3,x    ; $9A4D
-                ldy #$CF    ; $9A4F
-                inc $79EC    ; $9A51
-                cmp ($9A,x)    ; $9A54
-        dfb $8B        ; $9A56  (data/65C02-bit)
-        dfb $BB        ; $9A57  (data/65C02-bit)
-        dfb $D4        ; $9A58  (data/65C02-bit)
-                sbc ($E7,x)    ; $9A59
-        dfb $F3        ; $9A5B  (data/65C02-bit)
-                ldy #$C6    ; $9A5C
-                sbc #$EE    ; $9A5E
-                cpx $A0    ; $9A60
-                dec $E9    ; $9A62
-                cpx $E165    ; $9A64
-                txs    ; $9A67
-        dfb $02        ; $9A68  (data/65C02-bit)
-        dfb $B3        ; $9A69  (data/65C02-bit)
-;
-; === VariableLink ===
-                brk    ; $9A6A
-                brk    ; $9A6B
-                brk    ; $9A6C
-;
-; === VarList ===
-                brk    ; $9A6D
-        dfb $FF        ; $9A6E  (data/65C02-bit)
-                ldy: scrny    ; $9A6F
-                clc    ; $9A72
-                sbc $31,x    ; $9A73
-                brk    ; $9A75
-                bvc $9A77    ; $9A76
-                trb $0502    ; $9A78
-                brk    ; $9A7B
-                ora $0502,x    ; $9A7C
-                ora $1D    ; $9A7F
-                ora ($00,x)    ; $9A81
-        dfb $0F        ; $9A83  (data/65C02-bit)
-                eor: $0003,x    ; $9A84
-                and $18    ; $9A87
-                brk    ; $9A89
-        dfb $FF        ; $9A8A  (data/65C02-bit)
-                eor BASH    ; $9A8B
-        dfb $03        ; $9A8D  (data/65C02-bit)
-                brk    ; $9A8E
-        dfb $37        ; $9A8F  (data/65C02-bit)
-                rol    ; $9A90
-        dfb $03        ; $9A91  (data/65C02-bit)
-                brk    ; $9A92
-                sec    ; $9A93
-                rol    ; $9A94
-        dfb $03        ; $9A95  (data/65C02-bit)
-                brk    ; $9A96
-                phy    ; $9A97
-        dfb $27        ; $9A98  (data/65C02-bit)
-                brk    ; $9A99
-                bra $9AF7    ; $9A9A
-        dfb $27        ; $9A9C  (data/65C02-bit)
-        dfb $03        ; $9A9D  (data/65C02-bit)
-                brk    ; $9A9E
-                sta $035E    ; $9A9F
-                brk    ; $9AA2
-                bvs $9A29    ; $9AA3
-        dfb $02        ; $9AA5  (data/65C02-bit)
-                asl $4E    ; $9AA6
-        dfb $67        ; $9AA8  (data/65C02-bit)
-                brk    ; $9AA9
-        dfb $FF        ; $9AAA  (data/65C02-bit)
-        dfb $3B        ; $9AAB  (data/65C02-bit)
-        dfb $8F        ; $9AAC  (data/65C02-bit)
-        dfb $02        ; $9AAD  (data/65C02-bit)
-        dfb $02        ; $9AAE  (data/65C02-bit)
-                bit $028F,x    ; $9AAF
-                ora #$3E    ; $9AB2
-        dfb $8F        ; $9AB4  (data/65C02-bit)
-        dfb $02        ; $9AB5  (data/65C02-bit)
-                ora #$48    ; $9AB6
-        dfb $8F        ; $9AB8  (data/65C02-bit)
-                brk    ; $9AB9
-        dfb $FF        ; $9ABA  (data/65C02-bit)
-        dfb $83        ; $9ABB  (data/65C02-bit)
-                adc $3102    ; $9ABC
-        dfb $23        ; $9ABF  (data/65C02-bit)
-        dfb $83        ; $9AC0  (data/65C02-bit)
-        dfb $03        ; $9AC1  (data/65C02-bit)
-                brk    ; $9AC2
-                dec: $0089,x    ; $9AC3
-                clc    ; $9AC6
-        dfb $D3        ; $9AC7  (data/65C02-bit)
-                bit $03,x    ; $9AC8
-                brk    ; $9ACA
-                sec    ; $9ACB
-                bit $01,x    ; $9ACC
-                brk    ; $9ACE
-        dfb $2B        ; $9ACF  (data/65C02-bit)
-                sty $5000    ; $9AD0
-                php    ; $9AD3
-                bit $02,x    ; $9AD4
-                ora $98    ; $9AD6
-                and ($03,x)    ; $9AD8
-                brk    ; $9ADA
-                sta $0221,x    ; $9ADB
-                rti    ; $9ADE
-                cpx $76    ; $9ADF
-        dfb $03        ; $9AE1  (data/65C02-bit)
-                brk    ; $9AE2
-                sta ($94,x)    ; $9AE3
-                brk    ; $9AE5
-        dfb $07        ; $9AE6  (data/65C02-bit)
-                bit $8F,x    ; $9AE7
-                brk    ; $9AE9
-        dfb $FF        ; $9AEA  (data/65C02-bit)
-                and $8F,x    ; $9AEB
-                brk    ; $9AED
-        dfb $FF        ; $9AEE  (data/65C02-bit)
-                rol $8F,x    ; $9AEF
-                brk    ; $9AF1
-                sty $37    ; $9AF2
-        dfb $8F        ; $9AF4  (data/65C02-bit)
-        dfb $02        ; $9AF5  (data/65C02-bit)
-                asl    ; $9AF6
-        dfb $54        ; $9AF7  (data/65C02-bit)
-        dfb $8F        ; $9AF8  (data/65C02-bit)
-                brk    ; $9AF9
-                bvc $9B5A    ; $9AFA
-        dfb $8F        ; $9AFC  (data/65C02-bit)
-                brk    ; $9AFD
-                bvc $9B5F    ; $9AFE
-        dfb $8F        ; $9B00  (data/65C02-bit)
-                ora ($00,x)    ; $9B01
-                sec    ; $9B03
-        dfb $8F        ; $9B04  (data/65C02-bit)
-                brk    ; $9B05
-        dfb $FF        ; $9B06  (data/65C02-bit)
-                dec    ; $9B07
-        dfb $8F        ; $9B08  (data/65C02-bit)
-                brk    ; $9B09
-                ora $47    ; $9B0A
-                sta ($03,x)    ; $9B0C
-                brk    ; $9B0E
-                sbc ($77),y    ; $9B0F
-        dfb $03        ; $9B11  (data/65C02-bit)
-                brk    ; $9B12
-                rol $CF75,x    ; $9B13
-                inc $EDA0    ; $9B16
-                sbc $E1    ; $9B19
-                inc $A0F3    ; $9B1B
-                cpx $E9    ; $9B1E
-        dfb $F3        ; $9B20  (data/65C02-bit)
-                beq $9B0F    ; $9B21
-                sbc ($F9,x)    ; $9B23
-                ldy #$E6    ; $9B25
-                sbc #$EC    ; $9B27
-                sbc $A0    ; $9B29
-        dfb $F3        ; $9B2B  (data/65C02-bit)
-                sbc #$FA    ; $9B2C
-                sbc $F3    ; $9B2E
-                ldy #$E9    ; $9B30
-                inc $E8A0    ; $9B32
-                sbc $78    ; $9B35
+; ---- $975D-$9A69  data  Variables (variable-name + record table) ----
+        dfb $C1,$F5,$F4,$EF,$A0,$C6,$E9,$EC,$E5,$A0,$C5,$F8,$F4,$E5,$EE,$F3    ; $975D  Auto File Extens
+        dfb $E9,$EF,$6E,$A5,$9A,$2C,$BB,$C2,$E5,$E5,$F0,$A0,$C2,$EC,$E9,$EE    ; $976D  ion%.,;Beep Blin
+        dfb $EB,$F3,$A0,$CD,$EF,$E4,$E5,$EC,$E9,$EE,$65,$8D,$9A,$73,$BA,$C2    ; $977D  ks Modeline..s:B
+        dfb $E5,$E5,$F0,$A0,$D2,$E9,$EE,$E7,$F3,$A0,$C2,$E5,$EC,$6C,$91,$9A    ; $978D  eep Rings Bell..
+        dfb $93,$BA,$C2,$EC,$E9,$EE,$EB,$E5,$F2,$A0,$D3,$F0,$E5,$E5,$64,$89    ; $979D  .:Blinker Speed.
+        dfb $9A,$59,$BA,$C3,$E1,$F3,$E5,$A0,$D2,$E5,$F0,$EC,$E1,$E3,$65,$A1    ; $97AD  .Y:Case Replace!
+        dfb $9A,$04,$BB,$C3,$E1,$F3,$E5,$A0,$D3,$E5,$E1,$F2,$E3,$68,$9D,$9A    ; $97BD  ..;Case Search..
+        dfb $E6,$BA,$C3,$EC,$E9,$E3,$EB,$A0,$D6,$EF,$EC,$F5,$ED,$65,$99,$9A    ; $97CD  f:Click Volume..
+        dfb $CB,$BA,$C3,$EF,$ED,$ED,$E5,$EE,$F4,$A0,$C2,$E5,$E7,$E9,$6E,$79    ; $97DD  K:Comment Beginy
+        dfb $9A,$E0,$B9,$C3,$EF,$ED,$ED,$E5,$EE,$F4,$A0,$C3,$EF,$EC,$F5,$ED    ; $97ED  .`9Comment Colum
+        dfb $6E,$75,$9A,$C0,$B9,$C3,$EF,$ED,$ED,$E5,$EE,$F4,$A0,$C5,$EE,$64    ; $97FD  nu.@9Comment End
+        dfb $7D,$9A,$F7,$B9,$C3,$EF,$ED,$F0,$E9,$EC,$E5,$F2,$A0,$C6,$E9,$EC    ; $980D  }.w9Compiler Fil
+        dfb $E5,$EE,$E1,$ED,$65,$DD,$9A,$5E,$B9,$C3,$F5,$F2,$F3,$EF,$F2,$A0    ; $981D  ename].^9Cursor 
+        dfb $C3,$E5,$EE,$F4,$E5,$F2,$E9,$EE,$E7,$A0,$CC,$E9,$EE,$65,$71,$9A    ; $982D  Centering Lineq.
+        dfb $9F,$B9,$C4,$E5,$E6,$E1,$F5,$EC,$F4,$A0,$C6,$E9,$EC,$E5,$A0,$D4    ; $983D  .9Default File T
+        dfb $F9,$F0,$65,$B9,$9A,$4D,$BB,$C4,$E5,$E6,$E1,$F5,$EC,$F4,$A0,$CD    ; $984D  ype9.M;Default M
+        dfb $E1,$EA,$EF,$F2,$A0,$CD,$EF,$E4,$65,$09,$9B,$60,$BE,$C5,$F8,$E9    ; $985D  ajor Mode..`>Exi
+        dfb $F4,$A0,$D0,$F2,$EF,$ED,$F0,$74,$0D,$9B,$4E,$50,$C6,$E9,$EC,$EC    ; $986D  t Prompt..NPFill
+        dfb $A0,$C3,$EF,$EC,$F5,$ED,$6E,$6D,$9A,$7A,$B9,$C7,$EF,$E1,$EC,$A0    ; $987D   Columnm.z9Goal 
+        dfb $C3,$EF,$EC,$F5,$ED,$6E,$D1,$9A,$3C,$BC,$C8,$C3,$A0,$C1,$F5,$F4    ; $988D  ColumnQ.<<HC Aut
+        dfb $EF,$A0,$CE,$F5,$ED,$E2,$E5,$72,$A9,$9A,$13,$BE,$C8,$C3,$A0,$C3    ; $989D  o Number)..>HC C
+        dfb $EF,$EC,$F5,$ED,$EE,$73,$F1,$9A,$4D,$BD,$C8,$C3,$A0,$C3,$EF,$EE    ; $98AD  olumnsq.M=HC Con
+        dfb $F4,$E5,$F8,$F4,$A0,$C2,$E5,$E7,$E9,$6E,$B1,$9A,$46,$BE,$C8,$C3    ; $98BD  text Begin1.F>HC
+        dfb $A0,$C3,$EF,$EE,$F4,$E5,$F8,$F4,$A0,$C5,$EE,$64,$B5,$9A,$46,$BE    ; $98CD   Context End5.F>
+        dfb $C8,$C3,$A0,$C5,$F3,$E3,$E1,$F0,$65,$AD,$9A,$3E,$BE,$C8,$C3,$A0    ; $98DD  HC Escape-.>>HC 
+        dfb $C9,$EE,$E9,$F4,$A0,$D3,$F4,$F2,$E9,$EE,$67,$F5,$9A,$66,$BD,$C8    ; $98ED  Init Stringu.f=H
+        dfb $C3,$A0,$CC,$E5,$E6,$F4,$A0,$CD,$E1,$F2,$E7,$E9,$6E,$F9,$9A,$83    ; $98FD  C Left Marginy..
+        dfb $BD,$C8,$C3,$A0,$D0,$E1,$E7,$E5,$A0,$CC,$E9,$EE,$E5,$73,$ED,$9A    ; $990D  =HC Page Linesm.
+        dfb $36,$BD,$C8,$C3,$A0,$D0,$E1,$E7,$E5,$A0,$CE,$F5,$ED,$E2,$E5,$72    ; $991D  6=HC Page Number
+        dfb $01,$9B,$E3,$BC,$C8,$C3,$A0,$D2,$E9,$E7,$E8,$F4,$A0,$CD,$E1,$F2    ; $992D  ..c<HC Right Mar
+        dfb $E7,$E9,$6E,$FD,$9A,$83,$BD,$C8,$C3,$A0,$D3,$EC,$EF,$74,$E5,$9A    ; $993D  gin}..=HC Slote.
+        dfb $FF,$BC,$C8,$C3,$A0,$D3,$E8,$E5,$E5,$F4,$A0,$CC,$E9,$EE,$E5,$73    ; $994D  .<HC Sheet Lines
+        dfb $E9,$9A,$1E,$BD,$C8,$C3,$A0,$D4,$EF,$F0,$A0,$CC,$E9,$EE,$65,$05    ; $995D  i..=HC Top Line.
+        dfb $9B,$BD,$BC,$C8,$E5,$F8,$A0,$C6,$E9,$EC,$E5,$A0,$D3,$E9,$FA,$65    ; $996D  .=<Hex File Size
+        dfb $11,$9B,$15,$9B,$C9,$E7,$EE,$EF,$F2,$E5,$A0,$C1,$EC,$F0,$E8,$E1    ; $997D  ....Ignore Alpha
+        dfb $A0,$CC,$E1,$E2,$E5,$EC,$73,$D9,$9A,$99,$BC,$CB,$E5,$F9,$A0,$C3    ; $998D   LabelsY..<Key C
+        dfb $EC,$E9,$E3,$6B,$95,$9A,$AE,$BA,$CC,$E1,$E2,$E5,$EC,$A0,$D3,$F4    ; $999D  lick...:Label St
+        dfb $E1,$F2,$F4,$E5,$F2,$73,$D5,$9A,$74,$BC,$CE,$E5,$F8,$F4,$A0,$D3    ; $99AD  artersU.t<Next S
+        dfb $E3,$F2,$E5,$E5,$EE,$A0,$C3,$EF,$EE,$F4,$E5,$F8,$F4,$A0,$CC,$E9    ; $99BD  creen Context Li
+        dfb $EE,$E5,$73,$C5,$9A,$B4,$BB,$CE,$E5,$F7,$A0,$CC,$E9,$EE,$E5,$F3    ; $99CD  nesE.4;New Lines
+        dfb $A0,$C1,$F4,$A0,$C5,$CF,$42,$C9,$9A,$DF,$BB,$D2,$E5,$E7,$E9,$EF    ; $99DD   At EOBI._;Regio
+        dfb $EE,$A0,$D1,$F5,$E5,$F2,$F9,$A0,$D3,$E9,$FA,$65,$CD,$9A,$07,$BC    ; $99ED  n Query SizeM..<
+        dfb $D3,$E5,$E1,$F2,$E3,$E8,$A0,$CD,$EF,$F6,$E5,$ED,$E5,$EE,$F4,$A0    ; $99FD  Search Movement 
+        dfb $CD,$E1,$78,$81,$9A,$0C,$BA,$D3,$EB,$E9,$F0,$A0,$C3,$EF,$ED,$ED    ; $9A0D  Max...:Skip Comm
+        dfb $E5,$EE,$F4,$A0,$C5,$EE,$64,$85,$9A,$37,$BA,$D3,$F9,$F3,$F4,$E5    ; $9A1D  ent End..7:Syste
+        dfb $ED,$A0,$C6,$E9,$EC,$E5,$F3,$A0,$D0,$E1,$F4,$68,$BD,$9A,$68,$BB    ; $9A2D  m Files Path=.h;
+        dfb $D4,$F2,$E1,$EE,$F3,$F0,$EF,$F3,$E5,$A0,$D0,$F2,$E5,$F6,$E9,$EF    ; $9A3D  Transpose Previo
+        dfb $F5,$F3,$A0,$CF,$EE,$EC,$79,$C1,$9A,$8B,$BB,$D4,$E1,$E7,$F3,$A0    ; $9A4D  us OnlyA..;Tags 
+        dfb $C6,$E9,$EE,$E4,$A0,$C6,$E9,$EC,$65,$E1,$9A,$02,$B3    ; $9A5D  Find Filea..3
+; ---- $9A6A-$9A6C  data  VariableLink ----
+        dfb $00,$00,$00    ; $9A6A  ...
+; ---- $9A6D-$9B14  data  VarList (variable records) ----
+        dfb $00,$FF,$AC,$1F,$00,$18,$F5,$31,$00,$50,$FF,$1C,$02,$05,$00,$1D    ; $9A6D  ..,...u1.P......
+        dfb $02,$05,$05,$1D,$01,$00,$0F,$5D,$03,$00,$25,$18,$00,$FF,$45,$29    ; $9A7D  .......]..%...E)
+        dfb $03,$00,$37,$2A,$03,$00,$38,$2A,$03,$00,$5A,$27,$00,$80,$5B,$27    ; $9A8D  ..7*..8*..Z'..['
+        dfb $03,$00,$8D,$5E,$03,$00,$70,$84,$02,$06,$4E,$67,$00,$FF,$3B,$8F    ; $9A9D  ...^..p...Ng..;.
+        dfb $02,$02,$3C,$8F,$02,$09,$3E,$8F,$02,$09,$48,$8F,$00,$FF,$83,$6D    ; $9AAD  ..<...>...H....m
+        dfb $02,$31,$23,$83,$03,$00,$DE,$89,$00,$18,$D3,$34,$03,$00,$38,$34    ; $9ABD  .1#...^...S4..84
+        dfb $01,$00,$2B,$8C,$00,$50,$08,$34,$02,$05,$98,$21,$03,$00,$9D,$21    ; $9ACD  ..+..P.4...!...!
+        dfb $02,$40,$E4,$76,$03,$00,$81,$94,$00,$07,$34,$8F,$00,$FF,$35,$8F    ; $9ADD  .@dv......4...5.
+        dfb $00,$FF,$36,$8F,$00,$84,$37,$8F,$02,$0A,$54,$8F,$00,$50,$5E,$8F    ; $9AED  ..6...7...T..P^.
+        dfb $00,$50,$5F,$8F,$01,$00,$38,$8F,$00,$FF,$3A,$8F,$00,$05,$47,$81    ; $9AFD  .P_...8...:...G.
+        dfb $03,$00,$F1,$77,$03,$00,$3E,$75    ; $9B0D  ..qw..>u
+; ---- $9B15-$9B36  data  VarDocList (variable doc strings) ----
+        dfb $CF,$EE,$A0,$ED,$E5,$E1,$EE,$F3,$A0,$E4,$E9,$F3,$F0,$EC,$E1,$F9    ; $9B15  On means display
+        dfb $A0,$E6,$E9,$EC,$E5,$A0,$F3,$E9,$FA,$E5,$F3,$A0,$E9,$EE,$A0,$E8    ; $9B25   file sizes in h
+        dfb $E5,$78    ; $9B35  ex
 ; ---- $9B37-$A4F7  data  CommandNames (command-name string table to EOF) ----
         dfb $C1,$E3,$E3,$F5,$ED,$F5,$EC,$E1,$F4,$E5,$A0,$CD,$E1,$F4,$E3,$E8    ; $9B37  Accumulate Match
         dfb $E9,$EE,$E7,$A0,$CC,$E9,$EE,$E5,$73,$71,$89,$45,$B5,$C1,$F0,$F0    ; $9B47  ing Linesq.E5App

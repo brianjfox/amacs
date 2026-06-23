@@ -138,6 +138,12 @@
     "name": "msg: M-X "
   },
   {
+    "start": "3F6D",
+    "end": "3F70",
+    "kind": "data",
+    "name": "CharIndex (3 bytes)"
+  },
+  {
     "start": "3F80",
     "end": "3F8A",
     "kind": "data",
@@ -234,6 +240,12 @@
     "name": "msg: ):"
   },
   {
+    "start": "4F84",
+    "end": "504E",
+    "kind": "data",
+    "name": "ComTab (command dispatch table)"
+  },
+  {
     "start": "51CC",
     "end": "51D8",
     "kind": "data",
@@ -244,6 +256,18 @@
     "end": "5216",
     "kind": "data",
     "name": "msg: \" can't be opened.  Check \"System Files "
+  },
+  {
+    "start": "54F2",
+    "end": "5528",
+    "kind": "data",
+    "name": "ModeNames (major+minor mode name strings)"
+  },
+  {
+    "start": "5528",
+    "end": "5538",
+    "kind": "data",
+    "name": "MinorNames (pointers into ModeNames)"
   },
   {
     "start": "585B",
@@ -264,6 +288,12 @@
     "name": "msg: -Arrow"
   },
   {
+    "start": "5908",
+    "end": "5944",
+    "kind": "data",
+    "name": "KeyNames (8 key codes + 8 name pointers + name strings)"
+  },
+  {
     "start": "5947",
     "end": "5950",
     "kind": "data",
@@ -280,6 +310,12 @@
     "end": "5967",
     "kind": "data",
     "name": "msg: Space"
+  },
+  {
+    "start": "5987",
+    "end": "598C",
+    "kind": "data",
+    "name": "CompList / CompOffset / CompCount"
   },
   {
     "start": "5F93",
@@ -486,6 +522,12 @@
     "name": "msg: Current prefix: "
   },
   {
+    "start": "6E79",
+    "end": "6E9D",
+    "kind": "data",
+    "name": "MonthNames (12 x 3-char month abbreviations)"
+  },
+  {
     "start": "6EAB",
     "end": "6EB5",
     "kind": "data",
@@ -532,6 +574,12 @@
     "end": "753D",
     "kind": "data",
     "name": "msg: .."
+  },
+  {
+    "start": "7640",
+    "end": "7679",
+    "kind": "data",
+    "name": "FileTypeNames (14 [type,3-char] records: TXT,BIN,DIR.. + $00)"
   },
   {
     "start": "7B85",
@@ -694,6 +742,30 @@
     "end": "9714",
     "kind": "data",
     "name": "msg: ' not found."
+  },
+  {
+    "start": "975D",
+    "end": "9A6A",
+    "kind": "data",
+    "name": "Variables (variable-name + record table)"
+  },
+  {
+    "start": "9A6A",
+    "end": "9A6D",
+    "kind": "data",
+    "name": "VariableLink"
+  },
+  {
+    "start": "9A6D",
+    "end": "9B15",
+    "kind": "data",
+    "name": "VarList (variable records)"
+  },
+  {
+    "start": "9B15",
+    "end": "9B37",
+    "kind": "data",
+    "name": "VarDocList (variable doc strings)"
   },
   {
     "start": "9B37",
