@@ -135,14 +135,21 @@ ZP_CAPABLE = {
 }
 
 
-def operand_text(mne, mode, b1, b2, addr, sym):
+def operand_text(mne, mode, b1, b2, addr, sym, labels=None):
     """Return (mnemonic, operand, named?) for one instruction. When the target
-    address has a known symbol (in `sym`, an addr->name dict) the numeric
-    operand is replaced by the original name; force-abs (`:`) is preserved."""
+    address has a known symbol (`sym`, addr->name) the numeric operand is
+    replaced by that original name. Failing that, control-flow targets
+    (branches, jmp/jsr) that hit a local instruction get a synthetic `Lxxxx`
+    label from `labels`. Force-abs (`:`) is preserved."""
+    labels = labels or {}
+    use_labels = (mode == "rel") or (mode == "abs" and mne in ("jmp", "jsr"))
+
     def nm(val, numfmt):
         key = f"{val:04X}"
         if key in sym:
             return sym[key], True
+        if use_labels and key in labels:
+            return labels[key], True
         return numfmt, False
 
     if mode in ("imp", "acc"):
@@ -177,10 +184,45 @@ def operand_text(mne, mode, b1, b2, addr, sym):
     return out_mne, f"{t}{suffix}", named
 
 
-def fmt_instr(addr, mne, operand):
-    label = ""  # numeric pass: no labels yet
+def fmt_instr(label, mne, operand):
     text = f"{mne} {operand}".rstrip()
     return f"{label:<8}{text}"
+
+
+def scan_code(data, start, end, instr_starts, targets):
+    """Replicate the emit decode loop's byte advancement to record where real
+    instructions start (instr_starts) and which addresses are control-flow
+    targets (targets: branch / jmp-abs / jsr-abs operands). Used to synthesize
+    local labels before emitting."""
+    off1 = end - ORG
+    i = start - ORG
+    while i < off1:
+        addr = ORG + i
+        op = data[i]
+        if op in (0x00, 0xFF):
+            j = i
+            while j < off1 and data[j] == op:
+                j += 1
+            if j - i >= 4:
+                i = j
+                continue
+        entry = OPC.get(op)
+        if entry is None:
+            i += 1
+            continue
+        mne, mode = entry
+        n = LEN[mode]
+        if i + n > off1:
+            i += 1
+            continue
+        instr_starts.add(addr)
+        b1 = data[i + 1] if n >= 2 else 0
+        b2 = data[i + 2] if n >= 3 else 0
+        if mode == "rel":
+            targets.add((addr + 2 + ((b1 ^ 0x80) - 0x80)) & 0xFFFF)
+        elif mode == "abs" and mne in ("jmp", "jsr"):
+            targets.add(b1 | (b2 << 8))
+        i += n
 
 
 def _gloss(chunk):
@@ -201,10 +243,11 @@ def emit_data(out, data, start, end):
         i += len(chunk)
 
 
-def disassemble(out, data, start, end, sym, aliases, stats):
+def disassemble(out, data, start, end, sym, aliases, labels, stats):
     """Linear-disassemble bytes [start,end) of the image into Merlin source.
     Emits a `; === Name ===' marker where an instruction starts at a known
-    symbol, and replaces operands with symbol names via operand_text()."""
+    symbol, a local `Lxxxx' label at control-flow targets, and replaces
+    operands with symbol/label names via operand_text()."""
     off1 = end - ORG
     i = start - ORG
     while i < off1:
@@ -230,20 +273,21 @@ def disassemble(out, data, start, end, sym, aliases, stats):
                 stats["fill"] += 1
                 i = j
                 continue
+        label = labels.get(key, "")
         entry = OPC.get(op)
         if entry is None:
-            out.append(f"        dfb ${op:02X}        ; ${addr:04X}  (data/65C02-bit)")
+            out.append(f"{label:<8}dfb ${op:02X}        ; ${addr:04X}  (data/65C02-bit)")
             i += 1
             continue
         mne, mode = entry
         n = LEN[mode]
         if i + n > off1:
-            out.append(f"        dfb ${op:02X}        ; ${addr:04X}  (truncated)")
+            out.append(f"{label:<8}dfb ${op:02X}        ; ${addr:04X}  (truncated)")
             i += 1
             continue
         b1 = data[i + 1] if n >= 2 else 0
         b2 = data[i + 2] if n >= 3 else 0
-        out_mne, operand, named = operand_text(mne, mode, b1, b2, addr, sym)
+        out_mne, operand, named = operand_text(mne, mode, b1, b2, addr, sym, labels)
         stats["instrs"] += 1
         if mode not in ("imp", "acc", "imm"):
             stats["operands"] += 1
@@ -260,7 +304,7 @@ def disassemble(out, data, start, end, sym, aliases, stats):
         if ref in BANK_NOTES:
             note = f"   <== {BANK_NOTES[ref]}"
             stats["bank"] += 1
-        out.append(f"        {fmt_instr(addr, out_mne, operand)}    ; ${addr:04X}{note}")
+        out.append(f"{fmt_instr(label, out_mne, operand)}    ; ${addr:04X}{note}")
         i += n
 
 
@@ -326,7 +370,19 @@ def main(argv):
 
     out += [f"        org ${ORG:04X}", "        dsk AMACS.OBJ", ";"]
 
-    stats = {"instrs": 0, "operands": 0, "named": 0, "bank": 0, "fill": 0}
+    # Pass A: scan code spans for instruction boundaries and control-flow
+    # targets, then synthesize local labels for targets that hit a local
+    # instruction and have no original symbol.
+    instr_starts, targets = set(), set()
+    for (s, e, kind) in spans:
+        if kind != "data":
+            scan_code(data, s, e, instr_starts, targets)
+    labels = {f"{a:04X}": f"L{a:04X}" for a in (targets & instr_starts)
+              if f"{a:04X}" not in sym}
+
+    # Pass B: emit.
+    stats = {"instrs": 0, "operands": 0, "named": 0, "bank": 0, "fill": 0,
+             "labels": len(labels)}
     names = {(int(str(r["start"]), 16)): r.get("name", "") for r in regions}
     for (s, e, kind) in spans:
         nm = names.get(s, "")
@@ -335,7 +391,7 @@ def main(argv):
         if kind == "data":
             emit_data(out, data, s, e)
         else:
-            disassemble(out, data, s, e, sym, aliases, stats)
+            disassemble(out, data, s, e, sym, aliases, labels, stats)
 
     out_dir = os.path.dirname(out_s)
     if out_dir:
@@ -345,8 +401,8 @@ def main(argv):
     pct = (100 * stats["named"] // stats["operands"]) if stats["operands"] else 0
     print(f"wrote {out_s}: {len(out)} lines, {len(data)} bytes, {len(spans)} regions; "
           f"{stats['instrs']} instrs, {stats['named']}/{stats['operands']} "
-          f"address operands named ({pct}%), {stats['bank']} bank-switch sites flagged, "
-          f"{stats['fill']} fill runs collapsed")
+          f"address operands named ({pct}%), {stats['labels']} local labels, "
+          f"{stats['bank']} bank-switch sites flagged, {stats['fill']} fill runs collapsed")
     return 0
 
 
