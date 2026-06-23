@@ -248,5 +248,26 @@ pseudo-instructions for now; flagged so we don't mistake them for real code.
 ### Stage status (per PROMPTS.md)
 - Stage 0 (orientation) ✓ · Stage 1 (harness) ✓ · Stage 2 (disassembly + first
   code/data cut, round-trips) ✓
-- Stage 3 (symbolication from LINK.OUTPUT — the 700 names) — next.
-- Stages 4–5 (behavioral labels + bank-switch flags; comments/polish) — pending.
+- **Stage 3 (symbolication) ✓** — `tools/build_symbols.py` builds an
+  address→name table (`src/symbols.json`): all 700 LINK.OUTPUT names plus 121
+  curated DEFS addresses (zero-page vars, soft switches, ProDOS globals, RAM
+  buffers — constants/masks/char-codes deliberately excluded). `disasm.py` emits
+  a symbol-equate block, replaces matching operands with the original names, and
+  marks routine starts (`; === Name ===`). **37%** of address operands are named
+  (4003/10678; the denominator is inflated by data still decoded as code, so
+  real-code coverage is higher). Round-trips green. `make symbols && make disasm`.
+- Stage 4 (behavioral labels + bank-switch flags) — in progress (bank-switch
+  flagging next; behavioral naming needs Brian).
+- Stage 5 (comments/polish) — pending.
+
+### Needs Brian's confirmation / open questions
+- **Data hiding in code spans.** Small data structures are still linear-decoded
+  as instructions (round-trip-safe but unreadable), e.g. the window-descriptor
+  records at `WindowOne $111D` / `WindowTwo $1126` (decode as brk/asl/…). These,
+  plus `ComTab $4F84`, `CharIndex $3F6D`, `CompList $5987`, and the many
+  `*Msg`/`*String`/table symbols, need their extents bounded and marked data.
+- **AMACSStack $1035** — treated as a 1-byte saved-stack var (see `stx $1035`).
+  Confirm.
+- Alias choices where two original names share one address (11 cases, listed in
+  `src/symbols.json` and inline) — e.g. `$C000` = HardKey / Store80Off,
+  `$60` = TheBuffer / Point. Confirm canonical pick.

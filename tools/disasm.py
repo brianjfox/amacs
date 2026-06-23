@@ -117,38 +117,46 @@ ZP_CAPABLE = {
 }
 
 
-def operand_text(mne, mode, b1, b2, addr):
-    """Return the Merlin operand string (and possibly a `:'-suffixed mnemonic)
-    for one instruction. Returns (mnemonic, operand)."""
-    if mode == "imp" or mode == "acc":
-        return mne, ""
+def operand_text(mne, mode, b1, b2, addr, sym):
+    """Return (mnemonic, operand, named?) for one instruction. When the target
+    address has a known symbol (in `sym`, an addr->name dict) the numeric
+    operand is replaced by the original name; force-abs (`:`) is preserved."""
+    def nm(val, numfmt):
+        key = f"{val:04X}"
+        if key in sym:
+            return sym[key], True
+        return numfmt, False
+
+    if mode in ("imp", "acc"):
+        return mne, "", False
     if mode == "imm":
-        return mne, f"#${b1:02X}"
+        return mne, f"#${b1:02X}", False          # immediates stay numeric
     if mode == "zp":
-        return mne, f"${b1:02X}"
+        t, named = nm(b1, f"${b1:02X}");          return mne, t, named
     if mode == "zpx":
-        return mne, f"${b1:02X},x"
+        t, named = nm(b1, f"${b1:02X}");          return mne, f"{t},x", named
     if mode == "zpy":
-        return mne, f"${b1:02X},y"
+        t, named = nm(b1, f"${b1:02X}");          return mne, f"{t},y", named
     if mode == "izx":
-        return mne, f"(${b1:02X},x)"
+        t, named = nm(b1, f"${b1:02X}");          return mne, f"({t},x)", named
     if mode == "izy":
-        return mne, f"(${b1:02X}),y"
+        t, named = nm(b1, f"${b1:02X}");          return mne, f"({t}),y", named
     if mode == "izp":
-        return mne, f"(${b1:02X})"
+        t, named = nm(b1, f"${b1:02X}");          return mne, f"({t})", named
     if mode == "rel":
         target = (addr + 2 + ((b1 ^ 0x80) - 0x80)) & 0xFFFF
-        return mne, f"${target:04X}"
+        t, named = nm(target, f"${target:04X}");  return mne, t, named
     word = b1 | (b2 << 8)
     if mode == "ind":
-        return mne, f"(${word:04X})"
+        t, named = nm(word, f"${word:04X}");      return mne, f"({t})", named
     if mode == "iax":
-        return mne, f"(${word:04X},x)"
+        t, named = nm(word, f"${word:04X}");      return mne, f"({t},x)", named
     # abs / abx / aby
     suffix = {"abs": "", "abx": ",x", "aby": ",y"}[mode]
     force = (word < 0x100) and (mne in ZP_CAPABLE)
     out_mne = mne + ":" if force else mne
-    return out_mne, f"${word:04X}{suffix}"
+    t, named = nm(word, f"${word:04X}")
+    return out_mne, f"{t}{suffix}", named
 
 
 def fmt_instr(addr, mne, operand):
@@ -175,12 +183,19 @@ def emit_data(out, data, start, end):
         i += len(chunk)
 
 
-def disassemble(out, data, start, end):
-    """Linear-disassemble bytes [start,end) of the image into Merlin source."""
+def disassemble(out, data, start, end, sym, aliases, stats):
+    """Linear-disassemble bytes [start,end) of the image into Merlin source.
+    Emits a `; === Name ===' marker where an instruction starts at a known
+    symbol, and replaces operands with symbol names via operand_text()."""
     off1 = end - ORG
     i = start - ORG
     while i < off1:
         addr = ORG + i
+        key = f"{addr:04X}"
+        if key in sym:
+            extra = f"   (also {', '.join(aliases[key])})" if key in aliases else ""
+            out.append(f";")
+            out.append(f"; === {sym[key]}{extra} ===")
         op = data[i]
         entry = OPC.get(op)
         if entry is None:
@@ -190,26 +205,35 @@ def disassemble(out, data, start, end):
         mne, mode = entry
         n = LEN[mode]
         if i + n > off1:
-            # instruction would run past region end -> emit remaining as data
             out.append(f"        dfb ${op:02X}        ; ${addr:04X}  (truncated)")
             i += 1
             continue
         b1 = data[i + 1] if n >= 2 else 0
         b2 = data[i + 2] if n >= 3 else 0
-        out_mne, operand = operand_text(mne, mode, b1, b2, addr)
+        out_mne, operand, named = operand_text(mne, mode, b1, b2, addr, sym)
+        stats["instrs"] += 1
+        if mode not in ("imp", "acc", "imm"):
+            stats["operands"] += 1
+            if named:
+                stats["named"] += 1
         out.append(f"        {fmt_instr(addr, out_mne, operand)}    ; ${addr:04X}")
         i += n
 
 
 def main(argv):
-    if len(argv) not in (3, 4):
-        sys.stderr.write("usage: disasm.py INPUT.OBJ OUTPUT.s [regions.json]\n")
+    if len(argv) not in (3, 4, 5):
+        sys.stderr.write("usage: disasm.py INPUT.OBJ OUTPUT.s [regions.json] [symbols.json]\n")
         return 2
     src_obj, out_s = argv[1], argv[2]
     regions = []
-    if len(argv) == 4:
+    if len(argv) >= 4 and argv[3]:
         with open(argv[3]) as f:
             regions = json.load(f)
+    sym, aliases = {}, {}
+    if len(argv) == 5 and argv[4]:
+        with open(argv[4]) as f:
+            sj = json.load(f)
+        sym, aliases = sj.get("byaddr", {}), sj.get("aliases", {})
 
     with open(src_obj, "rb") as f:
         data = f.read()
@@ -232,16 +256,33 @@ def main(argv):
     out = [
         ";-*- Mode: Merlin -*-",
         ";",
-        "; src/amacs.s -- AMACS main editor: Stage 2 linear disassembly.",
+        "; src/amacs.s -- AMACS main editor: reconstructed disassembly.",
         ";",
-        "; *** GENERATED (tools/disasm.py) -- numeric operands, no labels yet. ***",
-        "; Reassembles byte-identical to BIN/AMACS.OBJ (verified by make check).",
+        "; *** GENERATED (tools/disasm.py). Operands carry original names from",
+        ";     DEFS/LINK.OUTPUT.S + DEFS/*.EQUS.S where known; the rest are bare",
+        ";     addresses. Reassembles byte-identical to BIN/AMACS.OBJ (make check). ***",
         f"; Origin ${ORG:04X}; {len(data)} bytes; last address ${end_addr - 1:04X}.",
         ";",
-        f"        org ${ORG:04X}",
-        "        dsk AMACS.OBJ",
-        ";",
     ]
+
+    # Symbol equates. Every name used by an operand must be defined; we emit the
+    # whole table (sorted by address) so it doubles as a symbol map. This is the
+    # original linker map + curated DEFS addresses, names verbatim.
+    if sym:
+        out.append("; ===================== symbol equates =====================")
+        for key in sorted(sym, key=lambda k: int(k, 16)):
+            v = int(key, 16)
+            # 2-digit value => Merlin types the symbol as zero-page (needed for
+            # zp / zp-indirect operands); 4-digit => absolute.
+            vfmt = f"${v:02X}" if v < 0x100 else f"${v:04X}"
+            al = f"  ; = {', '.join(aliases[key])}" if key in aliases else ""
+            out.append(f"{sym[key]:<18} = {vfmt}{al}")
+        out.append("; ==========================================================")
+        out.append(";")
+
+    out += [f"        org ${ORG:04X}", "        dsk AMACS.OBJ", ";"]
+
+    stats = {"instrs": 0, "operands": 0, "named": 0}
     names = {(int(str(r["start"]), 16)): r.get("name", "") for r in regions}
     for (s, e, kind) in spans:
         nm = names.get(s, "")
@@ -250,15 +291,17 @@ def main(argv):
         if kind == "data":
             emit_data(out, data, s, e)
         else:
-            disassemble(out, data, s, e)
+            disassemble(out, data, s, e, sym, aliases, stats)
 
     out_dir = os.path.dirname(out_s)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
     with open(out_s, "w") as f:
         f.write("\n".join(out) + "\n")
-    print(f"wrote {out_s}: {len(out)} lines, {len(data)} bytes "
-          f"({len(spans)} regions)")
+    pct = (100 * stats["named"] // stats["operands"]) if stats["operands"] else 0
+    print(f"wrote {out_s}: {len(out)} lines, {len(data)} bytes, {len(spans)} regions; "
+          f"{stats['instrs']} instrs, {stats['named']}/{stats['operands']} "
+          f"address operands named ({pct}%)")
     return 0
 
 

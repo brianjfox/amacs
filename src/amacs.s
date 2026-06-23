@@ -1,10 +1,823 @@
 ;-*- Mode: Merlin -*-
 ;
-; src/amacs.s -- AMACS main editor: Stage 2 linear disassembly.
+; src/amacs.s -- AMACS main editor: reconstructed disassembly.
 ;
-; *** GENERATED (tools/disasm.py) -- numeric operands, no labels yet. ***
-; Reassembles byte-identical to BIN/AMACS.OBJ (verified by make check).
+; *** GENERATED (tools/disasm.py). Operands carry original names from
+;     DEFS/LINK.OUTPUT.S + DEFS/*.EQUS.S where known; the rest are bare
+;     addresses. Reassembles byte-identical to BIN/AMACS.OBJ (make check). ***
 ; Origin $1000; 38136 bytes; last address $A4F7.
+;
+; ===================== symbol equates =====================
+scrny              = $1F
+WindowLft          = $20
+WindowRgt          = $21
+WindowTop          = $22
+WindowBot          = $23
+CH                 = $24
+CV                 = $25
+BASL               = $28
+BASH               = $29
+BuffPoint          = $5E
+TheBuffer          = $60  ; = Point
+PageTop            = $62
+MarkPnt            = $64
+BuffTop            = $66
+BuffBot            = $68
+GapTop             = $6A
+GapBot             = $6C
+PhysBuffTop        = $6E
+PhysBuffBot        = $70
+BuffData           = $72
+TheBuffer_X        = $74
+ThePathname        = $0301
+PathStr            = $0302
+ThePrefix          = $0341
+PrefixName         = $0342
+rm_PathComp        = $0381
+TagSpace           = $03C1
+LoRamPoint         = $0801  ; = RamBuffArea
+RamBuffEnd         = $0F39
+SelectedBuff       = $0F3A
+LastBuffer         = $0F3B
+BuffActList        = $0F3C
+BuffList_X         = $0F4A
+AMACSStack         = $1035
+TopLoop            = $1061
+ExitAMACS          = $1082
+TopBlink           = $1085
+InitAMACS          = $10A8
+ResetBoot          = $10DD
+WarmBoot           = $10E5
+TwoWindows?        = $111B
+WindowOne          = $111D
+WindowTwo          = $1126
+SelectedWind       = $112F
+GetSelWind         = $1130
+TwoWindows         = $1223
+OtherWindow        = $12C1
+EnsureWinds        = $1336
+OneWindow          = $133F
+GrowWindow         = $137F
+PrintVar           = $13EF
+SetVariable        = $14AF
+AutoPushPoint      = $1585
+Delete             = $1587
+Rubout             = $161D
+RubWithTab         = $168B
+TabInsert          = $16CC
+Insert             = $16CE
+RightChar          = $173B
+LeftChar           = $175E
+NewCenter          = $1781
+ScreenEdge         = $17E1
+SkipComment?       = $1825
+CRLF               = $1826
+InsertReturn       = $1969
+OpenLine           = $196E
+GotoTop            = $1A41
+GotoBot            = $1A5A
+MovePush?          = $1A7A
+PrefixMeta         = $1AD5
+PrefixCtrl         = $1ADE
+PrefixCMeta        = $1AEB
+ControlX           = $1B00
+RSrch              = $1B71
+ISrch              = $1B79
+RWordSearch        = $1B88
+WordSearch         = $1B90
+TabsIndent         = $1B9C
+SetTabsIndent      = $1B9D
+NotModified        = $1BA6
+QuotedInsert       = $1BB1
+UpLine             = $1BB7
+DownLine           = $1BC2
+TopAbort           = $1BF4
+AtomMode           = $1C08
+IndentMode         = $1C0C
+AutoMode           = $1C10
+CapsMode           = $1C14
+ToggleMode         = $1C16
+PointInfo          = $1C48
+WhatLossage        = $1CCD
+CommentColumn      = $1CFF
+CommentBegin       = $1D00
+CommentEnd         = $1D05
+StringPntr         = $1D0A
+StringInLine       = $1D0C
+MakeComment        = $1D8C
+KillComment        = $1E6A
+CommentLine        = $1E7A
+CommentLineI       = $1E93
+UpCommLine         = $1E9E
+DownCommLine       = $1EA6
+FindComment        = $1EEA
+DelBlankComm       = $1F3F
+SpaceBar           = $1F9F
+FillColumn         = $1FAC
+AutoFill           = $1FAD
+CleanBegLine       = $2089
+FillPrefix         = $20A5
+SetFillPrefix      = $20AC
+WhatSpace          = $2113
+Bottom?            = $2182
+Top?               = $218D
+LabelChars         = $2198
+AlphaLabel         = $219D
+LabelChar?         = $219E
+DownPara           = $21CF
+UpPara             = $2239
+MarkPara           = $22B5
+FillPara           = $22C7
+NextLabel          = $22DD
+PrevLabel          = $234C
+RepoWind           = $23F0
+XorASCII           = $242B
+ASCIIBuff1         = $2430
+ASCIIBuff          = $2438
+IndentVbtm         = $24A5
+IndentLine         = $24A6
+BackToIndent       = $2526
+PrevIndent         = $2548
+GetPrevIndent      = $254F
+OutdentCRLF        = $2572
+OutdentLine        = $2578
+AltmodeChar        = $2604
+IIcMode?           = $2605
+CoutDef            = $2606
+CharOutXY          = $2608
+CharOut            = $2611
+SI:CharOut         = $2614
+PrintCR            = $2679
+PrintCR1           = $267C
+UseTabTable?       = $2690
+TabBump            = $2691
+TabTable           = $26C5
+PrintTab           = $26CF
+vtab               = $26E9
+vtab1              = $26EB
+StoreChar          = $2703
+PickChar           = $271A
+KeyDownp           = $272F
+KeyAvail?          = $273A
+GetKey             = $2750
+KeyClickp          = $275A
+KeyClickVol        = $275B
+IIgsMode?          = $275C
+KeyModState        = $275D
+GetKeyPress        = $275E
+TYIBuff            = $27A7
+TYI_PopIndex       = $27E7
+TYI_PushIndex      = $27E8
+KillTYI            = $27EA
+AnyTYI?            = $27F1
+UnTYI              = $27FF
+PushTYI            = $280B
+PopTYI             = $2824  ; = TYI
+GatherTYI          = $2843
+ClearEOL           = $2862
+ClearEOL1          = $2864
+ClearPage          = $2871
+ClearEOP           = $2874
+ClearEOP1          = $2876
+Home               = $289E
+ResetTTY           = $28A9
+Cursor2            = $28B7
+BlinkTime          = $28B9
+TimedBlink         = $28BB
+BlinkCursor        = $292E
+AltBlink           = $293C
+BlinkRate          = $2945
+BlinkOnce          = $2946
+CursorOff          = $2992  ; = CursorOn, InvertChar
+BeepVector         = $29B7
+Beep               = $29B9
+Bell               = $29BC
+Click              = $29BE
+ParenFlag          = $29D5
+ParenPos           = $29D6
+BeepFlashes?       = $2A37
+BeepRings?         = $2A38
+SysBeep            = $2A39
+TypeoutOpen        = $2A95
+TypeoutFlag        = $2A96
+TypeoutAbort       = $2A97
+AbortedTO?         = $2A99
+TOAbortStk         = $2A9A
+TypeoutMax         = $2A9B
+TypeoutCH          = $2A9F
+InitTypeout        = $2AA1
+OpenTypeout        = $2AC4
+CloseTypeout       = $2B0F
+CloseTypeout1      = $2B19
+SaveWind           = $2B38
+RstrWind           = $2B45
+GetTypeWind        = $2B5B
+PrepTO             = $2B93
+UnPrepTO           = $2BB7
+PointToCH          = $2D25
+FindPoint          = $2D88
+FindPoint1         = $2D93
+GetXCharLen        = $2DE0
+BumpXPos           = $2E13
+BackLine           = $2E35
+BackScrLine        = $2E63
+SetTempBot         = $2EF3
+FixText            = $2F21
+CheckTop           = $2F5C
+EnableKDisp        = $300B
+DisplayPage        = $300C
+DisplayPage1       = $300F
+DisplayTemp        = $301D
+DisplayDown        = $30C6
+DispToPoint        = $30E0
+DecrScreen         = $30EC
+IncrScreen         = $3107
+DisplayLine        = $3147
+PrintTextLine      = $3164
+LinesPastPnt       = $3191
+FindPointCol       = $31E3
+CenterLine         = $31F5
+CenterPoint        = $31F6
+CenterPage         = $31F7
+CenterPage1        = $320D
+GenDisplay         = $3238
+DispVects          = $3262
+DispPointEnd       = $3279
+ScrollLineTop      = $32FF
+ScrollLineBot      = $3300
+ScrollDir          = $3301
+ScrollDest         = $3302
+Scroll             = $3304
+TV:InsLine         = $337A
+TV:InsLine1        = $337C
+TV:DelLine         = $33AB
+TV:DelLine1        = $33AD
+PointToCol         = $33DC
+GoalColumn         = $3406
+UserGoal           = $3408
+GetGoalColumn      = $340A
+NewLineEOB         = $3438
+DownRealLine       = $3439
+UpRealLine         = $3477
+BegOfLine          = $34A6
+EndOfLine          = $34BA
+ContextLines       = $34D3
+DownScreen         = $34D4
+UpScreen           = $354C
+SetPopMark         = $35AB
+LeftWord           = $35C2
+IN:LeftWord        = $35C5
+RightWord          = $3617
+IN:RightWord       = $361A
+UpperWord          = $3660
+LowerWord          = $3674
+CapWord            = $367D
+IN:UpperReg        = $3686
+IN:LowerReg        = $369F
+IN:CapReg          = $36B8
+EqTempPoint?       = $36F2
+UpperCon           = $36FD
+LowerCon           = $3708
+Separator?         = $376A
+WhiteSpace?        = $37A7
+WhiteSpace1        = $37AF
+SentDel?           = $37BB
+DeleteWord         = $37E7
+KillTempPoint      = $37FA
+RuboutWord         = $37FE
+KillLineBk         = $3826
+KillLine           = $382E
+IN:KillLine        = $386E
+DeleteSpace        = $393C
+GenSpaceDel        = $393F
+DeleteLines        = $3955
+DelForSpace        = $39BF
+DelBacSpace        = $39DA
+DelTempPoint       = $3A0A
+RightSent          = $3A2E
+IN:RightSent       = $3A31
+LeftSent           = $3A6E
+IN:LeftSent        = $3A71
+KillSent           = $3AE0
+KillSentB          = $3AF0
+BlankLine?         = $3B0D
+ReadLineHelp       = $3B20
+ReadArgLine        = $3B23
+ReadLine           = $3B2D
+IN:ReadLine        = $3B2F
+QuestionH?         = $3BB0
+BufferRead         = $3D86
+FileRead           = $3D87
+MakeBuffList       = $3DE1
+MakeFileList       = $3E37
+GetBank1           = $3F09
+GetBank2           = $3F10
+MustComplete       = $3F17
+ReadLineCH         = $3F18
+CommandList        = $3F1A
+CompLineHelp       = $3F1C
+MetaX              = $3F1F
+CharIndex          = $3F6D
+ReadVariable       = $3F70
+ReadFunction       = $3F8D
+ReadComplete       = $3FA9
+ReadCompLine       = $3FAE
+TypeLine           = $3FC9
+PushArg            = $42AE
+GiveArgs           = $42B8
+BotOfRam           = $42F8
+TopOfRam           = $42FA
+PointToBInfo       = $42FC
+InitBuffers        = $4316
+LogBuffer          = $4383
+PhysBuffer         = $43B6
+Deselect           = $43F0
+ForceSelect        = $4432
+SelectBuffer       = $45B1
+SelectNamed        = $45B5
+SI:OpenBuff        = $45EB
+IN:OpenBuff        = $45F4
+SI:SelectB         = $460F
+CreateBuffer       = $4624
+RenameBuffer       = $474A
+FindBuffer         = $47E7
+FindBuffFile       = $4829
+ListBuffers        = $4874
+MySize             = $49A4
+PBuffName          = $49DC
+PBuffName1         = $49DF
+PBuffPoint         = $49E1
+PBuffFile          = $49EC
+PBuffFile1         = $49EF
+IN:KillBuff        = $49F3
+ZapBuff            = $49F6
+KillBuffer         = $4A1F
+DefBuffer          = $4B02
+Modified?          = $4B83
+BuffInsert         = $4B84
+BuffRubout         = $4BBD
+BuffDelete         = $4BE7
+SetLastKill        = $4C15
+SetBuffFlag        = $4C17
+ClrLastKill        = $4C1E
+ClrBuffFlag        = $4C20
+OldKill?           = $4C29
+BuffFlagOn?        = $4C2B
+BuffFlagOff?       = $4C35
+SetAModified       = $4C3A
+SetModified        = $4C3C
+ClrModified        = $4C45
+SetGap             = $4C52
+KillGap            = $4CBE
+MarkStack          = $4CEA
+MarkStackPntr      = $4CFA
+PushMark           = $4CFB
+MarkTemp           = $4D03
+IN:MarkTemp        = $4D10
+MarkBuffer         = $4D2F
+PopMark            = $4D4A
+PopTempMark        = $4D9C
+GetTempMark        = $4DBA
+SwapPointMark      = $4DCD
+DeleteKill?        = $4DE4
+YankKill           = $4EED
+GenericKill        = $4F36
+SetNewAppend       = $4F7E
+ComTab             = $4F84
+doc:ExitSafe       = $504E
+Describe           = $5184
+LastPercnt         = $52E5
+ModeLineCV         = $52E6
+ModeLineInv        = $52E7
+ModeLineChar       = $52E8
+DrawModeLine       = $52F8
+ModeLineMsg        = $531C
+InvModeLine        = $533B
+InitModeLine       = $5356
+ClearModeLine      = $535D
+MajorNames         = $536A
+MakeModeLine       = $537E
+ModeInfo           = $5441
+MinorNames         = $5528
+PrintMinors        = $5538
+TempToMode         = $5564
+SI:Divide          = $5577
+P:Offset           = $55CB
+P:Total            = $55CD
+BuffPercent        = $55CF
+Percent            = $55EA
+PreBlinkCount      = $56FB
+PreCharGet         = $56FD
+EchoAreaCH         = $5724
+EchoOutput         = $5726
+ClrEchoArea        = $579B
+NewEchoArea        = $57CC
+EchoAreaSave       = $57D2
+OpenEchoArea       = $57D8
+UseEchoArea        = $57E4
+CloseEchoArea      = $57FA
+EchoAreaMsg        = $5814
+BadCharMsg         = $5833
+PrUnDefined        = $5858
+PrettyPrint        = $586C
+print_control      = $5944
+print_c_meta       = $5951
+print_meta         = $5954
+PrintMessage       = $5968
+CompList           = $5987
+CompOffset         = $5989
+CompCount          = $598B
+PrintCompDoc       = $598C
+DCIStringOut       = $598F  ; = PrintComp
+DCIStringOut1      = $5991
+DocRef             = $5A12
+DCIStringLen       = $5A24
+FunctionRef        = $5A2E
+PopCompPoint       = $5A3D
+PushCompPoint      = $5A56
+SkipEnt            = $5A68
+CompareEnt         = $5A78
+HighMatch          = $5AD3
+GetCompLink        = $5AD4
+SI:CompleteMe      = $5AE5
+SI:CompleteSp      = $5AE9
+SearchDefault      = $5BC8
+SearchString       = $5BF1
+ISearchStack       = $5C19
+IStackPntr         = $5D09
+ISearchDir         = $5D0A
+SMoveMax           = $5D0F
+IPopSearch         = $5D11
+IPushSearch        = $5D64
+ISearchChars       = $5DB0
+ISearchVects       = $5DB8
+SearchForward      = $5DC9
+SearchBackwrd      = $5E31
+CaseSearch         = $5E8D
+SearchCase         = $5E8E
+ISearch            = $5FD1
+SearchKeyin        = $6085
+SearchInit         = $617C
+StringSearch       = $6220
+RStrSearch         = $6224
+StrSearch          = $6226
+LabelSearch        = $63CA
+Apropos            = $6491
+ListVars           = $65B0
+CheckString        = $6608
+SI:Apropos         = $663D
+GetAproArg         = $66E1
+GetKeyFun          = $6704
+GetKeyFun1         = $6708
+AutoFileExt        = $674E
+ShowExtension      = $6754
+VisitFile          = $6756
+SI:VisFile         = $6758
+MaybeSave          = $681F
+Default            = $68C0
+SetFileDef         = $68E4
+IN:SaveFile        = $6922
+WriteFile          = $69CA
+ReadFilename       = $69D0
+SaveFile           = $6A7D
+PrBuffName         = $6AC6
+PrFileName         = $6ACC
+InsertFile         = $6AD2
+EORValue           = $6B26
+FileLister         = $6B54
+DirLister          = $6B58
+SelfPath           = $6B9D
+BackPath           = $6BAC
+BeepFindPoint      = $6BB8
+FindFile           = $6BBE
+FixPath            = $6C38
+SetPrefix          = $6CB7
+DeleteFile         = $6D16
+InitFiler          = $6D3C
+OpCallMLI          = $6D61
+CallMLI            = $6D64
+MLIParams          = $6D71
+DefFileType        = $6D83
+GetPrefix          = $6D84
+DSK:Quit           = $6D96
+DSK:ChkExit        = $6DD1
+DSK:SetPrefix      = $6DDB
+SlotDrive          = $6DF0
+MakeSD             = $6DF2
+Time               = $6E0B
+GetSysDate         = $6E0F
+GetSystemTime      = $6E43
+GetRealTime        = $6E4F
+Months             = $6E61
+PrintDate          = $6E9D
+DSK:ModeTime       = $6F00
+PrintTime          = $6F2A
+BuffDateTime       = $6F7F
+BuffPutOn          = $6FAC
+BuffPutter         = $6FC3
+BuffPutOff         = $6FD5
+PushFilePath       = $6FE9
+PushFilePath1      = $6FEB
+PrintPath          = $7025
+RBlock             = $7038
+RBlock1            = $703B
+VolInfo            = $7056
+FileInfo           = $707E
+MakePath           = $70AA
+OpenPath           = $70DC
+OpenPath1          = $70E2
+GblLength          = $7126
+CompFile           = $712A
+GetDirInfo         = $715F
+NextFile           = $71DC
+GetOnline          = $7280
+DSK:OpenFile       = $729D
+DSK:ReadByte       = $72AB
+PrepRead           = $72FE
+PrepWrite          = $7321
+DSK:WriteByte      = $732B
+DSK:SaveFile       = $734A
+DSK:CloseHere      = $73B4
+DSK:CloseFile      = $73E5
+DSK:DiskSpace      = $73F2
+PrintPages         = $749B
+DSK:ListDir        = $74BA
+DSK:ListFiles      = $74BE
+HexListing         = $753E
+FTypeTable         = $7640
+PrintType          = $7679
+DSK:Create         = $76A6
+DSK:Delete         = $76CA
+Compiler           = $76E4
+Compile            = $7724
+ClockPatch         = $77BF
+GetTheTime         = $77C0
+DayOfWeek          = $77F0
+ExitPrompt         = $77F1
+SafetyCheck        = $77F2
+CommandChar        = $7832
+LastCommand        = $7833
+CommandVector      = $7834
+LastComVect        = $7836
+DisplayCode        = $7838
+DispatchTab        = $7839
+Dispatch           = $783D
+CallTemp           = $7898
+CharError          = $789B
+BadCharacter       = $789E
+NextByte           = $78A2
+UnMerlinify        = $78E0
+Merlinify          = $7965
+PrintDec           = $7A01
+PD:Justify         = $7A54
+ZeroJustify        = $7A55
+Argument           = $7A5B
+ExplicitArg        = $7A5D
+ArgSign            = $7A5E
+GetArgSign         = $7A60
+InitArgument       = $7A6B
+AnyArgument?       = $7A7F
+AddArgDigit        = $7A9B
+ArgumentDigit      = $7AD2
+ZeroArg?           = $7AF6
+NegativeArg        = $7B11
+UniversalArg       = $7B1D
+PrintArgument      = $7B9A
+StringArgs         = $7BA7
+ArgCount           = $7C27
+ArgIndex           = $7C28
+InitStrArgs        = $7C29
+GetStrArg          = $7C32
+PointForward       = $7C68
+GapBotPoint        = $7CB4
+PointBuffBot?      = $7CC2
+PointBackward      = $7CCD
+GetYOrNp           = $7D20
+ReadAltKey         = $7D4A
+HexByteOut         = $7D81
+PrintDone          = $7D97
+PrintReturn        = $7DA3
+PrintSpace         = $7DA7
+Plurilize          = $7DAC
+C_XCharacters      = $7DB8
+C_XVectors         = $7DDE
+C_XCharCount       = $7E2A
+SwapMark           = $7E2B
+SetGoalCol         = $7E34
+SetFillCol         = $7E3F
+SetCommCol         = $7E4A
+ToggleRO           = $7E7B
+FunPtr             = $7E95
+FindFunKey         = $7E97
+FindFunRef         = $7EA8
+GetFunName         = $7EC2
+SetKey             = $7F0F
+BindIfNot          = $7FB2
+UnBindKey          = $7FCD
+BindKey            = $7FD3
+WhatKey            = $7FE8
+PrFunDoc           = $8045
+WhatCtrlX          = $8090
+FindXKey           = $810B
+PrCtrlXDoc         = $8135
+DefMajor           = $8147
+TheModes           = $8148
+MODE:C             = $815A
+MODE:Lisp          = $816D
+MODE:Merlin        = $817D
+MODE:Text          = $81B1
+MODE:Pascal        = $81C6
+BlockBind          = $81D9
+SetMinorMd         = $81EB
+MODE:Fund          = $81F2
+ModeFinish         = $81FF
+SetModeComm        = $8225
+ParseMode          = $823F
+SelectMode         = $829C
+SI:ParseMode       = $82B7
+SI:ListScan        = $82BF
+HelpHelpFile       = $8312
+SystemPath         = $8323
+SetSysPath         = $8355
+GetHelpFile        = $8375
+Help               = $8391
+SetMyFile          = $845A
+QueryFlag          = $846F
+CaseReplace        = $8470
+QueryReplace       = $8475
+Replace            = $8479
+ReplaceEm          = $847B
+AlphaChar?         = $867B
+TecoSearch         = $86AB
+CountOccurs        = $8768
+Occur              = $876F
+Bccur              = $8776
+PrintOccurs        = $87AB
+IN:Occur           = $87B1
+AccumLines         = $8971
+XCharMove          = $89DE
+EOLorEOB?          = $89DF
+XposeChars         = $89FA
+XposeLines         = $8A7D
+MacroExec          = $8AA5
+MacroDef           = $8AA6
+ViewKbdMacro       = $8AA7
+DoLastMacro        = $8B04
+KeyToMac           = $8B20
+KeyFromMac         = $8B67
+EndMacroExec       = $8BD3
+StartMacro         = $8BD9
+EndMacro           = $8C05
+RegionQSize        = $8C2B
+TheRegion          = $8CAE
+OpenRegion         = $8CB3
+CloseRegion        = $8CF5
+LCaseRegion        = $8D61
+UCaseRegion        = $8D75
+CCaseRegion        = $8D83
+CopyRegion         = $8D92
+KRegion            = $8D9A
+CLinesRegion       = $8DB0
+CLInternal         = $8DDA
+LsInReg            = $8E08
+FillRegion         = $8E0A
+PrintBuffer        = $8EAC
+PrintRegion        = $8EB2
+IndentReg          = $8EBB
+PrinterSlot        = $8F34
+SheetLines         = $8F35
+PLinesPage         = $8F36
+PrinterCols        = $8F37
+PageNum            = $8F38
+FileLine?          = $8F3A
+AutoNumber         = $8F3B
+HCEscape           = $8F3C
+ContextBeg         = $8F3E
+ContextEnd         = $8F48
+PInitStr           = $8F54
+LeftMargin         = $8F5E
+RightMargin        = $8F5F
+PrintOut           = $8FB9
+PrintText          = $9176
+BaseLibAddr        = $91D8
+LibCount           = $91DA
+LoadLibrary        = $91E6
+SI:LoadLib         = $91F6
+FlushLibs          = $92BB
+SI:FlushLibs       = $92E0
+CopyLibPfx         = $9310
+GetLinkEnd         = $9339
+IN:LibLoad         = $93A8
+AddLibName         = $93FA
+TheTag             = $9463
+TagsFindFile       = $9481
+GetTagBuff         = $9488
+ScanForTag         = $94D2
+WhatTagFile        = $94D6
+VisitTags          = $9749
+Variables          = $975D
+VariableLink       = $9A6A
+VarList            = $9A6D
+VarDocList         = $9B15
+CommandNames       = $9B37
+CommandLink        = $A4E7
+Documentation      = $A4F8
+rm_FileBuffer      = $A500  ; = rm_DirectBuff
+rm_ExcessComp      = $A700
+rm_DataBuffer      = $A900  ; = rm_CompTable
+MLI                = $BF00
+SysDeath           = $BF03
+ReadClock          = $BF06
+SysError           = $BF09
+SysDeath1          = $BF0C
+SysErrorByte       = $BF0F
+DriverList         = $BF10  ; = drvr_RAM
+drvr_S1D1          = $BF12
+drvr_S2D1          = $BF14
+drvr_S3D1          = $BF16
+drvr_S4D1          = $BF18
+drvr_S5D1          = $BF1A
+drvr_S6D1          = $BF1C
+drvr_S7D1          = $BF1E
+drvr_S0D2          = $BF20
+drvr_S1D2          = $BF22
+drvr_S2D2          = $BF24
+drvr_S3D2          = $BF26
+drvr_S4D2          = $BF28
+drvr_S5D2          = $BF2A
+drvr_S6D2          = $BF2C
+drvr_S7D2          = $BF2E
+LastUnit           = $BF30
+ActDevCnt          = $BF31
+ActDevLst          = $BF32
+SysCopyRgt         = $BF40
+SysCallIRQ         = $BF50
+SysScratch1        = $BF56
+SysMemMap          = $BF58
+SysFileBuffs       = $BF70
+SysIntAddrs        = $BF80
+SysRegisters       = $BF88
+SysWhatBank        = $BF8D
+SysIntReturn       = $BF8E
+SysTheDate         = $BF90
+SysTheTime         = $BF92
+SysFileLevel       = $BF94
+SysBkpBit          = $BF95
+SysScratch2        = $BF96
+MachineID          = $BF98
+SysSlotROM         = $BF99
+SysPfxFlag         = $BF9A
+SysMLIActive       = $BF9B
+SysLastReturn      = $BF9C
+SysMLI_X           = $BF9D
+SysMLI_Y           = $BF9E
+HiRamPoint         = $BFFF
+HardKey            = $C000  ; = Store80Off
+Store80On          = $C001
+RdMainRam          = $C002
+RdAltRam           = $C003
+WrMainRam          = $C004
+WrAltRam           = $C005
+UseMainZP          = $C008
+UseAuxZP           = $C009
+HardKeyReset       = $C010
+RdWhichRam?        = $C013  ; = RdMainRam?
+WrWhichRam?        = $C014  ; = WrMainRam?
+UseMainZP?         = $C016
+Store80Off?        = $C018
+Page1?             = $C01C
+HardModState       = $C025
+HardBeep           = $C030
+Page1              = $C054
+Page2              = $C055
+HardMeta           = $C061
+HardHyper          = $C062
+RdWrBank2          = $C083
+RdRomBank          = $C08A
+RdWrBank1          = $C08B
+SetParens          = $D0AD
+Closes             = $D0F1
+Opens              = $D0F4
+CloseParen?        = $D0F7
+CheckArrowKey      = $D10D
+LibNames           = $D480
+BufferLoad         = $D500
+BufferDump         = $D503
+BufferFName        = $D506
+LibBase            = $D800
+EditTabStops       = $DACD
+SetSerialSlot      = $DB16
+InitSerialIO       = $DB43
+SetBaud            = $DB56
+SerialInput        = $DB6C
+ClearChannel       = $DBA2
+SerialOutput       = $DBB8
+WeekDays           = $DBC3
+SendBuff           = $DBF7
+SendRegion         = $DBFD
+LibBase_X          = $E000
+IIcLoc             = $FBC0
+; ==========================================================
 ;
         org $1000
         dsk AMACS.OBJ
@@ -12,20 +825,22 @@
 ; ---- $1000-$1026  code ----
                 jmp $1046    ; $1000
                 jmp $1055    ; $1003
-                jmp $729D    ; $1006
-                jmp $72FE    ; $1009
-                jmp $73E5    ; $100C
-                jmp $72AB    ; $100F
-                jmp $5AE5    ; $1012
-                jmp $7A6B    ; $1015
-                jmp $14AF    ; $1018
-                jmp $42B8    ; $101B
-                jmp $5A2E    ; $101E
-                jmp $7FD3    ; $1021
-                jmp $280B    ; $1024
+                jmp DSK:OpenFile    ; $1006
+                jmp PrepRead    ; $1009
+                jmp DSK:CloseFile    ; $100C
+                jmp DSK:ReadByte    ; $100F
+                jmp SI:CompleteMe    ; $1012
+                jmp InitArgument    ; $1015
+                jmp SetVariable    ; $1018
+                jmp GiveArgs    ; $101B
+                jmp FunctionRef    ; $101E
+                jmp BindKey    ; $1021
+                jmp PushTYI    ; $1024
 ; ---- $1027-$1034  data  entry pointer block (CompList,CommandNames,CharIndex,ComTab,C_XCharacters,C_XVectors,C_XCharCount) ----
         dfb $87,$59,$37,$9B,$6D,$3F,$84,$4F,$B8,$7D,$DE,$7D,$2A,$7E    ; $1027  .Y7.m?.O8}^}*~
 ; ---- $1035-$7DB7  code ----
+;
+; === AMACSStack ===
                 brk    ; $1035
                 lda #$55    ; $1036
                 sta $03F2    ; $1038
@@ -35,90 +850,104 @@
                 sta $03F4    ; $1042
                 rts    ; $1045
                 tsx    ; $1046
-                stx $1035    ; $1047
+                stx AMACSStack    ; $1047
                 jsr $1036    ; $104A
-                jsr $10A8    ; $104D
+                jsr InitAMACS    ; $104D
                 lda #$06    ; $1050
-                jmp $1061    ; $1052
-                ldx $1035    ; $1055
+                jmp TopLoop    ; $1052
+                ldx AMACSStack    ; $1055
                 txs    ; $1058
                 jsr $1036    ; $1059
-                jsr $10DD    ; $105C
+                jsr ResetBoot    ; $105C
                 lda #$01    ; $105F
+;
+; === TopLoop ===
                 pha    ; $1061
-                jsr $4C52    ; $1062
+                jsr SetGap    ; $1062
                 pla    ; $1065
-                bit $2A99    ; $1066
+                bit AbortedTO?    ; $1066
                 bpl $1070    ; $1069
-                inc $2A99    ; $106B
+                inc AbortedTO?    ; $106B
                 beq $1073    ; $106E
-                jsr $3238    ; $1070
-                jsr $7A6B    ; $1073
-                jsr $7C29    ; $1076
-                jsr $1085    ; $1079
-                jsr $783D    ; $107C
-                jmp $1061    ; $107F
-                jmp $6D96    ; $1082
+                jsr GenDisplay    ; $1070
+                jsr InitArgument    ; $1073
+                jsr InitStrArgs    ; $1076
+                jsr TopBlink    ; $1079
+                jsr Dispatch    ; $107C
+                jmp TopLoop    ; $107F
+;
+; === ExitAMACS ===
+                jmp DSK:Quit    ; $1082
+;
+; === TopBlink ===
                 ldx #$29    ; $1085
                 lda $00,x    ; $1087
-                sta $C009    ; $1089
+                sta UseAuxZP    ; $1089
                 sta $00,x    ; $108C
-                sta $C008    ; $108E
+                sta UseMainZP    ; $108E
                 dex    ; $1091
                 cpx #$1F    ; $1092
                 bne $1087    ; $1094
-                sta $C009    ; $1096
-                jsr $3F09    ; $1099
-                jsr $D0AD    ; $109C
-                sta $C008    ; $109F
-                jsr $3F10    ; $10A2
-                jmp $292E    ; $10A5
-                lda $C083    ; $10A8
-                lda $C083    ; $10AB
-                jsr $6D3C    ; $10AE
-                jsr $5356    ; $10B1
-                jsr $4316    ; $10B4
+                sta UseAuxZP    ; $1096
+                jsr GetBank1    ; $1099
+                jsr SetParens    ; $109C
+                sta UseMainZP    ; $109F
+                jsr GetBank2    ; $10A2
+                jmp BlinkCursor    ; $10A5
+;
+; === InitAMACS ===
+                lda RdWrBank2    ; $10A8
+                lda RdWrBank2    ; $10AB
+                jsr InitFiler    ; $10AE
+                jsr InitModeLine    ; $10B1
+                jsr InitBuffers    ; $10B4
                 ldx #$00    ; $10B7
                 lda $1116,x    ; $10B9
                 sta $0200,x    ; $10BC
                 beq $10C4    ; $10BF
                 inx    ; $10C1
                 bne $10B9    ; $10C2
-                jsr $4624    ; $10C4
-                lda $27E8    ; $10C7
-                cmp $27E7    ; $10CA
+                jsr CreateBuffer    ; $10C4
+                lda TYI_PushIndex    ; $10C7
+                cmp TYI_PopIndex    ; $10CA
                 bne $10DA    ; $10CD
-                lda $C062    ; $10CF
-                and $C061    ; $10D2
+                lda HardHyper    ; $10CF
+                and HardMeta    ; $10D2
                 bmi $10DA    ; $10D5
-                jsr $D500    ; $10D7
-                jmp $10E5    ; $10DA
+                jsr BufferLoad    ; $10D7
+                jmp WarmBoot    ; $10DA
+;
+; === ResetBoot ===
                 lda #$00    ; $10DD
-                sta $27E8    ; $10DF
-                sta $27E7    ; $10E2
-                lda $C08A    ; $10E5
-                jsr $28A9    ; $10E8
-                lda $C083    ; $10EB
-                lda $C083    ; $10EE
-                lda $23    ; $10F1
+                sta TYI_PushIndex    ; $10DF
+                sta TYI_PopIndex    ; $10E2
+;
+; === WarmBoot ===
+                lda RdRomBank    ; $10E5
+                jsr ResetTTY    ; $10E8
+                lda RdWrBank2    ; $10EB
+                lda RdWrBank2    ; $10EE
+                lda WindowBot    ; $10F1
                 sec    ; $10F3
                 sbc #$04    ; $10F4
-                sta $52E6    ; $10F6
-                sta $23    ; $10F9
+                sta ModeLineCV    ; $10F6
+                sta WindowBot    ; $10F9
                 ldy #$3F    ; $10FB
-                lda ($72),y    ; $10FD
-                jsr $829C    ; $10FF
-                jsr $537E    ; $1102
+                lda (BuffData),y    ; $10FD
+                jsr SelectMode    ; $10FF
+                jsr MakeModeLine    ; $1102
                 lda #$14    ; $1105
-                sta $2606    ; $1107
+                sta CoutDef    ; $1107
                 lda #$26    ; $110A
                 sta $2607    ; $110C
-                jsr $2AA1    ; $110F
-                jsr $300C    ; $1112
+                jsr InitTypeout    ; $110F
+                jsr DisplayPage    ; $1112
                 rts    ; $1115
                 cmp $E9E1    ; $1116
                 inc: $0000    ; $1119
                 brk    ; $111C
+;
+; === WindowOne ===
                 brk    ; $111D
                 bvc $1120    ; $111E
                 asl    ; $1120
@@ -127,6 +956,8 @@
                 brk    ; $1123
                 brk    ; $1124
                 brk    ; $1125
+;
+; === WindowTwo ===
                 brk    ; $1126
                 bvc $1134    ; $1127
                 trb $00    ; $1129
@@ -134,17 +965,21 @@
                 brk    ; $112C
                 brk    ; $112D
                 brk    ; $112E
+;
+; === SelectedWind ===
                 brk    ; $112F
-                sta $112F    ; $1130
+;
+; === GetSelWind ===
+                sta SelectedWind    ; $1130
                 jsr $1293    ; $1133
                 ldy #$00    ; $1136
                 lda ($00),y    ; $1138
-                sta: $0020,y    ; $113A
+                sta: WindowLft,y    ; $113A
                 iny    ; $113D
                 cpy #$04    ; $113E
                 bcc $1138    ; $1140
-                lda $23    ; $1142
-                sta $52E6    ; $1144
+                lda WindowBot    ; $1142
+                sta ModeLineCV    ; $1144
                 ldy #$04    ; $1147
                 lda ($00),y    ; $1149
                 tax    ; $114B
@@ -169,14 +1004,14 @@
                 sta $03    ; $116D
                 jsr $11C2    ; $116F
                 lda $02    ; $1172
-                sta $60    ; $1174
+                sta TheBuffer    ; $1174
                 lda $03    ; $1176
                 sta $61    ; $1178
                 lda $01    ; $117A
                 pha    ; $117C
                 lda $00    ; $117D
                 pha    ; $117F
-                jsr $4C52    ; $1180
+                jsr SetGap    ; $1180
                 pla    ; $1183
                 sta $00    ; $1184
                 pla    ; $1186
@@ -192,27 +1027,27 @@
                 sta $04    ; $1199
                 lda $03    ; $119B
                 sta $05    ; $119D
-                jsr $2E63    ; $119F
+                jsr BackScrLine    ; $119F
                 lda $04    ; $11A2
-                sta $62    ; $11A4
+                sta PageTop    ; $11A4
                 lda $05    ; $11A6
                 sta $63    ; $11A8
-                jsr $2D88    ; $11AA
+                jsr FindPoint    ; $11AA
                 beq $11B2    ; $11AD
-                jmp $31F7    ; $11AF
-                lda $25    ; $11B2
+                jmp CenterPage    ; $11AF
+                lda CV    ; $11B2
                 pha    ; $11B4
-                lda $24    ; $11B5
+                lda CH    ; $11B5
                 pha    ; $11B7
-                jsr $300C    ; $11B8
+                jsr DisplayPage    ; $11B8
                 pla    ; $11BB
-                sta $24    ; $11BC
+                sta CH    ; $11BC
                 pla    ; $11BE
-                sta $25    ; $11BF
+                sta CV    ; $11BF
                 rts    ; $11C1
                 lda $02    ; $11C2
                 clc    ; $11C4
-                adc $6E    ; $11C5
+                adc PhysBuffTop    ; $11C5
                 sta $02    ; $11C7
                 lda $03    ; $11C9
                 adc $6F    ; $11CB
@@ -221,9 +1056,9 @@
                 bcc $11DB    ; $11D1
                 bne $11E4    ; $11D3
                 lda $02    ; $11D5
-                cmp $6E    ; $11D7
+                cmp PhysBuffTop    ; $11D7
                 bcs $11E4    ; $11D9
-                lda $6E    ; $11DB
+                lda PhysBuffTop    ; $11DB
                 sta $02    ; $11DD
                 lda $6F    ; $11DF
                 sta $03    ; $11E1
@@ -233,19 +1068,19 @@
                 bcc $1222    ; $11E8
                 bne $11F4    ; $11EA
                 lda $02    ; $11EC
-                cmp $6A    ; $11EE
+                cmp GapTop    ; $11EE
                 bcc $1222    ; $11F0
                 beq $1222    ; $11F2
                 lda $02    ; $11F4
                 sec    ; $11F6
-                sbc $6A    ; $11F7
+                sbc GapTop    ; $11F7
                 sta $02    ; $11F9
                 lda $03    ; $11FB
                 sbc $6B    ; $11FD
                 sta $03    ; $11FF
                 lda $02    ; $1201
                 sec    ; $1203
-                adc $6C    ; $1204
+                adc GapBot    ; $1204
                 sta $02    ; $1206
                 lda $03    ; $1208
                 adc $6D    ; $120A
@@ -254,27 +1089,29 @@
                 bcc $1222    ; $1210
                 bne $121A    ; $1212
                 lda $02    ; $1214
-                cmp $68    ; $1216
+                cmp BuffBot    ; $1216
                 bcc $1222    ; $1218
-                lda $68    ; $121A
+                lda BuffBot    ; $121A
                 sta $02    ; $121C
                 lda $69    ; $121E
                 sta $03    ; $1220
                 rts    ; $1222
-                lda $0F3A    ; $1223
+;
+; === TwoWindows ===
+                lda SelectedBuff    ; $1223
                 sta $1292    ; $1226
-                bit $111B    ; $1229
+                bit TwoWindows?    ; $1229
                 bmi $123C    ; $122C
                 sta $1121    ; $122E
                 sta $112A    ; $1231
                 bpl $123C    ; $1234
-                jsr $29B9    ; $1236
+                jsr Beep    ; $1236
                 lda #$01    ; $1239
                 rts    ; $123B
                 bit $111C    ; $123C
                 bmi $1236    ; $123F
                 lda #$18    ; $1241
-                sta $31F5    ; $1243
+                sta CenterLine    ; $1243
                 lda $1292    ; $1246
                 cmp $1121    ; $1249
                 beq $1256    ; $124C
@@ -283,14 +1120,14 @@
                 sta $1121    ; $1253
                 lda #$FF    ; $1256
                 sta $111C    ; $1258
-                sta $111B    ; $125B
+                sta TwoWindows?    ; $125B
                 ldy $1292    ; $125E
                 ldx $1121    ; $1261
-                lda $0F3C,x    ; $1264
+                lda BuffActList,x    ; $1264
                 bmi $126C    ; $1267
                 sty $1121    ; $1269
                 ldx $112A    ; $126C
-                lda $0F3C,x    ; $126F
+                lda BuffActList,x    ; $126F
                 bmi $1277    ; $1272
                 sty $112A    ; $1274
                 lda $1121    ; $1277
@@ -299,16 +1136,16 @@
                 jsr $1293    ; $127F
                 jsr $130E    ; $1282
                 lda #$01    ; $1285
-                jsr $1130    ; $1287
+                jsr GetSelWind    ; $1287
                 lda #$02    ; $128A
-                jsr $1130    ; $128C
+                jsr GetSelWind    ; $128C
                 jmp $1239    ; $128F
                 brk    ; $1292
                 lda #$1D    ; $1293
                 sta $00    ; $1295
                 lda #$11    ; $1297
                 sta $01    ; $1299
-                ldy $112F    ; $129B
+                ldy SelectedWind    ; $129B
                 dey    ; $129E
                 beq $12A9    ; $129F
                 lda #$26    ; $12A1
@@ -318,9 +1155,9 @@
                 ldy #$04    ; $12A9
                 lda ($00),y    ; $12AB
                 tay    ; $12AD
-                lda $0F3C,y    ; $12AE
+                lda BuffActList,y    ; $12AE
                 bmi $12BF    ; $12B1
-                lda $0F3A    ; $12B3
+                lda SelectedBuff    ; $12B3
                 ldy #$04    ; $12B6
                 sta ($00),y    ; $12B8
                 pha    ; $12BA
@@ -328,12 +1165,14 @@
                 pla    ; $12BE
                 tya    ; $12BF
                 rts    ; $12C0
-                bit $111B    ; $12C1
+;
+; === OtherWindow ===
+                bit TwoWindows?    ; $12C1
                 bmi $12C9    ; $12C4
                 jmp $1330    ; $12C6
                 bit $111C    ; $12C9
                 bmi $12F6    ; $12CC
-                lda $0F3A    ; $12CE
+                lda SelectedBuff    ; $12CE
                 cmp $1121    ; $12D1
                 beq $12DF    ; $12D4
                 cmp $112A    ; $12D6
@@ -341,36 +1180,36 @@
                 lda #$02    ; $12DB
                 bne $12E1    ; $12DD
                 lda #$01    ; $12DF
-                sta $112F    ; $12E1
-                lda $112F    ; $12E4
+                sta SelectedWind    ; $12E1
+                lda SelectedWind    ; $12E4
                 eor #$03    ; $12E7
-                sta $112F    ; $12E9
+                sta SelectedWind    ; $12E9
                 jsr $1293    ; $12EC
                 tax    ; $12EF
                 jsr $1370    ; $12F0
                 jmp $1333    ; $12F3
                 jsr $1293    ; $12F6
-                lda $0F3A    ; $12F9
+                lda SelectedBuff    ; $12F9
                 ldy #$04    ; $12FC
                 sta ($00),y    ; $12FE
                 jsr $130E    ; $1300
-                lda $112F    ; $1303
+                lda SelectedWind    ; $1303
                 eor #$03    ; $1306
-                jsr $1130    ; $1308
+                jsr GetSelWind    ; $1308
                 jmp $1333    ; $130B
                 ldy #$05    ; $130E
-                lda $60    ; $1310
+                lda TheBuffer    ; $1310
                 sec    ; $1312
-                sbc $6E    ; $1313
+                sbc PhysBuffTop    ; $1313
                 sta ($00),y    ; $1315
                 iny    ; $1317
                 lda $61    ; $1318
                 sbc $6F    ; $131A
                 sta ($00),y    ; $131C
                 iny    ; $131E
-                lda $62    ; $131F
+                lda PageTop    ; $131F
                 sec    ; $1321
-                sbc $6E    ; $1322
+                sbc PhysBuffTop    ; $1322
                 sta ($00),y    ; $1324
                 iny    ; $1326
                 lda $63    ; $1327
@@ -379,54 +1218,60 @@
                 rts    ; $132D
                 pla    ; $132E
                 pla    ; $132F
-                jsr $29B9    ; $1330
+                jsr Beep    ; $1330
                 lda #$01    ; $1333
                 rts    ; $1335
-                lda $111B    ; $1336
+;
+; === EnsureWinds ===
+                lda TwoWindows?    ; $1336
                 and $111C    ; $1339
                 bpl $132E    ; $133C
                 rts    ; $133E
-                jsr $1336    ; $133F
+;
+; === OneWindow ===
+                jsr EnsureWinds    ; $133F
                 lda #$09    ; $1342
-                sta $31F5    ; $1344
+                sta CenterLine    ; $1344
                 lda #$00    ; $1347
-                sta $22    ; $1349
-                sta $20    ; $134B
+                sta WindowTop    ; $1349
+                sta WindowLft    ; $134B
                 lda #$14    ; $134D
-                sta $23    ; $134F
-                sta $52E6    ; $1351
+                sta WindowBot    ; $134F
+                sta ModeLineCV    ; $1351
                 jsr $1293    ; $1354
-                lda $0F3A    ; $1357
+                lda SelectedBuff    ; $1357
                 ldy #$04    ; $135A
                 sta ($00),y    ; $135C
                 tax    ; $135E
                 jsr $130E    ; $135F
                 jsr $1370    ; $1362
-                jsr $300C    ; $1365
+                jsr DisplayPage    ; $1365
                 lda #$00    ; $1368
                 sta $111C    ; $136A
                 jmp $1333    ; $136D
-                jsr $45F4    ; $1370
+                jsr IN:OpenBuff    ; $1370
                 lda $1121    ; $1373
                 cmp $112A    ; $1376
                 beq $137E    ; $1379
-                jsr $300C    ; $137B
+                jsr DisplayPage    ; $137B
                 rts    ; $137E
+;
+; === GrowWindow ===
                 bit $111C    ; $137F
                 bmi $1387    ; $1382
                 jmp $1330    ; $1384
-                jsr $7A60    ; $1387
+                jsr GetArgSign    ; $1387
                 bpl $1396    ; $138A
-                lda $112F    ; $138C
+                lda SelectedWind    ; $138C
                 cmp #$01    ; $138F
                 beq $13BE    ; $1391
                 jmp $139D    ; $1393
-                lda $112F    ; $1396
+                lda SelectedWind    ; $1396
                 cmp #$01    ; $1399
                 bne $13BE    ; $139B
                 lda $1120    ; $139D
                 clc    ; $13A0
-                adc $7A5B    ; $13A1
+                adc Argument    ; $13A1
                 bcs $13BB    ; $13A4
                 cmp #$10    ; $13A6
                 bcc $13AC    ; $13A8
@@ -434,13 +1279,13 @@
                 sta $1120    ; $13AC
                 sta $1128    ; $13AF
                 inc $1128    ; $13B2
-                jsr $12C1    ; $13B5
-                jmp $12C1    ; $13B8
+                jsr OtherWindow    ; $13B5
+                jmp OtherWindow    ; $13B8
                 lda #$01    ; $13BB
                 rts    ; $13BD
                 lda $1120    ; $13BE
                 sec    ; $13C1
-                sbc $7A5B    ; $13C2
+                sbc Argument    ; $13C2
                 bcc $13BB    ; $13C5
                 cmp #$03    ; $13C7
                 bcs $13AC    ; $13C9
@@ -450,12 +1295,12 @@
                 sta ($14,x)    ; $13D1
         dfb $8F        ; $13D3  (data/65C02-bit)
                 trb $A7    ; $13D4
-                trb $64    ; $13D6
+                trb MarkPnt    ; $13D6
                 trb $1C    ; $13D8
                 trb $32    ; $13DA
                 trb $3C    ; $13DC
                 trb $51    ; $13DE
-                trb $20    ; $13E0
+                trb WindowLft    ; $13E0
                 rol $A05A    ; $13E2
         dfb $03        ; $13E5  (data/65C02-bit)
                 lda ($00),y    ; $13E6
@@ -463,12 +1308,14 @@
                 dey    ; $13EB
                 bpl $13E6    ; $13EC
                 rts    ; $13EE
+;
+; === PrintVar ===
                 jsr $13E1    ; $13EF
                 lda $F0    ; $13F2
                 asl    ; $13F4
                 tax    ; $13F5
                 ldy #$00    ; $13F6
-                sty $7A54    ; $13F8
+                sty PD:Justify    ; $13F8
                 lda $13D9,x    ; $13FB
                 sta $02    ; $13FE
                 lda $13DA,x    ; $1400
@@ -490,45 +1337,45 @@
                 adc #$01    ; $1423
                 pha    ; $1425
                 lda #$AD    ; $1426
-                jsr $2611    ; $1428
+                jsr CharOut    ; $1428
                 pla    ; $142B
                 tax    ; $142C
                 lda #$00    ; $142D
-                jmp $7A01    ; $142F
+                jmp PrintDec    ; $142F
                 lda ($F2),y    ; $1432
                 tax    ; $1434
                 iny    ; $1435
                 lda ($F2),y    ; $1436
-                jsr $7A01    ; $1438
+                jsr PrintDec    ; $1438
                 rts    ; $143B
                 lda #$A2    ; $143C
-                jsr $2611    ; $143E
+                jsr CharOut    ; $143E
                 lda ($F2),y    ; $1441
                 beq $144B    ; $1443
-                jsr $2611    ; $1445
+                jsr CharOut    ; $1445
                 iny    ; $1448
                 bne $1441    ; $1449
                 lda #$A2    ; $144B
-                jsr $2611    ; $144D
+                jsr CharOut    ; $144D
                 rts    ; $1450
                 lda ($F2),y    ; $1451
                 bpl $145C    ; $1453
-                jsr $5968    ; $1455
+                jsr PrintMessage    ; $1455
         dfb $CF        ; $1458  (data/65C02-bit)
                 inc $6000    ; $1459
-                jsr $5968    ; $145C
+                jsr PrintMessage    ; $145C
         dfb $CF        ; $145F  (data/65C02-bit)
                 inc $E6    ; $1460
                 brk    ; $1462
                 rts    ; $1463
                 lda $7A5C    ; $1464
                 bne $1480    ; $1467
-                lda $7A5B    ; $1469
+                lda Argument    ; $1469
                 cmp $F1    ; $146C
                 bcc $1472    ; $146E
                 bne $1480    ; $1470
                 ldy #$00    ; $1472
-                bit $7A5E    ; $1474
+                bit ArgSign    ; $1474
                 bpl $147E    ; $1477
                 eor #$FF    ; $1479
                 clc    ; $147B
@@ -536,7 +1383,7 @@
                 sta ($F2),y    ; $147E
                 rts    ; $1480
                 ldy #$00    ; $1481
-                lda $7A5B    ; $1483
+                lda Argument    ; $1483
                 sta ($F2),y    ; $1486
                 iny    ; $1488
                 lda $7A5C    ; $1489
@@ -555,54 +1402,56 @@
                 lda #$00    ; $14A2
                 sta ($F2),y    ; $14A4
                 rts    ; $14A6
-                lda $7A5E    ; $14A7
+                lda ArgSign    ; $14A7
                 ldy #$00    ; $14AA
                 sta ($F2),y    ; $14AC
                 rts    ; $14AE
-                jsr $7C32    ; $14AF
+;
+; === SetVariable ===
+                jsr GetStrArg    ; $14AF
                 beq $14B9    ; $14B2
-                jsr $3F70    ; $14B4
+                jsr ReadVariable    ; $14B4
                 bne $14D0    ; $14B7
                 lda #$5D    ; $14B9
-                sta $5987    ; $14BB
+                sta CompList    ; $14BB
                 lda #$97    ; $14BE
                 sta $5988    ; $14C0
                 lda #$9B    ; $14C3
                 sta $0200,x    ; $14C5
-                jsr $5AE5    ; $14C8
+                jsr SI:CompleteMe    ; $14C8
                 beq $14D3    ; $14CB
-                jsr $29B9    ; $14CD
+                jsr Beep    ; $14CD
                 lda #$01    ; $14D0
                 rts    ; $14D2
-                jsr $5A3D    ; $14D3
-                jsr $5A56    ; $14D6
+                jsr PopCompPoint    ; $14D3
+                jsr PushCompPoint    ; $14D6
                 jsr $13E1    ; $14D9
                 lda $F0    ; $14DC
                 cmp #$02    ; $14DE
                 beq $14E7    ; $14E0
-                jsr $7A7F    ; $14E2
+                jsr AnyArgument?    ; $14E2
                 beq $1510    ; $14E5
-                jsr $7C32    ; $14E7
+                jsr GetStrArg    ; $14E7
                 beq $150D    ; $14EA
                 lda #$16    ; $14EC
                 sta $5725    ; $14EE
-                jsr $57D8    ; $14F1
-                jsr $5968    ; $14F4
+                jsr OpenEchoArea    ; $14F1
+                jsr PrintMessage    ; $14F4
                 sta $E1D6    ; $14F7
                 cpx $E5F5    ; $14FA
                 tsx    ; $14FD
                 brk    ; $14FE
-                jsr $3B23    ; $14FF
+                jsr ReadArgLine    ; $14FF
                 php    ; $1502
                 txa    ; $1503
                 pha    ; $1504
-                jsr $57FA    ; $1505
+                jsr CloseEchoArea    ; $1505
                 pla    ; $1508
                 tax    ; $1509
                 plp    ; $150A
                 bne $14CD    ; $150B
                 jsr $1519    ; $150D
-                jsr $5A3D    ; $1510
+                jsr PopCompPoint    ; $1510
                 jsr $1408    ; $1513
                 lda #$01    ; $1516
                 rts    ; $1518
@@ -622,29 +1471,29 @@
                 bcc $1556    ; $1535
                 cmp #$BA    ; $1537
                 bcc $155E    ; $1539
-                jsr $36FD    ; $153B
+                jsr UpperCon    ; $153B
                 cmp #$CF    ; $153E
                 bne $1556    ; $1540
                 lda $0202    ; $1542
                 cmp #$9B    ; $1545
                 beq $1550    ; $1547
                 lda #$00    ; $1549
-                sta $7A5E    ; $154B
+                sta ArgSign    ; $154B
                 beq $1555    ; $154E
                 lda #$FF    ; $1550
-                sta $7A5E    ; $1552
+                sta ArgSign    ; $1552
                 rts    ; $1555
                 ldy #$00    ; $1556
                 lda ($F2),y    ; $1558
-                sta $7A5E    ; $155A
+                sta ArgSign    ; $155A
                 rts    ; $155D
                 ldx #$00    ; $155E
-                stx $7A5B    ; $1560
+                stx Argument    ; $1560
                 lda $0200    ; $1563
                 cmp #$AD    ; $1566
                 bne $1570    ; $1568
                 lda #$FF    ; $156A
-                sta $7A5E    ; $156C
+                sta ArgSign    ; $156C
                 inx    ; $156F
                 lda $0200,x    ; $1570
                 cmp #$B0    ; $1573
@@ -653,370 +1502,392 @@
                 bcs $1555    ; $1579
                 sec    ; $157B
                 sbc #$B0    ; $157C
-                jsr $7A9B    ; $157E
+                jsr AddArgDigit    ; $157E
                 inx    ; $1581
                 jmp $1570    ; $1582
+;
+; === AutoPushPoint ===
         dfb $F4        ; $1585  (data/65C02-bit)
-                ora ($20,x)    ; $1586
+                ora (WindowLft,x)    ; $1586
                 rts    ; $1588
                 ply    ; $1589
                 bpl $158F    ; $158A
-                jmp $161D    ; $158C
-                jsr $7A7F    ; $158F
+                jmp Rubout    ; $158C
+                jsr AnyArgument?    ; $158F
                 bne $15BE    ; $1592
-                jsr $4C52    ; $1594
+                jsr SetGap    ; $1594
                 lda $61    ; $1597
                 pha    ; $1599
-                lda $60    ; $159A
+                lda TheBuffer    ; $159A
                 pha    ; $159C
                 ldy #$41    ; $159D
-                lda ($72),y    ; $159F
+                lda (BuffData),y    ; $159F
                 pha    ; $15A1
-                jsr $173B    ; $15A2
+                jsr RightChar    ; $15A2
                 pla    ; $15A5
                 ldy #$41    ; $15A6
-                sta ($72),y    ; $15A8
-                jsr $4C52    ; $15AA
+                sta (BuffData),y    ; $15A8
+                jsr SetGap    ; $15AA
                 pla    ; $15AD
                 sta $00    ; $15AE
                 pla    ; $15B0
                 sta $01    ; $15B1
                 lda #$00    ; $15B3
-                jsr $37FA    ; $15B5
+                jsr KillTempPoint    ; $15B5
                 lda #$02    ; $15B8
                 rts    ; $15BA
                 lda #$01    ; $15BB
                 rts    ; $15BD
-                jsr $4C1E    ; $15BE
-                jsr $3191    ; $15C1
+                jsr ClrLastKill    ; $15BE
+                jsr LinesPastPnt    ; $15C1
                 sta $B5    ; $15C4
-                jsr $4BE7    ; $15C6
+                jsr BuffDelete    ; $15C6
                 bne $15BB    ; $15C9
                 ldy #$00    ; $15CB
                 jsr $D03F    ; $15CD
                 cmp #$8D    ; $15D0
                 bne $1613    ; $15D2
-                lda $24    ; $15D4
-                cmp $20    ; $15D6
+                lda CH    ; $15D4
+                cmp WindowLft    ; $15D6
                 bne $15B8    ; $15D8
-                ldx $25    ; $15DA
+                ldx CV    ; $15DA
                 inx    ; $15DC
                 inx    ; $15DD
-                cpx $23    ; $15DE
+                cpx WindowBot    ; $15DE
                 bcs $15B8    ; $15E0
-                lda $25    ; $15E2
+                lda CV    ; $15E2
                 pha    ; $15E4
-                lda $24    ; $15E5
+                lda CH    ; $15E5
                 pha    ; $15E7
-                jsr $33AB    ; $15E8
-                lda $23    ; $15EB
-                sta $25    ; $15ED
-                dec $25    ; $15EF
-                lda $20    ; $15F1
-                sta $24    ; $15F3
+                jsr TV:DelLine    ; $15E8
+                lda WindowBot    ; $15EB
+                sta CV    ; $15ED
+                dec CV    ; $15EF
+                lda WindowLft    ; $15F1
+                sta CH    ; $15F3
                 lda $61    ; $15F5
                 pha    ; $15F7
-                lda $60    ; $15F8
+                lda TheBuffer    ; $15F8
                 pha    ; $15FA
-                jsr $2D25    ; $15FB
-                jsr $3279    ; $15FE
+                jsr PointToCH    ; $15FB
+                jsr DispPointEnd    ; $15FE
                 pla    ; $1601
-                sta $60    ; $1602
+                sta TheBuffer    ; $1602
                 pla    ; $1604
                 sta $61    ; $1605
                 pla    ; $1607
-                sta $24    ; $1608
+                sta CH    ; $1608
                 pla    ; $160A
-                sta $25    ; $160B
-                jsr $26E9    ; $160D
+                sta CV    ; $160B
+                jsr vtab    ; $160D
                 lda #$00    ; $1610
                 rts    ; $1612
-                jsr $3191    ; $1613
+                jsr LinesPastPnt    ; $1613
                 cmp $B5    ; $1616
                 bne $15B8    ; $1618
                 lda #$05    ; $161A
                 rts    ; $161C
-                jsr $7A60    ; $161D
+;
+; === Rubout ===
+                jsr GetArgSign    ; $161D
                 bpl $1625    ; $1620
-                jmp $1587    ; $1622
-                jsr $7A7F    ; $1625
+                jmp Delete    ; $1622
+                jsr AnyArgument?    ; $1625
                 bne $165B    ; $1628
                 lda $61    ; $162A
                 pha    ; $162C
-                lda $60    ; $162D
+                lda TheBuffer    ; $162D
                 pha    ; $162F
                 ldy #$41    ; $1630
-                lda ($72),y    ; $1632
+                lda (BuffData),y    ; $1632
                 pha    ; $1634
-                jsr $175E    ; $1635
+                jsr LeftChar    ; $1635
                 pla    ; $1638
                 ldy #$41    ; $1639
-                sta ($72),y    ; $163B
-                lda $60    ; $163D
+                sta (BuffData),y    ; $163B
+                lda TheBuffer    ; $163D
                 sta $00    ; $163F
                 lda $61    ; $1641
                 sta $01    ; $1643
                 pla    ; $1645
-                sta $60    ; $1646
+                sta TheBuffer    ; $1646
                 pla    ; $1648
                 sta $61    ; $1649
                 lda #$FF    ; $164B
-                jsr $37FA    ; $164D
-                jsr $2D88    ; $1650
+                jsr KillTempPoint    ; $164D
+                jsr FindPoint    ; $1650
                 beq $1658    ; $1653
                 lda #$06    ; $1655
                 rts    ; $1657
                 lda #$02    ; $1658
                 rts    ; $165A
-                jsr $4C1E    ; $165B
-                lda $25    ; $165E
+                jsr ClrLastKill    ; $165B
+                lda CV    ; $165E
                 sta $168A    ; $1660
-                jsr $3191    ; $1663
+                jsr LinesPastPnt    ; $1663
                 sta $B5    ; $1666
-                jsr $4BBD    ; $1668
+                jsr BuffRubout    ; $1668
                 ldy #$00    ; $166B
                 jsr $D01B    ; $166D
                 cmp #$8D    ; $1670
                 beq $1650    ; $1672
-                jsr $2D88    ; $1674
+                jsr FindPoint    ; $1674
                 bne $1655    ; $1677
-                jsr $3191    ; $1679
+                jsr LinesPastPnt    ; $1679
                 cmp $B5    ; $167C
                 bne $1658    ; $167E
-                lda $25    ; $1680
+                lda CV    ; $1680
                 cmp $168A    ; $1682
                 bne $1658    ; $1685
                 lda #$05    ; $1687
                 rts    ; $1689
                 brk    ; $168A
-                jsr $4C1E    ; $168B
-                lda $7A5E    ; $168E
+;
+; === RubWithTab ===
+                jsr ClrLastKill    ; $168B
+                lda ArgSign    ; $168E
                 bmi $16C9    ; $1691
-                jsr $7CCD    ; $1693
+                jsr PointBackward    ; $1693
                 bne $16C9    ; $1696
                 ldy #$00    ; $1698
                 jsr $D01B    ; $169A
                 cmp #$89    ; $169D
                 bne $16C3    ; $169F
-                jsr $2D88    ; $16A1
-                lda $24    ; $16A4
-                jsr $2691    ; $16A6
+                jsr FindPoint    ; $16A1
+                lda CH    ; $16A4
+                jsr TabBump    ; $16A6
                 sec    ; $16A9
-                sbc $24    ; $16AA
+                sbc CH    ; $16AA
                 sta $B5    ; $16AC
-                jsr $4C52    ; $16AE
-                inc $6C    ; $16B1
+                jsr SetGap    ; $16AE
+                inc GapBot    ; $16B1
                 bne $16B7    ; $16B3
                 inc $6D    ; $16B5
                 lda #$A0    ; $16B7
-                jsr $4B84    ; $16B9
+                jsr BuffInsert    ; $16B9
                 dec $B5    ; $16BC
                 bne $16B7    ; $16BE
                 jmp $16C9    ; $16C0
-                jsr $7C68    ; $16C3
-                jsr $4C52    ; $16C6
-                jmp $161D    ; $16C9
+                jsr PointForward    ; $16C3
+                jsr SetGap    ; $16C6
+                jmp Rubout    ; $16C9
+;
+; === TabInsert ===
                 lda #$89    ; $16CC
+;
+; === Insert ===
                 sta $B6    ; $16CE
-                jsr $3191    ; $16D0
+                jsr LinesPastPnt    ; $16D0
                 sta $B4    ; $16D3
-                jsr $4C1E    ; $16D5
-                jsr $7AF6    ; $16D8
+                jsr ClrLastKill    ; $16D5
+                jsr ZeroArg?    ; $16D8
                 beq $1738    ; $16DB
                 lda $B6    ; $16DD
-                jsr $4B84    ; $16DF
+                jsr BuffInsert    ; $16DF
                 bne $1735    ; $16E2
                 lda $B6    ; $16E4
-                jsr $2DE0    ; $16E6
+                jsr GetXCharLen    ; $16E6
                 txa    ; $16E9
                 sec    ; $16EA
-                adc $24    ; $16EB
-                cmp $21    ; $16ED
+                adc CH    ; $16EB
+                cmp WindowRgt    ; $16ED
                 bcc $1723    ; $16EF
-                ldx $25    ; $16F1
+                ldx CV    ; $16F1
                 inx    ; $16F3
-                cpx $23    ; $16F4
+                cpx WindowBot    ; $16F4
                 bcc $1709    ; $16F6
-                jsr $31F7    ; $16F8
-                lda $7A5B    ; $16FB
+                jsr CenterPage    ; $16F8
+                lda Argument    ; $16FB
                 bne $1703    ; $16FE
                 dec $7A5C    ; $1700
-                dec $7A5B    ; $1703
+                dec Argument    ; $1703
                 jmp $16D8    ; $1706
                 lda $B6    ; $1709
-                jsr $2611    ; $170B
-                jsr $2862    ; $170E
-                ldx $21    ; $1711
+                jsr CharOut    ; $170B
+                jsr ClearEOL    ; $170E
+                ldx WindowRgt    ; $1711
                 dex    ; $1713
-                stx $24    ; $1714
+                stx CH    ; $1714
                 lda #$A1    ; $1716
-                jsr $2611    ; $1718
+                jsr CharOut    ; $1718
                 inc $B4    ; $171B
-                jsr $30C6    ; $171D
+                jsr DisplayDown    ; $171D
                 jmp $16FB    ; $1720
                 lda $B6    ; $1723
-                jsr $2611    ; $1725
-                jsr $3191    ; $1728
+                jsr CharOut    ; $1725
+                jsr LinesPastPnt    ; $1728
                 cmp $B4    ; $172B
                 bne $171D    ; $172D
-                jsr $3279    ; $172F
+                jsr DispPointEnd    ; $172F
                 jmp $16FB    ; $1732
-                jsr $29B9    ; $1735
+                jsr Beep    ; $1735
                 lda #$00    ; $1738
                 rts    ; $173A
-                jsr $7A60    ; $173B
-                bmi $175E    ; $173E
-                jsr $4C1E    ; $1740
-                jsr $7AF6    ; $1743
+;
+; === RightChar ===
+                jsr GetArgSign    ; $173B
+                bmi LeftChar    ; $173E
+                jsr ClrLastKill    ; $1740
+                jsr ZeroArg?    ; $1743
                 beq $175B    ; $1746
-                jsr $7C68    ; $1748
+                jsr PointForward    ; $1748
                 bne $175B    ; $174B
-                lda $7A5B    ; $174D
+                lda Argument    ; $174D
                 bne $1755    ; $1750
                 dec $7A5C    ; $1752
-                dec $7A5B    ; $1755
+                dec Argument    ; $1755
                 jmp $1743    ; $1758
                 lda #$01    ; $175B
                 rts    ; $175D
-                jsr $7A60    ; $175E
-                bmi $173B    ; $1761
-                jsr $4C1E    ; $1763
-                jsr $7AF6    ; $1766
+;
+; === LeftChar ===
+                jsr GetArgSign    ; $175E
+                bmi RightChar    ; $1761
+                jsr ClrLastKill    ; $1763
+                jsr ZeroArg?    ; $1766
                 beq $177E    ; $1769
-                jsr $7CCD    ; $176B
+                jsr PointBackward    ; $176B
                 bne $177E    ; $176E
-                lda $7A5B    ; $1770
+                lda Argument    ; $1770
                 bne $1778    ; $1773
                 dec $7A5C    ; $1775
-                dec $7A5B    ; $1778
+                dec Argument    ; $1778
                 jmp $1766    ; $177B
                 lda #$01    ; $177E
                 rts    ; $1780
-                jsr $7A60    ; $1781
+;
+; === NewCenter ===
+                jsr GetArgSign    ; $1781
                 bmi $179A    ; $1784
-                bit $7A5D    ; $1786
+                bit ExplicitArg    ; $1786
                 bpl $17A6    ; $1789
                 jsr $17C2    ; $178B
-                lda $7A5B    ; $178E
-                sta $31F6    ; $1791
-                jsr $320D    ; $1794
+                lda Argument    ; $178E
+                sta CenterPoint    ; $1791
+                jsr CenterPage1    ; $1794
                 lda #$00    ; $1797
                 rts    ; $1799
                 jsr $17C2    ; $179A
-                lda $23    ; $179D
+                lda WindowBot    ; $179D
                 clc    ; $179F
-                sbc $7A5B    ; $17A0
+                sbc Argument    ; $17A0
                 jmp $1791    ; $17A3
-                lda $7A5B    ; $17A6
+                lda Argument    ; $17A6
                 bne $17AE    ; $17A9
                 dec $7A5C    ; $17AB
-                dec $7A5B    ; $17AE
-                lda $7A5B    ; $17B1
+                dec Argument    ; $17AE
+                lda Argument    ; $17B1
                 ora $7A5C    ; $17B4
                 beq $17BC    ; $17B7
                 lda #$03    ; $17B9
                 rts    ; $17BB
-                jsr $2871    ; $17BC
+                jsr ClearPage    ; $17BC
                 lda #$06    ; $17BF
                 rts    ; $17C1
                 lda #$00    ; $17C2
                 sta $7A5C    ; $17C4
-                lda $23    ; $17C7
+                lda WindowBot    ; $17C7
                 sec    ; $17C9
-                sbc $22    ; $17CA
+                sbc WindowTop    ; $17CA
                 sta $17E0    ; $17CC
-                lda $7A5B    ; $17CF
+                lda Argument    ; $17CF
                 cmp $17E0    ; $17D2
                 bcc $17DC    ; $17D5
                 sbc $17E0    ; $17D7
                 bne $17D2    ; $17DA
-                sta $7A5B    ; $17DC
+                sta Argument    ; $17DC
                 rts    ; $17DF
                 brk    ; $17E0
-                jsr $7A60    ; $17E1
+;
+; === ScreenEdge ===
+                jsr GetArgSign    ; $17E1
                 bmi $17FA    ; $17E4
-                bit $7A5D    ; $17E6
+                bit ExplicitArg    ; $17E6
                 bpl $1806    ; $17E9
                 jsr $17C2    ; $17EB
-                sta $25    ; $17EE
-                lda $20    ; $17F0
-                sta $24    ; $17F2
-                jsr $2D25    ; $17F4
+                sta CV    ; $17EE
+                lda WindowLft    ; $17F0
+                sta CH    ; $17F2
+                jsr PointToCH    ; $17F4
                 lda #$00    ; $17F7
                 rts    ; $17F9
                 jsr $17C2    ; $17FA
-                lda $23    ; $17FD
+                lda WindowBot    ; $17FD
                 clc    ; $17FF
-                sbc $7A5B    ; $1800
+                sbc Argument    ; $1800
                 jmp $17EE    ; $1803
-                lda $7A5B    ; $1806
+                lda Argument    ; $1806
                 bne $180E    ; $1809
                 dec $7A5C    ; $180B
-                dec $7A5B    ; $180E
-                jsr $7AF6    ; $1811
+                dec Argument    ; $180E
+                jsr ZeroArg?    ; $1811
                 beq $1820    ; $1814
-                inc $7A5B    ; $1816
+                inc Argument    ; $1816
                 bne $181E    ; $1819
                 inc $7A5C    ; $181B
                 bne $17EB    ; $181E
-                lda $25    ; $1820
+                lda CV    ; $1820
                 jmp $17EE    ; $1822
+;
+; === SkipComment? ===
         dfb $FF        ; $1825  (data/65C02-bit)
-                jsr $4C1E    ; $1826
-                jsr $7AF6    ; $1829
+;
+; === CRLF ===
+                jsr ClrLastKill    ; $1826
+                jsr ZeroArg?    ; $1829
                 beq $1882    ; $182C
-                jsr $7DA3    ; $182E
-                jsr $3191    ; $1831
+                jsr PrintReturn    ; $182E
+                jsr LinesPastPnt    ; $1831
                 sta $1851    ; $1834
                 jsr $188B    ; $1837
                 beq $1866    ; $183A
-                lda $25    ; $183C
-                cmp $22    ; $183E
+                lda CV    ; $183C
+                cmp WindowTop    ; $183E
                 beq $1885    ; $1840
-                cmp $23    ; $1842
+                cmp WindowBot    ; $1842
                 bcs $1885    ; $1844
                 ldx $1851    ; $1846
                 beq $1852    ; $1849
-                jsr $30C6    ; $184B
+                jsr DisplayDown    ; $184B
                 jmp $1866    ; $184E
                 brk    ; $1851
                 pha    ; $1852
-                jsr $337A    ; $1853
-                jsr $4C52    ; $1856
-                lda $20    ; $1859
-                sta $24    ; $185B
+                jsr TV:InsLine    ; $1853
+                jsr SetGap    ; $1856
+                lda WindowLft    ; $1859
+                sta CH    ; $185B
                 pla    ; $185D
-                sta $25    ; $185E
-                jsr $26EB    ; $1860
-                jsr $3279    ; $1863
-                lda $7A5B    ; $1866
+                sta CV    ; $185E
+                jsr vtab1    ; $1860
+                jsr DispPointEnd    ; $1863
+                lda Argument    ; $1866
                 bne $186E    ; $1869
                 dec $7A5C    ; $186B
-                dec $7A5B    ; $186E
+                dec Argument    ; $186E
                 lda #$04    ; $1871
                 ldy #$40    ; $1873
-                and ($72),y    ; $1875
+                and (BuffData),y    ; $1875
                 beq $1829    ; $1877
-                jsr $2548    ; $1879
-                jsr $3238    ; $187C
+                jsr PrevIndent    ; $1879
+                jsr GenDisplay    ; $187C
                 jmp $1829    ; $187F
                 lda #$00    ; $1882
                 rts    ; $1884
-                jsr $31F7    ; $1885
+                jsr CenterPage    ; $1885
                 jmp $1866    ; $1888
-                jsr $4C52    ; $188B
+                jsr SetGap    ; $188B
                 lda #$00    ; $188E
                 sta $B6    ; $1890
-                ldx $6C    ; $1892
+                ldx GapBot    ; $1892
                 ldy $6D    ; $1894
                 inx    ; $1896
                 bne $189A    ; $1897
                 iny    ; $1899
                 stx $02    ; $189A
                 sty $03    ; $189C
-                lda $68    ; $189E
+                lda BuffBot    ; $189E
                 sec    ; $18A0
-                sbc $6C    ; $18A1
+                sbc GapBot    ; $18A1
                 sta $00    ; $18A3
                 lda $69    ; $18A5
                 sbc $6D    ; $18A7
@@ -1025,11 +1896,11 @@
                 lda $00    ; $18AD
                 cmp #$04    ; $18AF
                 bcs $1919    ; $18B1
-                bit $1825    ; $18B3
+                bit SkipComment?    ; $18B3
                 bpl $1913    ; $18B6
                 ldy #$00    ; $18B8
                 ldx #$00    ; $18BA
-                cpx $1D05    ; $18BC
+                cpx CommentEnd    ; $18BC
                 beq $1913    ; $18BF
                 bit $B6    ; $18C1
                 bmi $1913    ; $18C3
@@ -1037,41 +1908,41 @@
                 cmp $69    ; $18C7
                 bcc $18D1    ; $18C9
                 lda $02    ; $18CB
-                cmp $68    ; $18CD
+                cmp BuffBot    ; $18CD
                 bcs $18E6    ; $18CF
                 jsr $D009    ; $18D1
                 cmp #$8D    ; $18D4
                 beq $18E6    ; $18D6
-                cmp $1D05,x    ; $18D8
+                cmp CommentEnd,x    ; $18D8
                 bne $1913    ; $18DB
                 inc $02    ; $18DD
                 bne $18E3    ; $18DF
                 inc $03    ; $18E1
                 inx    ; $18E3
                 bne $18C5    ; $18E4
-                lda $1D05,x    ; $18E6
+                lda CommentEnd,x    ; $18E6
                 bne $1913    ; $18E9
                 lda $02    ; $18EB
-                sta $60    ; $18ED
+                sta TheBuffer    ; $18ED
                 lda $03    ; $18EF
                 sta $61    ; $18F1
-                jsr $4C52    ; $18F3
-                jsr $1969    ; $18F6
-                jsr $2D88    ; $18F9
+                jsr SetGap    ; $18F3
+                jsr InsertReturn    ; $18F6
+                jsr FindPoint    ; $18F9
                 bne $1912    ; $18FC
-                lda $25    ; $18FE
+                lda CV    ; $18FE
                 pha    ; $1900
-                lda $24    ; $1901
+                lda CH    ; $1901
                 pha    ; $1903
-                jsr $300C    ; $1904
+                jsr DisplayPage    ; $1904
                 pla    ; $1907
-                sta $24    ; $1908
+                sta CH    ; $1908
                 pla    ; $190A
-                sta $25    ; $190B
-                jsr $26E9    ; $190D
+                sta CV    ; $190B
+                jsr vtab    ; $190D
                 lda #$00    ; $1910
                 rts    ; $1912
-                jsr $1969    ; $1913
+                jsr InsertReturn    ; $1913
                 lda #$FF    ; $1916
                 rts    ; $1918
                 ldy #$00    ; $1919
@@ -1099,74 +1970,78 @@
                 ora $01    ; $1943
                 bne $191D    ; $1945
                 jmp $18B3    ; $1947
-                inc $6C    ; $194A
+                inc GapBot    ; $194A
                 bne $1950    ; $194C
                 inc $6D    ; $194E
                 jsr $D03F    ; $1950
                 cmp #$8D    ; $1953
                 bne $194A    ; $1955
-                lda $6C    ; $1957
+                lda GapBot    ; $1957
                 bne $195D    ; $1959
                 dec $6D    ; $195B
-                dec $6C    ; $195D
-                jsr $7C68    ; $195F
-                jsr $4C52    ; $1962
-                jsr $2D88    ; $1965
+                dec GapBot    ; $195D
+                jsr PointForward    ; $195F
+                jsr SetGap    ; $1962
+                jsr FindPoint    ; $1965
                 rts    ; $1968
+;
+; === InsertReturn ===
                 lda #$8D    ; $1969
-                jmp $4B84    ; $196B
-                jsr $4C1E    ; $196E
+                jmp BuffInsert    ; $196B
+;
+; === OpenLine ===
+                jsr ClrLastKill    ; $196E
                 lda $7A5C    ; $1971
                 bne $1980    ; $1974
-                lda $23    ; $1976
+                lda WindowBot    ; $1976
                 sec    ; $1978
-                sbc $25    ; $1979
-                cmp $7A5B    ; $197B
+                sbc CV    ; $1979
+                cmp Argument    ; $197B
                 bcs $19B1    ; $197E
-                jsr $4C52    ; $1980
+                jsr SetGap    ; $1980
                 lda $61    ; $1983
                 pha    ; $1985
-                lda $60    ; $1986
+                lda TheBuffer    ; $1986
                 pha    ; $1988
-                lda $7A5B    ; $1989
+                lda Argument    ; $1989
                 ora $7A5C    ; $198C
                 beq $19A2    ; $198F
-                jsr $1969    ; $1991
-                lda $7A5B    ; $1994
+                jsr InsertReturn    ; $1991
+                lda Argument    ; $1994
                 bne $199C    ; $1997
                 dec $7A5C    ; $1999
-                dec $7A5B    ; $199C
+                dec Argument    ; $199C
                 jmp $1989    ; $199F
                 pla    ; $19A2
-                sta $60    ; $19A3
+                sta TheBuffer    ; $19A3
                 pla    ; $19A5
                 sta $61    ; $19A6
-                jsr $4C52    ; $19A8
-                jsr $2874    ; $19AB
+                jsr SetGap    ; $19A8
+                jsr ClearEOP    ; $19AB
                 lda #$00    ; $19AE
                 rts    ; $19B0
-                jsr $7AF6    ; $19B1
+                jsr ZeroArg?    ; $19B1
                 bne $19B9    ; $19B4
                 jmp $1A3E    ; $19B6
-                jsr $3191    ; $19B9
+                jsr LinesPastPnt    ; $19B9
                 pha    ; $19BC
-                jsr $4C52    ; $19BD
+                jsr SetGap    ; $19BD
                 lda $61    ; $19C0
                 pha    ; $19C2
-                lda $60    ; $19C3
+                lda TheBuffer    ; $19C3
                 pha    ; $19C5
-                jsr $1969    ; $19C6
+                jsr InsertReturn    ; $19C6
                 pla    ; $19C9
-                sta $60    ; $19CA
+                sta TheBuffer    ; $19CA
                 pla    ; $19CC
                 sta $61    ; $19CD
-                jsr $4C52    ; $19CF
-                jsr $2862    ; $19D2
-                ldx $25    ; $19D5
+                jsr SetGap    ; $19CF
+                jsr ClearEOL    ; $19D2
+                ldx CV    ; $19D5
                 inx    ; $19D7
-                cpx $23    ; $19D8
+                cpx WindowBot    ; $19D8
                 bcs $1A3A    ; $19DA
-                lda $6C    ; $19DC
+                lda GapBot    ; $19DC
                 clc    ; $19DE
                 adc #$02    ; $19DF
                 tax    ; $19E1
@@ -1174,93 +2049,99 @@
                 adc #$00    ; $19E4
                 cmp $69    ; $19E6
                 bne $19EE    ; $19E8
-                cpx $68    ; $19EA
+                cpx BuffBot    ; $19EA
                 beq $1A3A    ; $19EC
                 pla    ; $19EE
                 beq $19F7    ; $19EF
-                jsr $30C6    ; $19F1
+                jsr DisplayDown    ; $19F1
                 jmp $1A2C    ; $19F4
-                lda $25    ; $19F7
+                lda CV    ; $19F7
                 pha    ; $19F9
-                lda $24    ; $19FA
+                lda CH    ; $19FA
                 pha    ; $19FC
-                inc $25    ; $19FD
-                jsr $337A    ; $19FF
+                inc CV    ; $19FD
+                jsr TV:InsLine    ; $19FF
                 ldy #$02    ; $1A02
                 jsr $D03F    ; $1A04
                 cmp #$8D    ; $1A07
                 beq $1A23    ; $1A09
                 tya    ; $1A0B
                 clc    ; $1A0C
-                adc $6C    ; $1A0D
-                sta $60    ; $1A0F
+                adc GapBot    ; $1A0D
+                sta TheBuffer    ; $1A0F
                 lda #$00    ; $1A11
                 adc $6D    ; $1A13
                 sta $61    ; $1A15
-                jsr $4C52    ; $1A17
-                jsr $3279    ; $1A1A
-                jsr $7CCD    ; $1A1D
-                jsr $4C52    ; $1A20
+                jsr SetGap    ; $1A17
+                jsr DispPointEnd    ; $1A1A
+                jsr PointBackward    ; $1A1D
+                jsr SetGap    ; $1A20
                 pla    ; $1A23
-                sta $24    ; $1A24
+                sta CH    ; $1A24
                 pla    ; $1A26
-                sta $25    ; $1A27
-                jsr $26EB    ; $1A29
-                lda $7A5B    ; $1A2C
+                sta CV    ; $1A27
+                jsr vtab1    ; $1A29
+                lda Argument    ; $1A2C
                 bne $1A34    ; $1A2F
                 dec $7A5C    ; $1A31
-                dec $7A5B    ; $1A34
+                dec Argument    ; $1A34
                 jmp $19B1    ; $1A37
                 pla    ; $1A3A
                 jmp $1A2C    ; $1A3B
                 lda #$00    ; $1A3E
                 rts    ; $1A40
-                jsr $4C1E    ; $1A41
-                lda $60    ; $1A44
+;
+; === GotoTop ===
+                jsr ClrLastKill    ; $1A41
+                lda TheBuffer    ; $1A44
                 sta $00    ; $1A46
                 lda $61    ; $1A48
                 sta $01    ; $1A4A
-                lda $66    ; $1A4C
-                sta $60    ; $1A4E
+                lda BuffTop    ; $1A4C
+                sta TheBuffer    ; $1A4E
                 lda $67    ; $1A50
                 sta $61    ; $1A52
-                jsr $1A7A    ; $1A54
+                jsr MovePush?    ; $1A54
                 lda #$06    ; $1A57
                 rts    ; $1A59
-                jsr $4C1E    ; $1A5A
+;
+; === GotoBot ===
+                jsr ClrLastKill    ; $1A5A
                 lda $61    ; $1A5D
                 pha    ; $1A5F
-                lda $60    ; $1A60
+                lda TheBuffer    ; $1A60
                 pha    ; $1A62
-                lda $68    ; $1A63
-                sta $60    ; $1A65
+                lda BuffBot    ; $1A63
+                sta TheBuffer    ; $1A65
                 lda $69    ; $1A67
                 sta $61    ; $1A69
-                jsr $4C52    ; $1A6B
+                jsr SetGap    ; $1A6B
                 pla    ; $1A6E
                 sta $00    ; $1A6F
                 pla    ; $1A71
                 sta $01    ; $1A72
-                jsr $1A7A    ; $1A74
+                jsr MovePush?    ; $1A74
                 lda #$01    ; $1A77
                 rts    ; $1A79
+;
+; === MovePush? ===
                 lda $01    ; $1A7A
-                cmp $60    ; $1A7C
+                cmp TheBuffer    ; $1A7C
                 bcc $1A99    ; $1A7E
                 beq $1A98    ; $1A80
                 lda $00    ; $1A82
                 sec    ; $1A84
-                sbc $60    ; $1A85
+                sbc TheBuffer    ; $1A85
                 tax    ; $1A87
                 lda $01    ; $1A88
                 sbc $61    ; $1A8A
                 cmp $1586    ; $1A8C
                 bcc $1A98    ; $1A8F
                 bne $1AA6    ; $1A91
-                cpx $1585    ; $1A93
+                cpx AutoPushPoint    ; $1A93
                 bcs $1AA6    ; $1A96
                 rts    ; $1A98
-                lda $60    ; $1A99
+                lda TheBuffer    ; $1A99
                 sec    ; $1A9B
                 sbc $00    ; $1A9C
                 tax    ; $1A9E
@@ -1269,19 +2150,19 @@
                 jmp $1A8C    ; $1AA3
                 lda $61    ; $1AA6
                 pha    ; $1AA8
-                lda $60    ; $1AA9
+                lda TheBuffer    ; $1AA9
                 pha    ; $1AAB
                 lda $00    ; $1AAC
-                sta $60    ; $1AAE
+                sta TheBuffer    ; $1AAE
                 lda $01    ; $1AB0
                 sta $61    ; $1AB2
-                jsr $4CFB    ; $1AB4
+                jsr PushMark    ; $1AB4
                 pla    ; $1AB7
-                sta $60    ; $1AB8
+                sta TheBuffer    ; $1AB8
                 pla    ; $1ABA
                 sta $61    ; $1ABB
-                jsr $57CC    ; $1ABD
-                jsr $5968    ; $1AC0
+                jsr NewEchoArea    ; $1ABD
+                jsr PrintMessage    ; $1AC0
                 bne $1AB4    ; $1AC3
                 sbc #$EE    ; $1AC5
         dfb $F4        ; $1AC7  (data/65C02-bit)
@@ -1293,62 +2174,70 @@
                 plx    ; $1AD2
         dfb $57        ; $1AD3  (data/65C02-bit)
                 rts    ; $1AD4
+;
+; === PrefixMeta ===
                 lda #$00    ; $1AD5
                 jsr $1B4E    ; $1AD7
                 ldx #$01    ; $1ADA
                 bne $1AF2    ; $1ADC
+;
+; === PrefixCtrl ===
                 lda #$01    ; $1ADE
                 jsr $1B4E    ; $1AE0
                 ldx #$02    ; $1AE3
                 cmp #$80    ; $1AE5
                 bcc $1AF7    ; $1AE7
                 bcs $1AF2    ; $1AE9
+;
+; === PrefixCMeta ===
                 lda #$02    ; $1AEB
                 jsr $1B4E    ; $1AED
                 ldx #$00    ; $1AF0
                 ora #$80    ; $1AF2
-                jsr $36FD    ; $1AF4
+                jsr UpperCon    ; $1AF4
                 and $1AFD,x    ; $1AF7
-                jmp $783D    ; $1AFA
+                jmp Dispatch    ; $1AFA
         dfb $3F        ; $1AFD  (data/65C02-bit)
         dfb $7F        ; $1AFE  (data/65C02-bit)
         dfb $BF        ; $1AFF  (data/65C02-bit)
+;
+; === ControlX ===
                 lda #$04    ; $1B00
                 jsr $1B4E    ; $1B02
                 cmp #$80    ; $1B05
                 bcc $1B32    ; $1B07
                 ldx #$00    ; $1B09
-                jsr $36FD    ; $1B0B
-                cmp $7DB8,x    ; $1B0E
+                jsr UpperCon    ; $1B0B
+                cmp C_XCharacters,x    ; $1B0E
                 beq $1B1C    ; $1B11
                 inx    ; $1B13
-                cpx $7E2A    ; $1B14
+                cpx C_XCharCount    ; $1B14
                 bcc $1B0E    ; $1B17
                 jmp $1B32    ; $1B19
                 txa    ; $1B1C
                 asl    ; $1B1D
                 tax    ; $1B1E
-                lda $7DDE,x    ; $1B1F
+                lda C_XVectors,x    ; $1B1F
                 sta $00    ; $1B22
-                sta $7834    ; $1B24
+                sta CommandVector    ; $1B24
                 lda $7DDF,x    ; $1B27
                 sta $01    ; $1B2A
                 sta $7835    ; $1B2C
                 jmp ($0000)    ; $1B2F
                 pha    ; $1B32
-                jsr $57CC    ; $1B33
-                jsr $5968    ; $1B36
+                jsr NewEchoArea    ; $1B33
+                jsr PrintMessage    ; $1B36
         dfb $C3        ; $1B39  (data/65C02-bit)
                 lda $A0D8    ; $1B3A
                 brk    ; $1B3D
                 pla    ; $1B3E
-                jsr $586C    ; $1B3F
-                jsr $5858    ; $1B42
-                jsr $29B9    ; $1B45
-                jsr $57FA    ; $1B48
+                jsr PrettyPrint    ; $1B3F
+                jsr PrUnDefined    ; $1B42
+                jsr Beep    ; $1B45
+                jsr CloseEchoArea    ; $1B48
                 lda #$01    ; $1B4B
                 rts    ; $1B4D
-                jsr $56FD    ; $1B4E
+                jsr PreCharGet    ; $1B4E
                 php    ; $1B51
                 cmp #$87    ; $1B52
                 beq $1B63    ; $1B54
@@ -1356,128 +2245,162 @@
                 plp    ; $1B58
                 beq $1B62    ; $1B59
                 ora #$80    ; $1B5B
-                jsr $5726    ; $1B5D
+                jsr EchoOutput    ; $1B5D
                 lda $00    ; $1B60
                 rts    ; $1B62
-                jsr $29B9    ; $1B63
+                jsr Beep    ; $1B63
                 lda #$87    ; $1B66
-                jsr $5726    ; $1B68
+                jsr EchoOutput    ; $1B68
                 plp    ; $1B6B
                 pla    ; $1B6C
                 pla    ; $1B6D
                 lda #$01    ; $1B6E
                 rts    ; $1B70
+;
+; === RSrch ===
                 lda #$FF    ; $1B71
-                eor $7A5E    ; $1B73
-                sta $7A5E    ; $1B76
-                lda $7A5E    ; $1B79
-                sta $5D0A    ; $1B7C
-                jsr $4C1E    ; $1B7F
-                jsr $5FD1    ; $1B82
+                eor ArgSign    ; $1B73
+                sta ArgSign    ; $1B76
+;
+; === ISrch ===
+                lda ArgSign    ; $1B79
+                sta ISearchDir    ; $1B7C
+                jsr ClrLastKill    ; $1B7F
+                jsr ISearch    ; $1B82
                 lda #$01    ; $1B85
                 rts    ; $1B87
-                lda $7A5E    ; $1B88
+;
+; === RWordSearch ===
+                lda ArgSign    ; $1B88
                 eor #$FF    ; $1B8B
-                sta $7A5E    ; $1B8D
-                jsr $4C1E    ; $1B90
-                lda $7A5E    ; $1B93
-                jsr $6226    ; $1B96
+                sta ArgSign    ; $1B8D
+;
+; === WordSearch ===
+                jsr ClrLastKill    ; $1B90
+                lda ArgSign    ; $1B93
+                jsr StrSearch    ; $1B96
                 lda #$01    ; $1B99
                 rts    ; $1B9B
+;
+; === TabsIndent ===
         dfb $FF        ; $1B9C  (data/65C02-bit)
-                lda $7A5E    ; $1B9D
-                sta $1B9C    ; $1BA0
+;
+; === SetTabsIndent ===
+                lda ArgSign    ; $1B9D
+                sta TabsIndent    ; $1BA0
                 lda #$01    ; $1BA3
                 rts    ; $1BA5
-                lda $4B83    ; $1BA6
+;
+; === NotModified ===
+                lda Modified?    ; $1BA6
                 eor #$FF    ; $1BA9
-                jsr $4C3A    ; $1BAB
+                jsr SetAModified    ; $1BAB
                 lda #$01    ; $1BAE
                 rts    ; $1BB0
-                jsr $292E    ; $1BB1
-                jmp $16CE    ; $1BB4
+;
+; === QuotedInsert ===
+                jsr BlinkCursor    ; $1BB1
+                jmp Insert    ; $1BB4
+;
+; === UpLine ===
                 lda #$77    ; $1BB7
                 sta $00    ; $1BB9
                 lda #$34    ; $1BBB
                 sta $01    ; $1BBD
                 jmp $1BCA    ; $1BBF
+;
+; === DownLine ===
                 lda #$39    ; $1BC2
                 sta $00    ; $1BC4
                 lda #$34    ; $1BC6
                 sta $01    ; $1BC8
-                jsr $4C1E    ; $1BCA
+                jsr ClrLastKill    ; $1BCA
                 lda #$1B    ; $1BCD
                 cmp $7837    ; $1BCF
                 bne $1BDB    ; $1BD2
                 lda #$B7    ; $1BD4
-                cmp $7836    ; $1BD6
+                cmp LastComVect    ; $1BD6
                 beq $1BF1    ; $1BD9
                 lda #$1B    ; $1BDB
                 cmp $7837    ; $1BDD
                 bne $1BE9    ; $1BE0
                 lda #$C2    ; $1BE2
-                cmp $7836    ; $1BE4
+                cmp LastComVect    ; $1BE4
                 beq $1BF1    ; $1BE7
                 lda #$00    ; $1BE9
-                sta $3406    ; $1BEB
+                sta GoalColumn    ; $1BEB
                 sta $3407    ; $1BEE
                 jmp ($0000)    ; $1BF1
-                jsr $29B9    ; $1BF4
-                jsr $579B    ; $1BF7
+;
+; === TopAbort ===
+                jsr Beep    ; $1BF4
+                jsr ClrEchoArea    ; $1BF7
                 lda #$00    ; $1BFA
-                sta $8AA6    ; $1BFC
-                sta $8AA5    ; $1BFF
-                jsr $537E    ; $1C02
+                sta MacroDef    ; $1BFC
+                sta MacroExec    ; $1BFF
+                jsr MakeModeLine    ; $1C02
                 lda #$01    ; $1C05
                 rts    ; $1C07
+;
+; === AtomMode ===
                 lda #$01    ; $1C08
-                bne $1C16    ; $1C0A
+                bne ToggleMode    ; $1C0A
+;
+; === IndentMode ===
                 lda #$04    ; $1C0C
-                bne $1C16    ; $1C0E
+                bne ToggleMode    ; $1C0E
+;
+; === AutoMode ===
                 lda #$02    ; $1C10
-                bne $1C16    ; $1C12
+                bne ToggleMode    ; $1C12
+;
+; === CapsMode ===
                 lda #$10    ; $1C14
+;
+; === ToggleMode ===
                 sta $1C47    ; $1C16
                 ldy #$40    ; $1C19
-                jsr $7A7F    ; $1C1B
+                jsr AnyArgument?    ; $1C1B
                 bne $1C27    ; $1C1E
-                lda $7A5E    ; $1C20
+                lda ArgSign    ; $1C20
                 bpl $1C2E    ; $1C23
                 bmi $1C3B    ; $1C25
                 lda $1C47    ; $1C27
-                and ($72),y    ; $1C2A
+                and (BuffData),y    ; $1C2A
                 bne $1C3B    ; $1C2C
                 lda $1C47    ; $1C2E
-                ora ($72),y    ; $1C31
-                sta ($72),y    ; $1C33
-                jsr $537E    ; $1C35
+                ora (BuffData),y    ; $1C31
+                sta (BuffData),y    ; $1C33
+                jsr MakeModeLine    ; $1C35
                 lda #$01    ; $1C38
                 rts    ; $1C3A
                 lda $1C47    ; $1C3B
                 eor #$FF    ; $1C3E
-                and ($72),y    ; $1C40
-                sta ($72),y    ; $1C42
+                and (BuffData),y    ; $1C40
+                sta (BuffData),y    ; $1C42
                 jmp $1C35    ; $1C44
                 brk    ; $1C47
-                jsr $2D88    ; $1C48
-                lda $25    ; $1C4B
+;
+; === PointInfo ===
+                jsr FindPoint    ; $1C48
+                lda CV    ; $1C4B
                 pha    ; $1C4D
-                lda $24    ; $1C4E
+                lda CH    ; $1C4E
                 pha    ; $1C50
-                jsr $57CC    ; $1C51
-                jsr $5968    ; $1C54
+                jsr NewEchoArea    ; $1C51
+                jsr PrintMessage    ; $1C54
                 cld    ; $1C57
                 ldy #$BD    ; $1C58
                 brk    ; $1C5A
                 pla    ; $1C5B
                 jsr $1CC6    ; $1C5C
-                jsr $5968    ; $1C5F
+                jsr PrintMessage    ; $1C5F
                 ldy $D9A0    ; $1C62
                 ldy #$BD    ; $1C65
                 brk    ; $1C67
                 pla    ; $1C68
                 jsr $1CC6    ; $1C69
-                jsr $5968    ; $1C6C
+                jsr PrintMessage    ; $1C6C
                 ldy $A0A0    ; $1C6F
         dfb $C3        ; $1C72  (data/65C02-bit)
                 iny    ; $1C73
@@ -1488,12 +2411,12 @@
                 pha    ; $1C7B
                 eor #$80    ; $1C7C
                 jsr $1CC6    ; $1C7E
-                jsr $5968    ; $1C81
+                jsr PrintMessage    ; $1C81
                 ldy #$A8    ; $1C84
                 brk    ; $1C86
                 pla    ; $1C87
-                jsr $586C    ; $1C88
-                jsr $5968    ; $1C8B
+                jsr PrettyPrint    ; $1C88
+                jsr PrintMessage    ; $1C8B
                 lda #$89    ; $1C8E
                 bne $1C81    ; $1C90
                 sbc #$EE    ; $1C92
@@ -1504,66 +2427,76 @@
         dfb $F4        ; $1C9A  (data/65C02-bit)
                 ldy #$00    ; $1C9B
                 sec    ; $1C9D
-                lda $60    ; $1C9E
-                sbc $66    ; $1CA0
+                lda TheBuffer    ; $1C9E
+                sbc BuffTop    ; $1CA0
                 tax    ; $1CA2
                 lda $61    ; $1CA3
                 sbc $67    ; $1CA5
-                jsr $7A01    ; $1CA7
-                jsr $5968    ; $1CAA
+                jsr PrintDec    ; $1CA7
+                jsr PrintMessage    ; $1CAA
                 ldy #$EF    ; $1CAD
                 inc $A0    ; $1CAF
                 brk    ; $1CB1
-                ldx $0F3A    ; $1CB2
-                jsr $49A4    ; $1CB5
-                jsr $7A01    ; $1CB8
+                ldx SelectedBuff    ; $1CB2
+                jsr MySize    ; $1CB5
+                jsr PrintDec    ; $1CB8
                 lda #$AE    ; $1CBB
-                jsr $2611    ; $1CBD
-                jsr $57FA    ; $1CC0
+                jsr CharOut    ; $1CBD
+                jsr CloseEchoArea    ; $1CC0
                 lda #$01    ; $1CC3
                 rts    ; $1CC5
                 tax    ; $1CC6
-                jsr $7A55    ; $1CC7
-                jmp $7A01    ; $1CCA
-                jsr $2AC4    ; $1CCD
-                lda $27E7    ; $1CD0
+                jsr ZeroJustify    ; $1CC7
+                jmp PrintDec    ; $1CCA
+;
+; === WhatLossage ===
+                jsr OpenTypeout    ; $1CCD
+                lda TYI_PopIndex    ; $1CD0
                 sec    ; $1CD3
                 sbc #$3C    ; $1CD4
                 and #$3F    ; $1CD6
                 sta $1CFE    ; $1CD8
                 ldx $1CFE    ; $1CDB
-                cpx $27E7    ; $1CDE
+                cpx TYI_PopIndex    ; $1CDE
                 beq $1CF7    ; $1CE1
-                lda $27A7,x    ; $1CE3
+                lda TYIBuff,x    ; $1CE3
                 beq $1CEE    ; $1CE6
-                jsr $586C    ; $1CE8
-                jsr $7DA7    ; $1CEB
+                jsr PrettyPrint    ; $1CE8
+                jsr PrintSpace    ; $1CEB
                 inc $1CFE    ; $1CEE
                 lda $1CFE    ; $1CF1
                 jmp $1CD6    ; $1CF4
-                jsr $2B0F    ; $1CF7
+                jsr CloseTypeout    ; $1CF7
                 lda #$01    ; $1CFA
                 rts    ; $1CFC
                 brk    ; $1CFD
                 brk    ; $1CFE
+;
+; === CommentColumn ===
                 jsr $00BB    ; $1CFF
                 brk    ; $1D02
                 brk    ; $1D03
                 brk    ; $1D04
+;
+; === CommentEnd ===
                 brk    ; $1D05
                 brk    ; $1D06
                 brk    ; $1D07
                 brk    ; $1D08
                 brk    ; $1D09
+;
+; === StringPntr ===
                 brk    ; $1D0A
                 brk    ; $1D0B
-                jsr $4C52    ; $1D0C
-                lda $6C    ; $1D0F
+;
+; === StringInLine ===
+                jsr SetGap    ; $1D0C
+                lda GapBot    ; $1D0F
                 sta $00    ; $1D11
                 lda $6D    ; $1D13
                 sta $01    ; $1D15
                 ldy #$00    ; $1D17
-                lda $1D0A    ; $1D19
+                lda StringPntr    ; $1D19
                 sta $02    ; $1D1C
                 lda $1D0B    ; $1D1E
                 sta $03    ; $1D21
@@ -1571,7 +2504,7 @@
                 bne $1D29    ; $1D25
                 inc $01    ; $1D27
                 lda $00    ; $1D29
-                cmp $68    ; $1D2B
+                cmp BuffBot    ; $1D2B
                 bne $1D44    ; $1D2D
                 lda $01    ; $1D2F
                 cmp $69    ; $1D31
@@ -1586,20 +2519,20 @@
                 rts    ; $1D43
                 lda ($02),y    ; $1D44
                 beq $1D67    ; $1D46
-                jsr $36FD    ; $1D48
+                jsr UpperCon    ; $1D48
                 sta $1D8A    ; $1D4B
                 jsr $D000    ; $1D4E
                 cmp #$8D    ; $1D51
                 beq $1D41    ; $1D53
                 ora #$80    ; $1D55
-                jsr $36FD    ; $1D57
+                jsr UpperCon    ; $1D57
                 cmp $1D8A    ; $1D5A
                 bne $1D19    ; $1D5D
                 inc $02    ; $1D5F
                 bne $1D65    ; $1D61
                 inc $03    ; $1D63
                 bne $1D23    ; $1D65
-                lda $1D0A    ; $1D67
+                lda StringPntr    ; $1D67
                 sta $02    ; $1D6A
                 lda $1D0B    ; $1D6C
                 sta $03    ; $1D6F
@@ -1619,196 +2552,212 @@
                 rts    ; $1D89
                 brk    ; $1D8A
                 brk    ; $1D8B
-                jsr $4C1E    ; $1D8C
-                jsr $4C3C    ; $1D8F
+;
+; === MakeComment ===
+                jsr ClrLastKill    ; $1D8C
+                jsr SetModified    ; $1D8F
                 lda #$00    ; $1D92
                 sta $1D8B    ; $1D94
-                jsr $1EEA    ; $1D97
+                jsr FindComment    ; $1D97
                 php    ; $1D9A
-                jsr $2D88    ; $1D9B
-                jsr $3191    ; $1D9E
+                jsr FindPoint    ; $1D9B
+                jsr LinesPastPnt    ; $1D9E
                 sta $1E69    ; $1DA1
-                jsr $393C    ; $1DA4
+                jsr DeleteSpace    ; $1DA4
                 plp    ; $1DA7
                 beq $1DC9    ; $1DA8
                 ldy #$FF    ; $1DAA
                 sty $1D8B    ; $1DAC
                 iny    ; $1DAF
-                lda $1D00,y    ; $1DB0
+                lda CommentBegin,y    ; $1DB0
                 beq $1DBA    ; $1DB3
                 jsr $D06F    ; $1DB5
                 bne $1DAF    ; $1DB8
                 tya    ; $1DBA
                 clc    ; $1DBB
-                adc $60    ; $1DBC
-                sta $6A    ; $1DBE
+                adc TheBuffer    ; $1DBC
+                sta GapTop    ; $1DBE
                 lda $61    ; $1DC0
                 adc #$00    ; $1DC2
                 sta $6B    ; $1DC4
-                jsr $4C52    ; $1DC6
-                jsr $2D88    ; $1DC9
+                jsr SetGap    ; $1DC6
+                jsr FindPoint    ; $1DC9
                 beq $1DD6    ; $1DCC
-                jsr $31F7    ; $1DCE
+                jsr CenterPage    ; $1DCE
                 lda #$FF    ; $1DD1
                 sta $1E69    ; $1DD3
-                lda $24    ; $1DD6
-                cmp $20    ; $1DD8
+                lda CH    ; $1DD6
+                cmp WindowLft    ; $1DD8
                 beq $1E1D    ; $1DDA
-                cmp $1CFF    ; $1DDC
+                cmp CommentColumn    ; $1DDC
                 beq $1E1D    ; $1DDF
                 bcs $1E10    ; $1DE1
-                lda $1CFF    ; $1DE3
-                cmp $21    ; $1DE6
+                lda CommentColumn    ; $1DE3
+                cmp WindowRgt    ; $1DE6
                 bcs $1E1D    ; $1DE8
-                bit $1B9C    ; $1DEA
+                bit TabsIndent    ; $1DEA
                 bpl $1E09    ; $1DED
                 lda #$89    ; $1DEF
-                jsr $2DE0    ; $1DF1
+                jsr GetXCharLen    ; $1DF1
                 txa    ; $1DF4
                 clc    ; $1DF5
-                adc $24    ; $1DF6
-                cmp $1CFF    ; $1DF8
+                adc CH    ; $1DF6
+                cmp CommentColumn    ; $1DF8
                 beq $1DFF    ; $1DFB
                 bcs $1E09    ; $1DFD
-                jsr $2E13    ; $1DFF
+                jsr BumpXPos    ; $1DFF
                 lda #$89    ; $1E02
-                jsr $4B84    ; $1E04
+                jsr BuffInsert    ; $1E04
                 beq $1DEF    ; $1E07
-                lda $24    ; $1E09
-                cmp $1CFF    ; $1E0B
+                lda CH    ; $1E09
+                cmp CommentColumn    ; $1E0B
                 bcs $1E1D    ; $1E0E
                 lda #$A0    ; $1E10
-                jsr $4B84    ; $1E12
+                jsr BuffInsert    ; $1E12
                 ldx #$01    ; $1E15
-                jsr $2E13    ; $1E17
+                jsr BumpXPos    ; $1E17
                 jmp $1E09    ; $1E1A
-                jsr $4C52    ; $1E1D
+                jsr SetGap    ; $1E1D
                 jsr $1F94    ; $1E20
                 iny    ; $1E23
                 tya    ; $1E24
                 clc    ; $1E25
-                adc $6C    ; $1E26
-                sta $60    ; $1E28
+                adc GapBot    ; $1E26
+                sta TheBuffer    ; $1E28
                 lda $6D    ; $1E2A
                 adc #$00    ; $1E2C
                 sta $61    ; $1E2E
-                jsr $4C52    ; $1E30
+                jsr SetGap    ; $1E30
                 bit $1D8B    ; $1E33
                 bpl $1E4F    ; $1E36
                 ldy #$00    ; $1E38
-                lda $1D05,y    ; $1E3A
+                lda CommentEnd,y    ; $1E3A
                 beq $1E45    ; $1E3D
                 jsr $D08A    ; $1E3F
                 iny    ; $1E42
                 bne $1E3A    ; $1E43
                 tya    ; $1E45
                 clc    ; $1E46
-                adc $6A    ; $1E47
-                sta $6A    ; $1E49
+                adc GapTop    ; $1E47
+                sta GapTop    ; $1E49
                 bcc $1E4F    ; $1E4B
                 inc $6B    ; $1E4D
-                jsr $4C52    ; $1E4F
-                jsr $3147    ; $1E52
+                jsr SetGap    ; $1E4F
+                jsr DisplayLine    ; $1E52
                 bit $1E69    ; $1E55
                 bmi $1E68    ; $1E58
-                jsr $2D88    ; $1E5A
-                jsr $3191    ; $1E5D
+                jsr FindPoint    ; $1E5A
+                jsr LinesPastPnt    ; $1E5D
                 cmp $1E69    ; $1E60
                 beq $1E68    ; $1E63
-                jsr $30C6    ; $1E65
+                jsr DisplayDown    ; $1E65
                 rts    ; $1E68
                 brk    ; $1E69
-                jsr $1EEA    ; $1E6A
+;
+; === KillComment ===
+                jsr FindComment    ; $1E6A
                 php    ; $1E6D
-                jsr $393C    ; $1E6E
+                jsr DeleteSpace    ; $1E6E
                 plp    ; $1E71
                 bne $1E77    ; $1E72
-                jmp $382E    ; $1E74
+                jmp KillLine    ; $1E74
                 lda #$01    ; $1E77
                 rts    ; $1E79
-                jsr $7A7F    ; $1E7A
-                bne $1E93    ; $1E7D
-                lda $1CFF    ; $1E7F
+;
+; === CommentLine ===
+                jsr AnyArgument?    ; $1E7A
+                bne CommentLineI    ; $1E7D
+                lda CommentColumn    ; $1E7F
                 pha    ; $1E82
-                lda $7A5B    ; $1E83
-                sta $1CFF    ; $1E86
-                jsr $1E93    ; $1E89
+                lda Argument    ; $1E83
+                sta CommentColumn    ; $1E86
+                jsr CommentLineI    ; $1E89
                 pla    ; $1E8C
-                sta $1CFF    ; $1E8D
+                sta CommentColumn    ; $1E8D
                 lda #$01    ; $1E90
                 rts    ; $1E92
-                lda $1D00    ; $1E93
+;
+; === CommentLineI ===
+                lda CommentBegin    ; $1E93
                 beq $1E9D    ; $1E96
-                jsr $1D8C    ; $1E98
+                jsr MakeComment    ; $1E98
                 lda #$01    ; $1E9B
                 rts    ; $1E9D
-                lda $7A5E    ; $1E9E
+;
+; === UpCommLine ===
+                lda ArgSign    ; $1E9E
                 eor #$FF    ; $1EA1
-                sta $7A5E    ; $1EA3
-                lda $1D00    ; $1EA6
+                sta ArgSign    ; $1EA3
+;
+; === DownCommLine ===
+                lda CommentBegin    ; $1EA6
                 beq $1EE6    ; $1EA9
-                jsr $7A60    ; $1EAB
+                jsr GetArgSign    ; $1EAB
                 sta $1EE9    ; $1EAE
-                jsr $7AF6    ; $1EB1
+                jsr ZeroArg?    ; $1EB1
                 beq $1EE6    ; $1EB4
                 lda $7A5C    ; $1EB6
                 pha    ; $1EB9
-                lda $7A5B    ; $1EBA
+                lda Argument    ; $1EBA
                 pha    ; $1EBD
-                jsr $7A6B    ; $1EBE
+                jsr InitArgument    ; $1EBE
                 lda $1EE9    ; $1EC1
-                sta $7A5E    ; $1EC4
-                jsr $1F3F    ; $1EC7
-                jsr $1BC2    ; $1ECA
-                jsr $1E93    ; $1ECD
+                sta ArgSign    ; $1EC4
+                jsr DelBlankComm    ; $1EC7
+                jsr DownLine    ; $1ECA
+                jsr CommentLineI    ; $1ECD
                 pla    ; $1ED0
-                sta $7A5B    ; $1ED1
+                sta Argument    ; $1ED1
                 pla    ; $1ED4
                 sta $7A5C    ; $1ED5
-                lda $7A5B    ; $1ED8
+                lda Argument    ; $1ED8
                 bne $1EE0    ; $1EDB
                 dec $7A5C    ; $1EDD
-                dec $7A5B    ; $1EE0
+                dec Argument    ; $1EE0
                 jmp $1EB1    ; $1EE3
                 lda #$01    ; $1EE6
                 rts    ; $1EE8
                 brk    ; $1EE9
-                lda $1D00    ; $1EEA
+;
+; === FindComment ===
+                lda CommentBegin    ; $1EEA
                 cmp #$BB    ; $1EED
                 bne $1F13    ; $1EEF
                 lda $1D01    ; $1EF1
-                ora $1D05    ; $1EF4
+                ora CommentEnd    ; $1EF4
                 bne $1F13    ; $1EF7
                 jsr $1F13    ; $1EF9
                 bne $1F30    ; $1EFC
-                jsr $7CCD    ; $1EFE
+                jsr PointBackward    ; $1EFE
                 bne $1F31    ; $1F01
                 jsr $D01B    ; $1F03
-                jsr $37A7    ; $1F06
+                jsr WhiteSpace?    ; $1F06
                 beq $1F31    ; $1F09
-                jsr $7C68    ; $1F0B
-                jsr $7C68    ; $1F0E
+                jsr PointForward    ; $1F0B
+                jsr PointForward    ; $1F0E
                 beq $1F20    ; $1F11
                 lda #$00    ; $1F13
-                sta $1D0A    ; $1F15
+                sta StringPntr    ; $1F15
                 lda #$1D    ; $1F18
                 sta $1D0B    ; $1F1A
-                jsr $34A6    ; $1F1D
-                jsr $4C52    ; $1F20
-                jsr $1D0C    ; $1F23
+                jsr BegOfLine    ; $1F1D
+                jsr SetGap    ; $1F20
+                jsr StringInLine    ; $1F23
                 beq $1F31    ; $1F26
-                jsr $34BA    ; $1F28
-                jsr $4C52    ; $1F2B
+                jsr EndOfLine    ; $1F28
+                jsr SetGap    ; $1F2B
                 lda #$FF    ; $1F2E
                 rts    ; $1F30
                 lda $00    ; $1F31
-                sta $60    ; $1F33
+                sta TheBuffer    ; $1F33
                 lda $01    ; $1F35
                 sta $61    ; $1F37
-                jsr $4C52    ; $1F39
+                jsr SetGap    ; $1F39
                 lda #$00    ; $1F3C
                 rts    ; $1F3E
-                jsr $1EEA    ; $1F3F
+;
+; === DelBlankComm ===
+                jsr FindComment    ; $1F3F
                 bne $1F7B    ; $1F42
                 jsr $1F94    ; $1F44
                 iny    ; $1F47
@@ -1816,13 +2765,13 @@
                 stx $1F93    ; $1F4A
                 tya    ; $1F4D
                 sec    ; $1F4E
-                adc $6C    ; $1F4F
+                adc GapBot    ; $1F4F
                 tax    ; $1F51
                 lda $6D    ; $1F52
                 adc #$00    ; $1F54
                 cmp $69    ; $1F56
                 bne $1F5E    ; $1F58
-                cpx $68    ; $1F5A
+                cpx BuffBot    ; $1F5A
                 beq $1F71    ; $1F5C
                 jsr $D03F    ; $1F5E
                 cmp #$8D    ; $1F61
@@ -1836,86 +2785,90 @@
                 dey    ; $1F70
                 tya    ; $1F71
                 clc    ; $1F72
-                adc $6C    ; $1F73
-                sta $6C    ; $1F75
+                adc GapBot    ; $1F73
+                sta GapBot    ; $1F75
                 bcc $1F7B    ; $1F77
                 inc $6D    ; $1F79
-                jsr $393C    ; $1F7B
-                jsr $3147    ; $1F7E
+                jsr DeleteSpace    ; $1F7B
+                jsr DisplayLine    ; $1F7E
                 rts    ; $1F81
                 ldx $1F93    ; $1F82
                 inc $1F93    ; $1F85
-                lda $1D05,x    ; $1F88
+                lda CommentEnd,x    ; $1F88
                 beq $1F81    ; $1F8B
                 jsr $D09C    ; $1F8D
                 beq $1F6D    ; $1F90
                 rts    ; $1F92
                 brk    ; $1F93
                 ldy #$00    ; $1F94
-                lda $1D00,y    ; $1F96
+                lda CommentBegin,y    ; $1F96
                 beq $1F9E    ; $1F99
                 iny    ; $1F9B
                 bne $1F96    ; $1F9C
                 rts    ; $1F9E
+;
+; === SpaceBar ===
                 lda #$02    ; $1F9F
                 ldy #$40    ; $1FA1
-                and ($72),y    ; $1FA3
-                bne $1FAD    ; $1FA5
+                and (BuffData),y    ; $1FA3
+                bne AutoFill    ; $1FA5
                 lda #$A0    ; $1FA7
-                jmp $16CE    ; $1FA9
+                jmp Insert    ; $1FA9
+;
+; === FillColumn ===
                 lsr: $00A0    ; $1FAC
                 jsr $20F6    ; $1FAF
-                jsr $2089    ; $1FB2
+                jsr CleanBegLine    ; $1FB2
                 lda #$00    ; $1FB5
                 sta $EB    ; $1FB7
                 sta $EF    ; $1FB9
                 jsr $2108    ; $1FBB
                 bne $1FE9    ; $1FBE
-                bit $300B    ; $1FC0
+                bit EnableKDisp    ; $1FC0
                 bpl $1FA7    ; $1FC3
-                jsr $2D88    ; $1FC5
+                jsr FindPoint    ; $1FC5
                 beq $1FD4    ; $1FC8
-                jsr $31F7    ; $1FCA
+                jsr CenterPage    ; $1FCA
                 lda #$00    ; $1FCD
-                sta $300B    ; $1FCF
+                sta EnableKDisp    ; $1FCF
                 beq $1FA7    ; $1FD2
-                lda $25    ; $1FD4
+                lda CV    ; $1FD4
                 pha    ; $1FD6
-                lda $24    ; $1FD7
+                lda CH    ; $1FD7
                 pha    ; $1FD9
-                jsr $300C    ; $1FDA
+                jsr DisplayPage    ; $1FDA
                 pla    ; $1FDD
-                sta $24    ; $1FDE
+                sta CH    ; $1FDE
                 pla    ; $1FE0
-                sta $25    ; $1FE1
-                jsr $26EB    ; $1FE3
+                sta CV    ; $1FE1
+                jsr vtab1    ; $1FE3
                 jmp $1FCD    ; $1FE6
                 jsr $D01B    ; $1FE9
                 cmp #$A0    ; $1FEC
                 bne $1FFA    ; $1FEE
-                lda $60    ; $1FF0
+                lda TheBuffer    ; $1FF0
                 sta $EE    ; $1FF2
                 lda $61    ; $1FF4
                 sta $EF    ; $1FF6
                 lda #$A0    ; $1FF8
                 tax    ; $1FFA
-                inc $60    ; $1FFB
+                inc TheBuffer    ; $1FFB
                 bne $2001    ; $1FFD
                 inc $61    ; $1FFF
-                jsr $2843    ; $2001
-                lda $24    ; $2004
+                jsr GatherTYI    ; $2001
+                lda CH    ; $2004
                 pha    ; $2006
                 lda $EB    ; $2007
-                sta $24    ; $2009
+                sta CH    ; $2009
                 txa    ; $200B
-                jsr $2DE0    ; $200C
+                jsr GetXCharLen    ; $200C
                 pla    ; $200F
-                sta $24    ; $2010
+                sta CH    ; $2010
                 txa    ; $2012
                 clc    ; $2013
                 adc $EB    ; $2014
                 sta $EB    ; $2016
-                cmp $1FAC    ; $2018
+                cmp FillColumn    ; $2018
                 bcc $1FBB    ; $201B
                 lda $EF    ; $201D
                 beq $1FBB    ; $201F
@@ -1924,65 +2877,69 @@
                 sta $00    ; $2025
                 lda #$8D    ; $2027
                 jsr $D054    ; $2029
-                sta $300B    ; $202C
+                sta EnableKDisp    ; $202C
                 lda $00    ; $202F
-                sta $60    ; $2031
+                sta TheBuffer    ; $2031
                 lda $01    ; $2033
                 sta $61    ; $2035
-                inc $60    ; $2037
+                inc TheBuffer    ; $2037
                 bne $203D    ; $2039
                 inc $61    ; $203B
-                lda $20A5    ; $203D
+                lda FillPrefix    ; $203D
                 bne $2045    ; $2040
                 jmp $1FB2    ; $2042
                 lda $EC    ; $2045
                 sec    ; $2047
-                sbc $60    ; $2048
+                sbc TheBuffer    ; $2048
                 sta $F0    ; $204A
                 lda $ED    ; $204C
                 sbc $61    ; $204E
                 sta $F1    ; $2050
                 lda #$00    ; $2052
                 sta $EA    ; $2054
-                jsr $4C52    ; $2056
+                jsr SetGap    ; $2056
                 ldy $EA    ; $2059
-                lda $20A5,y    ; $205B
+                lda FillPrefix,y    ; $205B
                 beq $2067    ; $205E
-                jsr $4B84    ; $2060
+                jsr BuffInsert    ; $2060
                 inc $EA    ; $2063
                 bne $2059    ; $2065
                 lda $61    ; $2067
                 pha    ; $2069
-                lda $60    ; $206A
+                lda TheBuffer    ; $206A
                 pha    ; $206C
                 lda $F0    ; $206D
                 sec    ; $206F
-                adc $6C    ; $2070
-                sta $60    ; $2072
+                adc GapBot    ; $2070
+                sta TheBuffer    ; $2072
                 lda $F1    ; $2074
                 adc $6D    ; $2076
                 sta $61    ; $2078
-                jsr $4C52    ; $207A
+                jsr SetGap    ; $207A
                 jsr $20F6    ; $207D
                 pla    ; $2080
-                sta $60    ; $2081
+                sta TheBuffer    ; $2081
                 pla    ; $2083
                 sta $61    ; $2084
                 jmp $1FB2    ; $2086
-                jsr $34A6    ; $2089
+;
+; === CleanBegLine ===
+                jsr BegOfLine    ; $2089
                 lda $61    ; $208C
                 cmp $6B    ; $208E
                 bcc $20A4    ; $2090
                 bne $209C    ; $2092
-                lda $60    ; $2094
-                cmp $6A    ; $2096
+                lda TheBuffer    ; $2094
+                cmp GapTop    ; $2096
                 beq $20A4    ; $2098
                 bcc $20A4    ; $209A
-                lda $6A    ; $209C
-                sta $60    ; $209E
+                lda GapTop    ; $209C
+                sta TheBuffer    ; $209E
                 lda $6B    ; $20A0
                 sta $61    ; $20A2
                 rts    ; $20A4
+;
+; === FillPrefix ===
                 brk    ; $20A5
                 brk    ; $20A6
                 brk    ; $20A7
@@ -1990,60 +2947,64 @@
                 brk    ; $20A9
                 brk    ; $20AA
                 brk    ; $20AB
-                jsr $4C52    ; $20AC
+;
+; === SetFillPrefix ===
+                jsr SetGap    ; $20AC
                 jsr $20F6    ; $20AF
-                jsr $2089    ; $20B2
+                jsr CleanBegLine    ; $20B2
                 ldx #$00    ; $20B5
                 jsr $2108    ; $20B7
                 beq $20CD    ; $20BA
                 jsr $D01B    ; $20BC
-                sta $20A5,x    ; $20BF
-                inc $60    ; $20C2
+                sta FillPrefix,x    ; $20BF
+                inc TheBuffer    ; $20C2
                 bne $20C8    ; $20C4
                 inc $61    ; $20C6
                 inx    ; $20C8
                 cpx #$06    ; $20C9
                 bcc $20B7    ; $20CB
                 lda #$00    ; $20CD
-                sta $20A5,x    ; $20CF
-                jsr $57CC    ; $20D2
-                jsr $5968    ; $20D5
+                sta FillPrefix,x    ; $20CF
+                jsr NewEchoArea    ; $20D2
+                jsr PrintMessage    ; $20D5
                 ldx $A0BD    ; $20D8
                 ldx #$00    ; $20DB
-                lda $20A5,y    ; $20DD
+                lda FillPrefix,y    ; $20DD
                 beq $20E8    ; $20E0
-                jsr $2611    ; $20E2
+                jsr CharOut    ; $20E2
                 iny    ; $20E5
                 bne $20DD    ; $20E6
                 lda #$A2    ; $20E8
-                jsr $2611    ; $20EA
-                jsr $57FA    ; $20ED
+                jsr CharOut    ; $20EA
+                jsr CloseEchoArea    ; $20ED
                 jsr $20FF    ; $20F0
                 lda #$01    ; $20F3
                 rts    ; $20F5
-                lda $60    ; $20F6
+                lda TheBuffer    ; $20F6
                 sta $EC    ; $20F8
                 lda $61    ; $20FA
                 sta $ED    ; $20FC
                 rts    ; $20FE
                 lda $EC    ; $20FF
-                sta $60    ; $2101
+                sta TheBuffer    ; $2101
                 lda $ED    ; $2103
                 sta $61    ; $2105
                 rts    ; $2107
-                lda $60    ; $2108
+                lda TheBuffer    ; $2108
                 cmp $EC    ; $210A
                 bne $2112    ; $210C
                 lda $61    ; $210E
                 cmp $ED    ; $2110
                 rts    ; $2112
+;
+; === WhatSpace ===
                 ldx #$00    ; $2113
                 stx $2181    ; $2115
                 stx $2180    ; $2118
                 ldx $2181    ; $211B
-                lda $0F3C,x    ; $211E
+                lda BuffActList,x    ; $211E
                 beq $212D    ; $2121
-                jsr $49A4    ; $2123
+                jsr MySize    ; $2123
                 clc    ; $2126
                 adc $2180    ; $2127
                 sta $2180    ; $212A
@@ -2051,28 +3012,28 @@
                 lda $2181    ; $2130
                 cmp #$0E    ; $2133
                 bcc $211B    ; $2135
-                jsr $57CC    ; $2137
+                jsr NewEchoArea    ; $2137
                 lda #$BF    ; $213A
                 sec    ; $213C
                 sbc #$08    ; $213D
                 sbc $2180    ; $213F
                 lsr    ; $2142
                 tax    ; $2143
-                jsr $7A55    ; $2144
-                jsr $749B    ; $2147
-                jsr $5968    ; $214A
+                jsr ZeroJustify    ; $2144
+                jsr PrintPages    ; $2147
+                jsr PrintMessage    ; $214A
                 sbc ($F6,x)    ; $214D
                 sbc ($E9,x)    ; $214F
                 cpx $E2E1    ; $2151
                 cpx $ACE5    ; $2154
                 ldy #$00    ; $2157
-                ldx $0F3A    ; $2159
-                jsr $49A4    ; $215C
+                ldx SelectedBuff    ; $2159
+                jsr MySize    ; $215C
                 lsr    ; $215F
                 tax    ; $2160
                 lda #$00    ; $2161
-                jsr $7A01    ; $2163
-                jsr $5968    ; $2166
+                jsr PrintDec    ; $2163
+                jsr PrintMessage    ; $2166
                 ldy #$E9    ; $2169
                 inc $E3A0    ; $216B
                 sbc $F2,x    ; $216E
@@ -2080,38 +3041,48 @@
                 inc $AEF4    ; $2172
                 sta $2000    ; $2175
                 sbc ($73)    ; $2178
-                jsr $57FA    ; $217A
+                jsr CloseEchoArea    ; $217A
                 lda #$01    ; $217D
                 rts    ; $217F
                 brk    ; $2180
                 brk    ; $2181
+;
+; === Bottom? ===
                 lda $00    ; $2182
-                cmp $68    ; $2184
+                cmp BuffBot    ; $2184
                 bne $218C    ; $2186
                 lda $01    ; $2188
                 cmp $69    ; $218A
                 rts    ; $218C
+;
+; === Top? ===
                 lda $00    ; $218D
-                cmp $66    ; $218F
+                cmp BuffTop    ; $218F
                 bne $2197    ; $2191
                 lda $01    ; $2193
                 cmp $67    ; $2195
                 rts    ; $2197
+;
+; === LabelChars ===
                 tay    ; $2198
         dfb $DB        ; $2199  (data/65C02-bit)
                 brk    ; $219A
                 brk    ; $219B
                 brk    ; $219C
+;
+; === AlphaLabel ===
                 brk    ; $219D
+;
+; === LabelChar? ===
                 sta $21CE    ; $219E
                 ldx #$00    ; $21A1
-                lda $2198,x    ; $21A3
+                lda LabelChars,x    ; $21A3
                 beq $21B0    ; $21A6
                 cmp $21CE    ; $21A8
                 beq $21C8    ; $21AB
                 inx    ; $21AD
                 bne $21A3    ; $21AE
-                bit $219D    ; $21B0
+                bit AlphaLabel    ; $21B0
                 bmi $21CB    ; $21B3
                 lda $21CE    ; $21B5
                 cmp #$C1    ; $21B8
@@ -2127,35 +3098,37 @@
                 ldx #$FF    ; $21CB
                 rts    ; $21CD
                 brk    ; $21CE
-                jsr $7A60    ; $21CF
-                bmi $2239    ; $21D2
-                jsr $4C52    ; $21D4
-                lda $6C    ; $21D7
+;
+; === DownPara ===
+                jsr GetArgSign    ; $21CF
+                bmi UpPara    ; $21D2
+                jsr SetGap    ; $21D4
+                lda GapBot    ; $21D7
                 sta $00    ; $21D9
                 lda $6D    ; $21DB
                 sta $01    ; $21DD
                 ldy #$00    ; $21DF
-                jsr $7AF6    ; $21E1
+                jsr ZeroArg?    ; $21E1
                 bne $21F4    ; $21E4
                 lda $00    ; $21E6
-                sta $60    ; $21E8
+                sta TheBuffer    ; $21E8
                 lda $01    ; $21EA
                 sta $61    ; $21EC
-                jsr $4C52    ; $21EE
+                jsr SetGap    ; $21EE
                 lda #$01    ; $21F1
                 rts    ; $21F3
                 inc $00    ; $21F4
                 bne $21FA    ; $21F6
                 inc $01    ; $21F8
-                jsr $2182    ; $21FA
+                jsr Bottom?    ; $21FA
                 beq $21E6    ; $21FD
                 jsr $D000    ; $21FF
-                jsr $37A7    ; $2202
+                jsr WhiteSpace?    ; $2202
                 beq $21F4    ; $2205
                 inc $00    ; $2207
                 bne $220D    ; $2209
                 inc $01    ; $220B
-                jsr $2182    ; $220D
+                jsr Bottom?    ; $220D
                 beq $21E6    ; $2210
                 jsr $D000    ; $2212
                 cmp #$8D    ; $2215
@@ -2163,44 +3136,46 @@
                 inc $00    ; $2219
                 bne $221F    ; $221B
                 inc $01    ; $221D
-                jsr $2182    ; $221F
+                jsr Bottom?    ; $221F
                 beq $21E6    ; $2222
                 jsr $D000    ; $2224
                 cmp #$8D    ; $2227
                 bne $2207    ; $2229
-                lda $7A5B    ; $222B
+                lda Argument    ; $222B
                 bne $2233    ; $222E
                 dec $7A5C    ; $2230
-                dec $7A5B    ; $2233
+                dec Argument    ; $2233
                 jmp $21E1    ; $2236
-                jsr $7A60    ; $2239
-                bmi $21CF    ; $223C
-                jsr $4C52    ; $223E
-                lda $60    ; $2241
+;
+; === UpPara ===
+                jsr GetArgSign    ; $2239
+                bmi DownPara    ; $223C
+                jsr SetGap    ; $223E
+                lda TheBuffer    ; $2241
                 sta $00    ; $2243
                 lda $61    ; $2245
                 sta $01    ; $2247
                 ldy #$00    ; $2249
-                jsr $7AF6    ; $224B
+                jsr ZeroArg?    ; $224B
                 bne $225E    ; $224E
                 lda $00    ; $2250
-                sta $60    ; $2252
+                sta TheBuffer    ; $2252
                 lda $01    ; $2254
                 sta $61    ; $2256
-                jsr $4C52    ; $2258
+                jsr SetGap    ; $2258
                 lda #$01    ; $225B
                 rts    ; $225D
-                jsr $218D    ; $225E
+                jsr Top?    ; $225E
                 beq $2250    ; $2261
                 jsr $D000    ; $2263
-                jsr $37A7    ; $2266
+                jsr WhiteSpace?    ; $2266
                 bne $2276    ; $2269
                 lda $00    ; $226B
                 bne $2271    ; $226D
                 dec $01    ; $226F
                 dec $00    ; $2271
                 jmp $225E    ; $2273
-                jsr $218D    ; $2276
+                jsr Top?    ; $2276
                 beq $2250    ; $2279
                 jsr $D000    ; $227B
                 cmp #$8D    ; $227E
@@ -2209,7 +3184,7 @@
                 bne $2288    ; $2284
                 dec $01    ; $2286
                 dec $00    ; $2288
-                jsr $218D    ; $228A
+                jsr Top?    ; $228A
                 beq $2250    ; $228D
                 jsr $D000    ; $228F
                 cmp #$8D    ; $2292
@@ -2222,48 +3197,54 @@
                 inc $00    ; $22A1
                 bne $22A7    ; $22A3
                 inc $01    ; $22A5
-                lda $7A5B    ; $22A7
+                lda Argument    ; $22A7
                 bne $22AF    ; $22AA
                 dec $7A5C    ; $22AC
-                dec $7A5B    ; $22AF
+                dec Argument    ; $22AF
                 jmp $224B    ; $22B2
-                jsr $7A6B    ; $22B5
-                jsr $21CF    ; $22B8
-                jsr $4C52    ; $22BB
-                jsr $4CFB    ; $22BE
-                jsr $7A6B    ; $22C1
-                jmp $2239    ; $22C4
+;
+; === MarkPara ===
+                jsr InitArgument    ; $22B5
+                jsr DownPara    ; $22B8
+                jsr SetGap    ; $22BB
+                jsr PushMark    ; $22BE
+                jsr InitArgument    ; $22C1
+                jmp UpPara    ; $22C4
+;
+; === FillPara ===
                 lda $7A5C    ; $22C7
                 pha    ; $22CA
-                lda $7A5B    ; $22CB
+                lda Argument    ; $22CB
                 pha    ; $22CE
-                jsr $22B5    ; $22CF
+                jsr MarkPara    ; $22CF
                 pla    ; $22D2
-                sta $7A5B    ; $22D3
+                sta Argument    ; $22D3
                 pla    ; $22D6
                 sta $7A5C    ; $22D7
-                jmp $8E0A    ; $22DA
-                jsr $7A60    ; $22DD
-                bmi $234C    ; $22E0
-                jsr $4C52    ; $22E2
-                lda $6C    ; $22E5
+                jmp FillRegion    ; $22DA
+;
+; === NextLabel ===
+                jsr GetArgSign    ; $22DD
+                bmi PrevLabel    ; $22E0
+                jsr SetGap    ; $22E2
+                lda GapBot    ; $22E5
                 sta $00    ; $22E7
                 lda $6D    ; $22E9
                 sta $01    ; $22EB
                 ldy #$00    ; $22ED
-                jsr $7AF6    ; $22EF
+                jsr ZeroArg?    ; $22EF
                 bne $2302    ; $22F2
                 lda $00    ; $22F4
-                sta $60    ; $22F6
+                sta TheBuffer    ; $22F6
                 lda $01    ; $22F8
                 sta $61    ; $22FA
-                jsr $4C52    ; $22FC
+                jsr SetGap    ; $22FC
                 lda #$01    ; $22FF
                 rts    ; $2301
                 inc $00    ; $2302
                 bne $2308    ; $2304
                 inc $01    ; $2306
-                jsr $2182    ; $2308
+                jsr Bottom?    ; $2308
                 beq $22F4    ; $230B
                 jsr $D000    ; $230D
                 cmp #$8D    ; $2310
@@ -2271,36 +3252,38 @@
                 inc $00    ; $2314
                 bne $231A    ; $2316
                 inc $01    ; $2318
-                jsr $2182    ; $231A
+                jsr Bottom?    ; $231A
                 beq $22F4    ; $231D
                 jsr $D000    ; $231F
                 cmp #$8D    ; $2322
                 beq $2314    ; $2324
-                jsr $219E    ; $2326
+                jsr LabelChar?    ; $2326
                 bne $2302    ; $2329
                 inc $00    ; $232B
                 bne $2331    ; $232D
                 inc $01    ; $232F
-                jsr $2182    ; $2331
+                jsr Bottom?    ; $2331
                 beq $22F4    ; $2334
                 jsr $D000    ; $2336
-                jsr $37A7    ; $2339
+                jsr WhiteSpace?    ; $2339
                 bne $232B    ; $233C
-                lda $7A5B    ; $233E
+                lda Argument    ; $233E
                 bne $2346    ; $2341
                 dec $7A5C    ; $2343
-                dec $7A5B    ; $2346
+                dec Argument    ; $2346
                 jmp $22EF    ; $2349
-                jsr $7A60    ; $234C
-                bmi $22DD    ; $234F
-                jsr $4C52    ; $2351
+;
+; === PrevLabel ===
+                jsr GetArgSign    ; $234C
+                bmi NextLabel    ; $234F
+                jsr SetGap    ; $2351
                 lda $61    ; $2354
                 pha    ; $2356
-                lda $60    ; $2357
+                lda TheBuffer    ; $2357
                 pha    ; $2359
-                jsr $34BA    ; $235A
-                jsr $4C52    ; $235D
-                lda $60    ; $2360
+                jsr EndOfLine    ; $235A
+                jsr SetGap    ; $235D
+                lda TheBuffer    ; $2360
                 sta $00    ; $2362
                 lda $61    ; $2364
                 sta $01    ; $2366
@@ -2311,18 +3294,18 @@
                 sta $01    ; $236F
                 sta $2429    ; $2371
                 ldy #$00    ; $2374
-                jsr $7AF6    ; $2376
+                jsr ZeroArg?    ; $2376
                 bne $2389    ; $2379
                 lda $00    ; $237B
-                sta $60    ; $237D
+                sta TheBuffer    ; $237D
                 lda $01    ; $237F
                 sta $61    ; $2381
-                jsr $4C52    ; $2383
+                jsr SetGap    ; $2383
                 lda #$01    ; $2386
                 rts    ; $2388
                 bit $23EF    ; $2389
                 bmi $23A2    ; $238C
-                jsr $218D    ; $238E
+                jsr Top?    ; $238E
                 beq $237B    ; $2391
                 lda $00    ; $2393
                 bne $2399    ; $2395
@@ -2331,7 +3314,7 @@
                 jsr $D000    ; $239B
                 cmp #$8D    ; $239E
                 bne $238E    ; $23A0
-                jsr $218D    ; $23A2
+                jsr Top?    ; $23A2
                 beq $237B    ; $23A5
                 lda $00    ; $23A7
                 bne $23AD    ; $23A9
@@ -2344,7 +3327,7 @@
                 bne $23BC    ; $23B8
                 inc $01    ; $23BA
                 jsr $D000    ; $23BC
-                jsr $219E    ; $23BF
+                jsr LabelChar?    ; $23BF
                 bne $238E    ; $23C2
                 lda $00    ; $23C4
                 sta $2428    ; $23C6
@@ -2356,45 +3339,53 @@
                 bne $23D9    ; $23D5
                 inc $01    ; $23D7
                 jsr $D000    ; $23D9
-                jsr $37A7    ; $23DC
+                jsr WhiteSpace?    ; $23DC
                 bne $23D3    ; $23DF
-                lda $7A5B    ; $23E1
+                lda Argument    ; $23E1
                 bne $23E9    ; $23E4
                 dec $7A5C    ; $23E6
-                dec $7A5B    ; $23E9
+                dec Argument    ; $23E9
                 jmp $2376    ; $23EC
                 brk    ; $23EF
-                jsr $4C52    ; $23F0
-                jsr $7A6B    ; $23F3
-                jsr $4CFB    ; $23F6
+;
+; === RepoWind ===
+                jsr SetGap    ; $23F0
+                jsr InitArgument    ; $23F3
+                jsr PushMark    ; $23F6
                 dec $23EF    ; $23F9
-                jsr $234C    ; $23FC
+                jsr PrevLabel    ; $23FC
                 inc $23EF    ; $23FF
                 lda $2428    ; $2402
-                sta $62    ; $2405
+                sta PageTop    ; $2405
                 lda $2429    ; $2407
                 sta $63    ; $240A
-                jsr $4DCD    ; $240C
-                jsr $4C52    ; $240F
-                jsr $2D88    ; $2412
+                jsr SwapPointMark    ; $240C
+                jsr SetGap    ; $240F
+                jsr FindPoint    ; $2412
                 beq $2422    ; $2415
-                lda $23    ; $2417
+                lda WindowBot    ; $2417
                 sec    ; $2419
                 sbc #$01    ; $241A
-                sta $31F6    ; $241C
-                jmp $320D    ; $241F
-                jsr $300C    ; $2422
+                sta CenterPoint    ; $241C
+                jmp CenterPage1    ; $241F
+                jsr DisplayPage    ; $2422
                 lda #$01    ; $2425
                 rts    ; $2427
                 brk    ; $2428
                 brk    ; $2429
                 brk    ; $242A
+;
+; === XorASCII ===
                 dec $242A    ; $242B
-                bmi $2438    ; $242E
-                lda $7A5E    ; $2430
+                bmi ASCIIBuff    ; $242E
+;
+; === ASCIIBuff1 ===
+                lda ArgSign    ; $2430
                 eor #$FF    ; $2433
-                sta $7A5E    ; $2435
-                lda $66    ; $2438
+                sta ArgSign    ; $2435
+;
+; === ASCIIBuff ===
+                lda BuffTop    ; $2438
                 sta $00    ; $243A
                 lda $67    ; $243C
                 sta $01    ; $243E
@@ -2404,10 +3395,10 @@
                 bcc $2482    ; $2446
                 bne $2460    ; $2448
                 lda $00    ; $244A
-                cmp $6A    ; $244C
+                cmp GapTop    ; $244C
                 bcc $2482    ; $244E
                 bne $2460    ; $2450
-                lda $6C    ; $2452
+                lda GapBot    ; $2452
                 sta $00    ; $2454
                 lda $6D    ; $2456
                 sta $01    ; $2458
@@ -2415,19 +3406,19 @@
                 bne $2460    ; $245C
                 inc $01    ; $245E
                 lda $00    ; $2460
-                cmp $68    ; $2462
+                cmp BuffBot    ; $2462
                 bne $2482    ; $2464
                 lda $01    ; $2466
                 cmp $69    ; $2468
                 bne $2482    ; $246A
                 lda #$00    ; $246C
                 sta $242A    ; $246E
-                jsr $4C3C    ; $2471
-                jsr $2D88    ; $2474
+                jsr SetModified    ; $2471
+                jsr FindPoint    ; $2474
                 beq $247C    ; $2477
                 lda #$06    ; $2479
                 rts    ; $247B
-                jsr $300C    ; $247C
+                jsr DisplayPage    ; $247C
                 lda #$01    ; $247F
                 rts    ; $2481
                 jsr $D000    ; $2482
@@ -2435,7 +3426,7 @@
                 bpl $248F    ; $2488
                 eor #$80    ; $248A
                 jmp $249A    ; $248C
-                bit $7A5E    ; $248F
+                bit ArgSign    ; $248F
                 bmi $2498    ; $2492
                 ora #$80    ; $2494
                 bmi $249A    ; $2496
@@ -2445,23 +3436,27 @@
                 bne $24A3    ; $249F
                 inc $01    ; $24A1
                 bne $2442    ; $24A3
+;
+; === IndentVbtm ===
         dfb $FF        ; $24A5  (data/65C02-bit)
+;
+; === IndentLine ===
                 sta $2522    ; $24A6
-                jsr $4C52    ; $24A9
-                jsr $3191    ; $24AC
+                jsr SetGap    ; $24A9
+                jsr LinesPastPnt    ; $24AC
                 sta $2524    ; $24AF
-                jsr $34A6    ; $24B2
-                jsr $393C    ; $24B5
+                jsr BegOfLine    ; $24B2
+                jsr DeleteSpace    ; $24B5
                 lda #$00    ; $24B8
                 sta $2523    ; $24BA
                 ldy #$01    ; $24BD
                 jsr $D03F    ; $24BF
                 cmp #$8D    ; $24C2
                 bne $24CB    ; $24C4
-                bit $24A5    ; $24C6
+                bit IndentVbtm    ; $24C6
                 bpl $2507    ; $24C9
                 lda $2523    ; $24CB
-                jsr $2691    ; $24CE
+                jsr TabBump    ; $24CE
                 sta $2525    ; $24D1
                 cmp $2522    ; $24D4
                 bcc $24EC    ; $24D7
@@ -2477,21 +3472,21 @@
                 lda $2525    ; $24EC
                 sec    ; $24EF
                 sbc $2523    ; $24F0
-                bit $1B9C    ; $24F3
+                bit TabsIndent    ; $24F3
                 bpl $24E6    ; $24F6
                 ldx #$89    ; $24F8
                 clc    ; $24FA
                 adc $2523    ; $24FB
                 sta $2523    ; $24FE
                 txa    ; $2501
-                jsr $4B84    ; $2502
+                jsr BuffInsert    ; $2502
                 beq $24CB    ; $2505
-                jsr $2D88    ; $2507
+                jsr FindPoint    ; $2507
                 beq $250F    ; $250A
                 lda #$06    ; $250C
                 rts    ; $250E
-                jsr $3147    ; $250F
-                jsr $3191    ; $2512
+                jsr DisplayLine    ; $250F
+                jsr LinesPastPnt    ; $2512
                 tax    ; $2515
                 lda #$00    ; $2516
                 cpx $2524    ; $2518
@@ -2504,64 +3499,74 @@
                 brk    ; $2523
                 brk    ; $2524
                 brk    ; $2525
-                jsr $34A6    ; $2526
+;
+; === BackToIndent ===
+                jsr BegOfLine    ; $2526
                 ldy #$00    ; $2529
-                sty $24    ; $252B
+                sty CH    ; $252B
                 jsr $D01B    ; $252D
                 cmp #$89    ; $2530
                 beq $2538    ; $2532
                 cmp #$A0    ; $2534
                 bne $2543    ; $2536
-                jsr $2DE0    ; $2538
-                jsr $2E13    ; $253B
-                jsr $7C68    ; $253E
+                jsr GetXCharLen    ; $2538
+                jsr BumpXPos    ; $253B
+                jsr PointForward    ; $253E
                 beq $252D    ; $2541
-                ldy $24    ; $2543
+                ldy CH    ; $2543
                 lda #$01    ; $2545
                 rts    ; $2547
-                jsr $254F    ; $2548
-                jsr $24A6    ; $254B
+;
+; === PrevIndent ===
+                jsr GetPrevIndent    ; $2548
+                jsr IndentLine    ; $254B
                 rts    ; $254E
-                lda $25    ; $254F
+;
+; === GetPrevIndent ===
+                lda CV    ; $254F
                 pha    ; $2551
-                lda $24    ; $2552
+                lda CH    ; $2552
                 pha    ; $2554
                 lda $61    ; $2555
                 pha    ; $2557
-                lda $60    ; $2558
+                lda TheBuffer    ; $2558
                 pha    ; $255A
-                jsr $34A6    ; $255B
-                jsr $7CCD    ; $255E
-                jsr $2526    ; $2561
+                jsr BegOfLine    ; $255B
+                jsr PointBackward    ; $255E
+                jsr BackToIndent    ; $2561
                 pla    ; $2564
-                sta $60    ; $2565
+                sta TheBuffer    ; $2565
                 pla    ; $2567
                 sta $61    ; $2568
                 pla    ; $256A
-                sta $24    ; $256B
+                sta CH    ; $256B
                 pla    ; $256D
-                sta $25    ; $256E
+                sta CV    ; $256E
                 tya    ; $2570
                 rts    ; $2571
-                jsr $1826    ; $2572
-                jsr $3238    ; $2575
+;
+; === OutdentCRLF ===
+                jsr CRLF    ; $2572
+                jsr GenDisplay    ; $2575
+;
+; === OutdentLine ===
                 lda #$00    ; $2578
                 sta $2600    ; $257A
-                lda $25    ; $257D
+                lda CV    ; $257D
                 pha    ; $257F
-                lda $24    ; $2580
+                lda CH    ; $2580
                 pha    ; $2582
                 lda $61    ; $2583
                 pha    ; $2585
-                lda $60    ; $2586
+                lda TheBuffer    ; $2586
                 pha    ; $2588
-                jsr $34A6    ; $2589
-                jsr $7CCD    ; $258C
-                lda $60    ; $258F
+                jsr BegOfLine    ; $2589
+                jsr PointBackward    ; $258C
+                lda TheBuffer    ; $258F
                 sta $2601    ; $2591
                 lda $61    ; $2594
                 sta $2602    ; $2596
-                jsr $2526    ; $2599
+                jsr BackToIndent    ; $2599
                 tya    ; $259C
                 sta $2603    ; $259D
                 bne $25BA    ; $25A0
@@ -2569,25 +3574,25 @@
                 cmp #$8D    ; $25A5
                 bne $25ED    ; $25A7
                 lda $2601    ; $25A9
-                cmp $66    ; $25AC
+                cmp BuffTop    ; $25AC
                 bne $2589    ; $25AE
                 lda $2602    ; $25B0
                 cmp $67    ; $25B3
                 bne $2589    ; $25B5
                 jmp $25ED    ; $25B7
                 lda $2601    ; $25BA
-                cmp $66    ; $25BD
+                cmp BuffTop    ; $25BD
                 bne $25C8    ; $25BF
                 lda $2602    ; $25C1
                 cmp $67    ; $25C4
                 beq $25ED    ; $25C6
-                jsr $34A6    ; $25C8
-                jsr $7CCD    ; $25CB
-                lda $60    ; $25CE
+                jsr BegOfLine    ; $25C8
+                jsr PointBackward    ; $25CB
+                lda TheBuffer    ; $25CE
                 sta $2601    ; $25D0
                 lda $61    ; $25D3
                 sta $2602    ; $25D5
-                jsr $2526    ; $25D8
+                jsr BackToIndent    ; $25D8
                 tya    ; $25DB
                 bne $25E5    ; $25DC
                 jsr $D01B    ; $25DE
@@ -2597,28 +3602,38 @@
                 bcs $25BA    ; $25E8
                 sty $2600    ; $25EA
                 pla    ; $25ED
-                sta $60    ; $25EE
+                sta TheBuffer    ; $25EE
                 pla    ; $25F0
                 sta $61    ; $25F1
                 pla    ; $25F3
-                sta $24    ; $25F4
+                sta CH    ; $25F4
                 pla    ; $25F6
-                sta $25    ; $25F7
+                sta CV    ; $25F7
                 lda $2600    ; $25F9
-                jsr $24A6    ; $25FC
+                jsr IndentLine    ; $25FC
                 rts    ; $25FF
                 brk    ; $2600
                 brk    ; $2601
                 brk    ; $2602
                 brk    ; $2603
+;
+; === AltmodeChar ===
                 ldy $00    ; $2604
+;
+; === CoutDef ===
                 trb $26    ; $2606
-                stx $24    ; $2608
-                sty $25    ; $260A
+;
+; === CharOutXY ===
+                stx CH    ; $2608
+                sty CV    ; $260A
                 pha    ; $260C
-                jsr $26E9    ; $260D
+                jsr vtab    ; $260D
                 pla    ; $2610
-                jmp ($2606)    ; $2611
+;
+; === CharOut ===
+                jmp (CoutDef)    ; $2611
+;
+; === SI:CharOut ===
                 sty $2677    ; $2614
                 stx $2676    ; $2617
                 sta $2675    ; $261A
@@ -2630,15 +3645,15 @@
                 bcs $2656    ; $2627
                 cmp #$9B    ; $2629
                 bne $2632    ; $262B
-                lda $2604    ; $262D
+                lda AltmodeChar    ; $262D
                 bne $2656    ; $2630
                 cmp #$8D    ; $2632
                 bne $263C    ; $2634
-                jsr $2679    ; $2636
+                jsr PrintCR    ; $2636
                 jmp $2666    ; $2639
                 cmp #$89    ; $263C
                 bne $2646    ; $263E
-                jsr $26CF    ; $2640
+                jsr PrintTab    ; $2640
                 jmp $2666    ; $2643
                 lda #$DE    ; $2646
                 jsr $2656    ; $2648
@@ -2648,13 +3663,13 @@
                 sbc #$20    ; $2651
                 clc    ; $2653
                 adc #$40    ; $2654
-                ldy $24    ; $2656
-                jsr $2703    ; $2658
-                inc $24    ; $265B
-                lda $24    ; $265D
-                cmp $21    ; $265F
+                ldy CH    ; $2656
+                jsr StoreChar    ; $2658
+                inc CH    ; $265B
+                lda CH    ; $265D
+                cmp WindowRgt    ; $265F
                 bcc $2666    ; $2661
-                jsr $267C    ; $2663
+                jsr PrintCR1    ; $2663
                 lda $2678    ; $2666
                 pha    ; $2669
                 ldx $2676    ; $266A
@@ -2666,19 +3681,27 @@
                 brk    ; $2676
                 brk    ; $2677
                 brk    ; $2678
-                jsr $2862    ; $2679
-                lda $20    ; $267C
-                sta $24    ; $267E
-                inc $25    ; $2680
-                lda $25    ; $2682
-                cmp $23    ; $2684
+;
+; === PrintCR ===
+                jsr ClearEOL    ; $2679
+;
+; === PrintCR1 ===
+                lda WindowLft    ; $267C
+                sta CH    ; $267E
+                inc CV    ; $2680
+                lda CV    ; $2682
+                cmp WindowBot    ; $2684
                 bcc $268C    ; $2686
-                lda $22    ; $2688
-                sta $25    ; $268A
-                jsr $26EB    ; $268C
+                lda WindowTop    ; $2688
+                sta CV    ; $268A
+                jsr vtab1    ; $268C
                 rts    ; $268F
+;
+; === UseTabTable? ===
         dfb $FF        ; $2690  (data/65C02-bit)
-                bit $2690    ; $2691
+;
+; === TabBump ===
+                bit UseTabTable?    ; $2691
                 bmi $269C    ; $2694
                 clc    ; $2696
                 adc #$08    ; $2697
@@ -2699,9 +3722,9 @@
                 bcs $26AA    ; $26AE
                 pha    ; $26B0
                 iny    ; $26B1
-                and $26C5,x    ; $26B2
+                and TabTable,x    ; $26B2
                 bne $26BA    ; $26B5
-                cpy $21    ; $26B7
+                cpy WindowRgt    ; $26B7
                 bit $BAC4    ; $26B9
                 pla    ; $26BC
                 bcc $26AA    ; $26BD
@@ -2709,119 +3732,147 @@
                 ldx $B9    ; $26C0
                 ldy $B8    ; $26C2
                 rts    ; $26C4
+;
+; === TabTable ===
                 brk    ; $26C5
                 bra $2648    ; $26C6
                 bra $264A    ; $26C8
                 bra $264C    ; $26CA
                 bra $264E    ; $26CC
                 bra $2675    ; $26CE
-                bit $20    ; $26D0
+                bit WindowLft    ; $26D0
                 sta ($26),y    ; $26D2
-                cmp $21    ; $26D4
+                cmp WindowRgt    ; $26D4
                 bcc $26DA    ; $26D6
-                lda $20    ; $26D8
-                cmp $24    ; $26DA
+                lda WindowLft    ; $26D8
+                cmp CH    ; $26DA
                 beq $26E8    ; $26DC
                 pha    ; $26DE
                 lda #$A0    ; $26DF
-                jsr $2611    ; $26E1
+                jsr CharOut    ; $26E1
                 pla    ; $26E4
                 jmp $26DA    ; $26E5
                 rts    ; $26E8
-                lda $25    ; $26E9
+;
+; === vtab ===
+                lda CV    ; $26E9
+;
+; === vtab1 ===
                 pha    ; $26EB
                 lsr    ; $26EC
                 and #$03    ; $26ED
                 ora #$04    ; $26EF
-                sta $29    ; $26F1
+                sta BASH    ; $26F1
                 pla    ; $26F3
                 and #$18    ; $26F4
                 bcc $26FA    ; $26F6
                 adc #$7F    ; $26F8
-                sta $28    ; $26FA
+                sta BASL    ; $26FA
                 asl    ; $26FC
                 asl    ; $26FD
-                ora $28    ; $26FE
-                sta $28    ; $2700
+                ora BASL    ; $26FE
+                sta BASL    ; $2700
                 rts    ; $2702
-                sty $1F    ; $2703
+;
+; === StoreChar ===
+                sty scrny    ; $2703
                 pha    ; $2705
                 tya    ; $2706
                 lsr    ; $2707
                 tay    ; $2708
                 pla    ; $2709
-                sta $C055    ; $270A
+                sta Page2    ; $270A
                 bcc $2712    ; $270D
-                sta $C054    ; $270F
-                sta ($28),y    ; $2712
-                sta $C054    ; $2714
-                ldy $1F    ; $2717
+                sta Page1    ; $270F
+                sta (BASL),y    ; $2712
+                sta Page1    ; $2714
+                ldy scrny    ; $2717
                 rts    ; $2719
-                sty $1F    ; $271A
+;
+; === PickChar ===
+                sty scrny    ; $271A
                 tya    ; $271C
                 lsr    ; $271D
                 tay    ; $271E
-                sta $C055    ; $271F
+                sta Page2    ; $271F
                 bcc $2727    ; $2722
-                sta $C054    ; $2724
-                lda ($28),y    ; $2727
-                ldy $1F    ; $2729
-                sta $C054    ; $272B
+                sta Page1    ; $2724
+                lda (BASL),y    ; $2727
+                ldy scrny    ; $2729
+                sta Page1    ; $272B
                 rts    ; $272E
-                lda $C000    ; $272F
+;
+; === KeyDownp ===
+                lda HardKey    ; $272F
                 bpl $2737    ; $2732
                 lda #$00    ; $2734
                 rts    ; $2736
                 lda #$FF    ; $2737
                 rts    ; $2739
-                jsr $27F1    ; $273A
+;
+; === KeyAvail? ===
+                jsr AnyTYI?    ; $273A
                 beq $274F    ; $273D
-                bit $8AA5    ; $273F
+                bit MacroExec    ; $273F
                 bpl $274C    ; $2742
-                jsr $8B67    ; $2744
-                jsr $27F1    ; $2747
+                jsr KeyFromMac    ; $2744
+                jsr AnyTYI?    ; $2747
                 beq $274F    ; $274A
-                jsr $272F    ; $274C
+                jsr KeyDownp    ; $274C
                 rts    ; $274F
-                jsr $2843    ; $2750
-                jsr $2824    ; $2753
-                jsr $8B20    ; $2756
+;
+; === GetKey ===
+                jsr GatherTYI    ; $2750
+                jsr PopTYI    ; $2753
+                jsr KeyToMac    ; $2756
                 rts    ; $2759
+;
+; === KeyClickp ===
                 brk    ; $275A
+;
+; === KeyClickVol ===
         dfb $03        ; $275B  (data/65C02-bit)
+;
+; === IIgsMode? ===
                 brk    ; $275C
+;
+; === KeyModState ===
                 brk    ; $275D
-                jsr $272F    ; $275E
-                bne $275E    ; $2761
-                lda $C061    ; $2763
-                ora $C062    ; $2766
+;
+; === GetKeyPress ===
+                jsr KeyDownp    ; $275E
+                bne GetKeyPress    ; $2761
+                lda HardMeta    ; $2763
+                ora HardHyper    ; $2766
                 and #$80    ; $2769
-                eor $C000    ; $276B
+                eor HardKey    ; $276B
                 pha    ; $276E
-                lda $C025    ; $276F
-                sta $275D    ; $2772
+                lda HardModState    ; $276F
+                sta KeyModState    ; $2772
                 pla    ; $2775
-                sta $C010    ; $2776
+                sta HardKeyReset    ; $2776
                 bmi $2785    ; $2779
                 cmp #$61    ; $277B
                 bcc $2785    ; $277D
                 cmp #$7B    ; $277F
                 bcs $2785    ; $2781
                 sbc #$1F    ; $2783
-                bit $275C    ; $2785
+                bit IIgsMode?    ; $2785
                 bpl $2799    ; $2788
-                sta $C009    ; $278A
-                jsr $3F09    ; $278D
-                jsr $D10D    ; $2790
-                sta $C008    ; $2793
-                jsr $3F10    ; $2796
-                bit $275A    ; $2799
+                sta UseAuxZP    ; $278A
+                jsr GetBank1    ; $278D
+                jsr CheckArrowKey    ; $2790
+                sta UseMainZP    ; $2793
+                jsr GetBank2    ; $2796
+                bit KeyClickp    ; $2799
                 bpl $27A6    ; $279C
                 pha    ; $279E
-                lda $275B    ; $279F
-                jsr $29BE    ; $27A2
+                lda KeyClickVol    ; $279F
+                jsr Click    ; $27A2
                 pla    ; $27A5
                 rts    ; $27A6
+;
+; === TYIBuff ===
                 brk    ; $27A7
                 brk    ; $27A8
                 brk    ; $27A9
@@ -2886,180 +3937,224 @@
                 brk    ; $27E4
                 brk    ; $27E5
                 brk    ; $27E6
+;
+; === TYI_PopIndex ===
                 brk    ; $27E7
+;
+; === TYI_PushIndex ===
                 brk    ; $27E8
                 brk    ; $27E9
-                lda $27E7    ; $27EA
-                sta $27E8    ; $27ED
+;
+; === KillTYI ===
+                lda TYI_PopIndex    ; $27EA
+                sta TYI_PushIndex    ; $27ED
                 rts    ; $27F0
-                lda $27E7    ; $27F1
-                cmp $27E8    ; $27F4
+;
+; === AnyTYI? ===
+                lda TYI_PopIndex    ; $27F1
+                cmp TYI_PushIndex    ; $27F4
                 beq $27FC    ; $27F7
                 lda #$00    ; $27F9
                 rts    ; $27FB
                 lda #$FF    ; $27FC
                 rts    ; $27FE
-                dec $27E7    ; $27FF
-                lda $27E7    ; $2802
+;
+; === UnTYI ===
+                dec TYI_PopIndex    ; $27FF
+                lda TYI_PopIndex    ; $2802
                 and #$3F    ; $2805
-                sta $27E7    ; $2807
+                sta TYI_PopIndex    ; $2807
                 rts    ; $280A
+;
+; === PushTYI ===
                 stx $27E9    ; $280B
-                ldx $27E8    ; $280E
-                sta $27A7,x    ; $2811
+                ldx TYI_PushIndex    ; $280E
+                sta TYIBuff,x    ; $2811
                 inx    ; $2814
                 txa    ; $2815
                 and #$3F    ; $2816
-                cmp $27E7    ; $2818
+                cmp TYI_PopIndex    ; $2818
                 beq $2820    ; $281B
-                sta $27E8    ; $281D
+                sta TYI_PushIndex    ; $281D
                 ldx $27E9    ; $2820
                 rts    ; $2823
-                jsr $27F1    ; $2824
+;
+; === PopTYI   (also TYI) ===
+                jsr AnyTYI?    ; $2824
                 bne $2842    ; $2827
                 stx $27E9    ; $2829
-                ldx $27E7    ; $282C
-                lda $27A7,x    ; $282F
+                ldx TYI_PopIndex    ; $282C
+                lda TYIBuff,x    ; $282F
                 pha    ; $2832
                 inx    ; $2833
                 txa    ; $2834
                 and #$3F    ; $2835
-                sta $27E7    ; $2837
+                sta TYI_PopIndex    ; $2837
                 pla    ; $283A
                 ldx #$00    ; $283B
                 php    ; $283D
                 ldx $27E9    ; $283E
                 plp    ; $2841
                 rts    ; $2842
-                jsr $272F    ; $2843
+;
+; === GatherTYI ===
+                jsr KeyDownp    ; $2843
                 bne $2861    ; $2846
-                jsr $275E    ; $2848
+                jsr GetKeyPress    ; $2848
                 cmp #$87    ; $284B
                 bne $2856    ; $284D
-                jsr $27EA    ; $284F
+                jsr KillTYI    ; $284F
                 lda #$87    ; $2852
                 bne $285C    ; $2854
-                bit $8AA5    ; $2856
+                bit MacroExec    ; $2856
                 bpl $285C    ; $2859
                 rts    ; $285B
-                jsr $280B    ; $285C
+                jsr PushTYI    ; $285C
                 lda #$00    ; $285F
                 rts    ; $2861
+;
+; === ClearEOL ===
                 lda #$A0    ; $2862
-                ldy $24    ; $2864
-                cpy $21    ; $2866
+;
+; === ClearEOL1 ===
+                ldy CH    ; $2864
+                cpy WindowRgt    ; $2866
                 bcs $2870    ; $2868
-                jsr $2703    ; $286A
+                jsr StoreChar    ; $286A
                 iny    ; $286D
                 bne $2866    ; $286E
                 rts    ; $2870
-                jsr $289E    ; $2871
+;
+; === ClearPage ===
+                jsr Home    ; $2871
+;
+; === ClearEOP ===
                 lda #$A0    ; $2874
+;
+; === ClearEOP1 ===
                 sta $289D    ; $2876
-                lda $25    ; $2879
+                lda CV    ; $2879
                 pha    ; $287B
-                lda $24    ; $287C
+                lda CH    ; $287C
                 pha    ; $287E
                 lda $289D    ; $287F
-                jsr $2864    ; $2882
+                jsr ClearEOL1    ; $2882
                 lda #$00    ; $2885
-                sta $24    ; $2887
-                inc $25    ; $2889
-                jsr $26E9    ; $288B
-                lda $25    ; $288E
-                cmp $23    ; $2890
+                sta CH    ; $2887
+                inc CV    ; $2889
+                jsr vtab    ; $288B
+                lda CV    ; $288E
+                cmp WindowBot    ; $2890
                 bcc $287F    ; $2892
                 pla    ; $2894
-                sta $24    ; $2895
+                sta CH    ; $2895
                 pla    ; $2897
-                sta $25    ; $2898
-                jmp $26E9    ; $289A
+                sta CV    ; $2898
+                jmp vtab    ; $289A
                 brk    ; $289D
-                lda $22    ; $289E
-                sta $25    ; $28A0
-                lda $20    ; $28A2
-                sta $24    ; $28A4
-                jmp $26E9    ; $28A6
+;
+; === Home ===
+                lda WindowTop    ; $289E
+                sta CV    ; $28A0
+                lda WindowLft    ; $28A2
+                sta CH    ; $28A4
+                jmp vtab    ; $28A6
+;
+; === ResetTTY ===
                 jsr $C300    ; $28A9
                 lda #$14    ; $28AC
-                sta $2606    ; $28AE
+                sta CoutDef    ; $28AE
                 lda #$26    ; $28B1
                 sta $2607    ; $28B3
                 rts    ; $28B6
+;
+; === Cursor2 ===
                 brk    ; $28B7
                 brk    ; $28B8
+;
+; === BlinkTime ===
                 brk    ; $28B9
                 brk    ; $28BA
-                lda $25    ; $28BB
+;
+; === TimedBlink ===
+                lda CV    ; $28BB
                 pha    ; $28BD
-                lda $24    ; $28BE
+                lda CH    ; $28BE
                 pha    ; $28C0
-                lda $28B7    ; $28C1
-                sta $24    ; $28C4
+                lda Cursor2    ; $28C1
+                sta CH    ; $28C4
                 lda $28B8    ; $28C6
-                sta $25    ; $28C9
-                jsr $26E9    ; $28CB
-                lda $2945    ; $28CE
+                sta CV    ; $28C9
+                jsr vtab    ; $28CB
+                lda BlinkRate    ; $28CE
                 beq $28D8    ; $28D1
                 sec    ; $28D3
                 sbc #$16    ; $28D4
                 bne $28DA    ; $28D6
                 lda #$58    ; $28D8
-                sta $2945    ; $28DA
-                lda $28B9    ; $28DD
+                sta BlinkRate    ; $28DA
+                lda BlinkTime    ; $28DD
                 ora $28BA    ; $28E0
                 beq $28FB    ; $28E3
-                jsr $273A    ; $28E5
+                jsr KeyAvail?    ; $28E5
                 beq $290E    ; $28E8
-                lda $28B9    ; $28EA
+                lda BlinkTime    ; $28EA
                 bne $28F2    ; $28ED
                 dec $28BA    ; $28EF
-                dec $28B9    ; $28F2
-                jsr $2946    ; $28F5
+                dec BlinkTime    ; $28F2
+                jsr BlinkOnce    ; $28F5
                 jmp $28DD    ; $28F8
                 pla    ; $28FB
-                sta $24    ; $28FC
+                sta CH    ; $28FC
                 pla    ; $28FE
-                sta $25    ; $28FF
-                jsr $26E9    ; $2901
-                lda $2945    ; $2904
+                sta CV    ; $28FF
+                jsr vtab    ; $2901
+                lda BlinkRate    ; $2904
                 clc    ; $2907
                 adc #$16    ; $2908
-                sta $2945    ; $290A
+                sta BlinkRate    ; $290A
                 rts    ; $290D
                 pla    ; $290E
-                sta $24    ; $290F
+                sta CH    ; $290F
                 pla    ; $2911
-                sta $25    ; $2912
-                jsr $26E9    ; $2914
-                lda $2945    ; $2917
+                sta CV    ; $2912
+                jsr vtab    ; $2914
+                lda BlinkRate    ; $2917
                 clc    ; $291A
                 adc #$16    ; $291B
-                sta $2945    ; $291D
+                sta BlinkRate    ; $291D
                 lda #$00    ; $2920
-                sta $28B9    ; $2922
+                sta BlinkTime    ; $2922
                 sta $28BA    ; $2925
                 php    ; $2928
-                jsr $2750    ; $2929
+                jsr GetKey    ; $2929
                 plp    ; $292C
                 rts    ; $292D
-                jsr $273A    ; $292E
+;
+; === BlinkCursor ===
+                jsr KeyAvail?    ; $292E
                 beq $2939    ; $2931
-                jsr $2946    ; $2933
-                jmp $292E    ; $2936
-                jmp $2750    ; $2939
-                jsr $28BB    ; $293C
+                jsr BlinkOnce    ; $2933
+                jmp BlinkCursor    ; $2936
+                jmp GetKey    ; $2939
+;
+; === AltBlink ===
+                jsr TimedBlink    ; $293C
                 beq $2944    ; $293F
-                jmp $292E    ; $2941
+                jmp BlinkCursor    ; $2941
                 rts    ; $2944
+;
+; === BlinkRate ===
                 cli    ; $2945
+;
+; === BlinkOnce ===
                 jsr $29DA    ; $2946
                 jsr $29FF    ; $2949
-                jsr $2992    ; $294C
-                lda $2945    ; $294F
+                jsr CursorOff    ; $294C
+                lda BlinkRate    ; $294F
                 pha    ; $2952
                 pha    ; $2953
-                jsr $273A    ; $2954
+                jsr KeyAvail?    ; $2954
                 beq $2984    ; $2957
                 pla    ; $2959
                 sec    ; $295A
@@ -3070,11 +4165,11 @@
                 sbc #$01    ; $2961
                 bne $2952    ; $2963
                 jsr $2A03    ; $2965
-                jsr $2992    ; $2968
-                lda $2945    ; $296B
+                jsr CursorOff    ; $2968
+                lda BlinkRate    ; $296B
                 pha    ; $296E
                 pha    ; $296F
-                jsr $273A    ; $2970
+                jsr KeyAvail?    ; $2970
                 beq $2987    ; $2973
                 pla    ; $2975
                 sec    ; $2976
@@ -3085,20 +4180,22 @@
                 bne $296E    ; $297E
                 jsr $2A03    ; $2980
                 rts    ; $2983
-                jsr $2992    ; $2984
+                jsr CursorOff    ; $2984
                 jsr $2A03    ; $2987
                 lda #$00    ; $298A
-                sta $29D5    ; $298C
+                sta ParenFlag    ; $298C
                 pla    ; $298F
                 pla    ; $2990
                 rts    ; $2991
+;
+; === CursorOff   (also CursorOn, InvertChar) ===
                 tya    ; $2992
                 pha    ; $2993
-                ldy $24    ; $2994
-                jsr $271A    ; $2996
+                ldy CH    ; $2994
+                jsr PickChar    ; $2996
                 sta $29B6    ; $2999
                 eor #$80    ; $299C
-                bit $2605    ; $299E
+                bit IIcMode?    ; $299E
                 bpl $29B0    ; $29A1
                 cmp #$60    ; $29A3
                 bcs $29B0    ; $29A5
@@ -3106,11 +4203,13 @@
                 bit $29B6    ; $29A9
                 bmi $29B0    ; $29AC
                 ora #$80    ; $29AE
-                jsr $2703    ; $29B0
+                jsr StoreChar    ; $29B0
                 pla    ; $29B3
                 tay    ; $29B4
                 rts    ; $29B5
                 brk    ; $29B6
+;
+; === BeepVector ===
                 and $6C2A,y    ; $29B7
         dfb $B7        ; $29BA  (data/65C02-bit)
                 and #$A9    ; $29BB
@@ -3123,91 +4222,101 @@
                 pla    ; $29C7
                 sbc #$01    ; $29C8
                 bne $29C1    ; $29CA
-                bit $C030    ; $29CC
+                bit HardBeep    ; $29CC
                 pla    ; $29CF
                 sbc #$01    ; $29D0
-                bne $29BE    ; $29D2
+                bne Click    ; $29D2
                 rts    ; $29D4
+;
+; === ParenFlag ===
                 brk    ; $29D5
+;
+; === ParenPos ===
                 brk    ; $29D6
                 brk    ; $29D7
                 brk    ; $29D8
                 brk    ; $29D9
-                bit $29D5    ; $29DA
+                bit ParenFlag    ; $29DA
                 bpl $2A36    ; $29DD
                 tya    ; $29DF
                 pha    ; $29E0
-                lda $25    ; $29E1
+                lda CV    ; $29E1
                 pha    ; $29E3
-                lda $24    ; $29E4
+                lda CH    ; $29E4
                 pha    ; $29E6
-                lda $29D6    ; $29E7
-                sta $24    ; $29EA
+                lda ParenPos    ; $29E7
+                sta CH    ; $29EA
                 lda $29D7    ; $29EC
-                sta $25    ; $29EF
-                jsr $26E9    ; $29F1
-                ldy $24    ; $29F4
-                jsr $271A    ; $29F6
+                sta CV    ; $29EF
+                jsr vtab    ; $29F1
+                ldy CH    ; $29F4
+                jsr PickChar    ; $29F6
                 sta $29D8    ; $29F9
                 jmp $2A2B    ; $29FC
                 lda #$A0    ; $29FF
                 bne $2A06    ; $2A01
                 lda $29D8    ; $2A03
                 sta $29D9    ; $2A06
-                bit $29D5    ; $2A09
+                bit ParenFlag    ; $2A09
                 bpl $2A36    ; $2A0C
                 tya    ; $2A0E
                 pha    ; $2A0F
-                lda $25    ; $2A10
+                lda CV    ; $2A10
                 pha    ; $2A12
-                lda $24    ; $2A13
+                lda CH    ; $2A13
                 pha    ; $2A15
-                lda $29D6    ; $2A16
-                sta $24    ; $2A19
+                lda ParenPos    ; $2A16
+                sta CH    ; $2A19
                 lda $29D7    ; $2A1B
-                sta $25    ; $2A1E
-                jsr $26E9    ; $2A20
-                ldy $24    ; $2A23
+                sta CV    ; $2A1E
+                jsr vtab    ; $2A20
+                ldy CH    ; $2A23
                 lda $29D9    ; $2A25
-                jsr $2703    ; $2A28
+                jsr StoreChar    ; $2A28
                 pla    ; $2A2B
-                sta $24    ; $2A2C
+                sta CH    ; $2A2C
                 pla    ; $2A2E
-                sta $25    ; $2A2F
-                jsr $26E9    ; $2A31
+                sta CV    ; $2A2F
+                jsr vtab    ; $2A31
                 pla    ; $2A34
                 tay    ; $2A35
                 rts    ; $2A36
+;
+; === BeepFlashes? ===
                 brk    ; $2A37
+;
+; === BeepRings? ===
         dfb $FF        ; $2A38  (data/65C02-bit)
-                bit $2A38    ; $2A39
+;
+; === SysBeep ===
+                bit BeepRings?    ; $2A39
                 bpl $2A65    ; $2A3C
-                lda $25    ; $2A3E
+                lda CV    ; $2A3E
                 pha    ; $2A40
-                lda $24    ; $2A41
+                lda CH    ; $2A41
                 pha    ; $2A43
-                bit $2A37    ; $2A44
+                bit BeepFlashes?    ; $2A44
                 bpl $2A4C    ; $2A47
-                jsr $533B    ; $2A49
-                bit $2A38    ; $2A4C
+                jsr InvModeLine    ; $2A49
+                bit BeepRings?    ; $2A4C
                 bpl $2A54    ; $2A4F
-                jsr $29BC    ; $2A51
-                bit $2A37    ; $2A54
+                jsr Bell    ; $2A51
+                bit BeepFlashes?    ; $2A54
                 bpl $2A5C    ; $2A57
-                jsr $533B    ; $2A59
+                jsr InvModeLine    ; $2A59
                 pla    ; $2A5C
-                sta $24    ; $2A5D
+                sta CH    ; $2A5D
                 pla    ; $2A5F
-                sta $25    ; $2A60
-                jmp $26EB    ; $2A62
-                bit $2A37    ; $2A65
+                sta CV    ; $2A60
+                jmp vtab1    ; $2A62
+                bit BeepFlashes?    ; $2A65
                 bmi $2A6B    ; $2A68
                 rts    ; $2A6A
-                lda $25    ; $2A6B
+                lda CV    ; $2A6B
                 pha    ; $2A6D
-                lda $24    ; $2A6E
+                lda CH    ; $2A6E
                 pha    ; $2A70
-                jsr $533B    ; $2A71
+                jsr InvModeLine    ; $2A71
                 lda #$80    ; $2A74
                 pha    ; $2A76
                 lda #$0C    ; $2A77
@@ -3221,99 +4330,125 @@
                 pla    ; $2A84
                 sbc #$01    ; $2A85
                 bne $2A76    ; $2A87
-                jsr $533B    ; $2A89
+                jsr InvModeLine    ; $2A89
                 pla    ; $2A8C
-                sta $24    ; $2A8D
+                sta CH    ; $2A8D
                 pla    ; $2A8F
-                sta $25    ; $2A90
-                jmp $26EB    ; $2A92
+                sta CV    ; $2A90
+                jmp vtab1    ; $2A92
+;
+; === TypeoutOpen ===
                 brk    ; $2A95
+;
+; === TypeoutFlag ===
                 brk    ; $2A96
+;
+; === TypeoutAbort ===
                 ora $2B    ; $2A97
+;
+; === AbortedTO? ===
                 brk    ; $2A99
+;
+; === TOAbortStk ===
                 brk    ; $2A9A
+;
+; === TypeoutMax ===
                 brk    ; $2A9B
                 brk    ; $2A9C
                 brk    ; $2A9D
                 brk    ; $2A9E
+;
+; === TypeoutCH ===
                 brk    ; $2A9F
                 brk    ; $2AA0
-                lda $22    ; $2AA1
+;
+; === InitTypeout ===
+                lda WindowTop    ; $2AA1
                 sta $2AA0    ; $2AA3
-                sta $2A9B    ; $2AA6
-                lda $20    ; $2AA9
-                sta $2A9F    ; $2AAB
+                sta TypeoutMax    ; $2AA6
+                lda WindowLft    ; $2AA9
+                sta TypeoutCH    ; $2AAB
                 lda #$00    ; $2AAE
-                sta $2A99    ; $2AB0
-                sta $2A96    ; $2AB3
-                cmp $2A95    ; $2AB6
+                sta AbortedTO?    ; $2AB0
+                sta TypeoutFlag    ; $2AB3
+                cmp TypeoutOpen    ; $2AB6
                 beq $2ABE    ; $2AB9
-                jsr $2B19    ; $2ABB
+                jsr CloseTypeout1    ; $2ABB
                 lda #$FF    ; $2ABE
                 sta $2A9C    ; $2AC0
                 rts    ; $2AC3
-                bit $2A95    ; $2AC4
+;
+; === OpenTypeout ===
+                bit TypeoutOpen    ; $2AC4
                 bpl $2ACC    ; $2AC7
-                jsr $2B19    ; $2AC9
-                lda $2606    ; $2ACC
+                jsr CloseTypeout1    ; $2AC9
+                lda CoutDef    ; $2ACC
                 sta $2A9D    ; $2ACF
                 lda $2607    ; $2AD2
                 sta $2A9E    ; $2AD5
                 lda #$CD    ; $2AD8
-                sta $2606    ; $2ADA
+                sta CoutDef    ; $2ADA
                 lda #$2B    ; $2ADD
                 sta $2607    ; $2ADF
-                lda $2A9F    ; $2AE2
-                sta $24    ; $2AE5
+                lda TypeoutCH    ; $2AE2
+                sta CH    ; $2AE5
                 lda $2AA0    ; $2AE7
-                sta $25    ; $2AEA
-                jsr $26E9    ; $2AEC
+                sta CV    ; $2AEA
+                jsr vtab    ; $2AEC
                 tsx    ; $2AEF
                 inx    ; $2AF0
                 inx    ; $2AF1
-                stx $2A9A    ; $2AF2
+                stx TOAbortStk    ; $2AF2
                 lda #$05    ; $2AF5
-                sta $2A97    ; $2AF7
+                sta TypeoutAbort    ; $2AF7
                 lda #$2B    ; $2AFA
                 sta $2A98    ; $2AFC
                 lda #$FF    ; $2AFF
-                sta $2A95    ; $2B01
+                sta TypeoutOpen    ; $2B01
                 rts    ; $2B04
-                jsr $2B19    ; $2B05
-                ldx $2A9A    ; $2B08
+                jsr CloseTypeout1    ; $2B05
+                ldx TOAbortStk    ; $2B08
                 txs    ; $2B0B
                 lda #$01    ; $2B0C
                 rts    ; $2B0E
-                jsr $292E    ; $2B0F
+;
+; === CloseTypeout ===
+                jsr BlinkCursor    ; $2B0F
                 cmp #$A0    ; $2B12
-                beq $2B19    ; $2B14
+                beq CloseTypeout1    ; $2B14
                 jsr $2BC4    ; $2B16
+;
+; === CloseTypeout1 ===
                 lda $2A9D    ; $2B19
-                sta $2606    ; $2B1C
+                sta CoutDef    ; $2B1C
                 lda $2A9E    ; $2B1F
                 sta $2607    ; $2B22
-                lda $24    ; $2B25
-                sta $2A9F    ; $2B27
-                lda $25    ; $2B2A
+                lda CH    ; $2B25
+                sta TypeoutCH    ; $2B27
+                lda CV    ; $2B2A
                 sta $2AA0    ; $2B2C
-                jsr $26E9    ; $2B2F
+                jsr vtab    ; $2B2F
                 lda #$00    ; $2B32
-                sta $2A95    ; $2B34
+                sta TypeoutOpen    ; $2B34
                 rts    ; $2B37
+;
+; === SaveWind ===
                 ldx #$00    ; $2B38
-                lda $20,x    ; $2B3A
+                lda WindowLft,x    ; $2B3A
                 sta $2B55,x    ; $2B3C
                 inx    ; $2B3F
                 cpx #$06    ; $2B40
                 bcc $2B3A    ; $2B42
                 rts    ; $2B44
+;
+; === RstrWind ===
                 ldx #$00    ; $2B45
                 lda $2B55,x    ; $2B47
-                sta $20,x    ; $2B4A
+                sta WindowLft,x    ; $2B4A
                 inx    ; $2B4C
                 cpx #$06    ; $2B4D
                 bcc $2B47    ; $2B4F
-                jsr $26EB    ; $2B51
+                jsr vtab1    ; $2B51
                 rts    ; $2B54
                 brk    ; $2B55
                 brk    ; $2B56
@@ -3321,6 +4456,8 @@
                 brk    ; $2B58
                 brk    ; $2B59
                 brk    ; $2B5A
+;
+; === GetTypeWind ===
                 ldy #$00    ; $2B5B
                 bit $111C    ; $2B5D
                 bpl $2B84    ; $2B60
@@ -3328,7 +4465,7 @@
                 sta $00    ; $2B64
                 lda #$11    ; $2B66
                 sta $01    ; $2B68
-                lda $112F    ; $2B6A
+                lda SelectedWind    ; $2B6A
                 cmp #$01    ; $2B6D
                 beq $2B79    ; $2B6F
                 lda #$26    ; $2B71
@@ -3336,46 +4473,50 @@
                 lda #$11    ; $2B75
                 sta $01    ; $2B77
                 lda ($00),y    ; $2B79
-                sta: $0020,y    ; $2B7B
+                sta: WindowLft,y    ; $2B7B
                 iny    ; $2B7E
                 cpy #$04    ; $2B7F
                 bcc $2B79    ; $2B81
                 rts    ; $2B83
                 lda #$00    ; $2B84
-                sta $22    ; $2B86
-                sta $20    ; $2B88
+                sta WindowTop    ; $2B86
+                sta WindowLft    ; $2B88
                 lda #$14    ; $2B8A
-                sta $23    ; $2B8C
+                sta WindowBot    ; $2B8C
                 lda #$50    ; $2B8E
-                sta $21    ; $2B90
+                sta WindowRgt    ; $2B90
                 rts    ; $2B92
-                jsr $2B38    ; $2B93
-                jsr $2B5B    ; $2B96
-                jsr $2AC4    ; $2B99
+;
+; === PrepTO ===
+                jsr SaveWind    ; $2B93
+                jsr GetTypeWind    ; $2B96
+                jsr OpenTypeout    ; $2B99
                 lda #$AD    ; $2B9C
-                sta $2A97    ; $2B9E
+                sta TypeoutAbort    ; $2B9E
                 lda #$2B    ; $2BA1
                 sta $2A98    ; $2BA3
                 tsx    ; $2BA6
                 inx    ; $2BA7
                 inx    ; $2BA8
-                stx $2A9A    ; $2BA9
+                stx TOAbortStk    ; $2BA9
                 rts    ; $2BAC
-                ldx $2A9A    ; $2BAD
+                ldx TOAbortStk    ; $2BAD
                 txs    ; $2BB0
-                jsr $2B19    ; $2BB1
+                jsr CloseTypeout1    ; $2BB1
                 jmp $2BBA    ; $2BB4
-                jsr $2B0F    ; $2BB7
-                jsr $2B45    ; $2BBA
+;
+; === UnPrepTO ===
+                jsr CloseTypeout    ; $2BB7
+                jsr RstrWind    ; $2BBA
                 lda #$01    ; $2BBD
                 rts    ; $2BBF
                 brk    ; $2BC0
                 brk    ; $2BC1
                 brk    ; $2BC2
                 brk    ; $2BC3
-                jsr $27FF    ; $2BC4
+                jsr UnTYI    ; $2BC4
                 ldx #$FF    ; $2BC7
-                stx $2A99    ; $2BC9
+                stx AbortedTO?    ; $2BC9
                 rts    ; $2BCC
                 sta $2BC2    ; $2BCD
                 stx $2BC0    ; $2BD0
@@ -3387,19 +4528,19 @@
                 bpl $2BF8    ; $2BDE
                 inc $2A9C    ; $2BE0
                 lda #$FF    ; $2BE3
-                sta $2A96    ; $2BE5
-                lda $2A9F    ; $2BE8
-                sta $24    ; $2BEB
+                sta TypeoutFlag    ; $2BE5
+                lda TypeoutCH    ; $2BE8
+                sta CH    ; $2BEB
                 lda $2AA0    ; $2BED
-                sta $25    ; $2BF0
-                jsr $26E9    ; $2BF2
+                sta CV    ; $2BF0
+                jsr vtab    ; $2BF2
                 jsr $2C5B    ; $2BF5
                 lda $2BC2    ; $2BF8
                 cmp #$A0    ; $2BFB
                 bcs $2C29    ; $2BFD
                 cmp #$9B    ; $2BFF
                 bne $2C08    ; $2C01
-                lda $2604    ; $2C03
+                lda AltmodeChar    ; $2C03
                 bne $2C29    ; $2C06
                 cmp #$8D    ; $2C08
                 bne $2C12    ; $2C0A
@@ -3423,77 +4564,77 @@
                 ldy $2BC1    ; $2C36
                 plp    ; $2C39
                 rts    ; $2C3A
-                ldy $24    ; $2C3B
-                jsr $2703    ; $2C3D
-                inc $24    ; $2C40
-                lda $24    ; $2C42
-                cmp $21    ; $2C44
+                ldy CH    ; $2C3B
+                jsr StoreChar    ; $2C3D
+                inc CH    ; $2C40
+                lda CH    ; $2C42
+                cmp WindowRgt    ; $2C44
                 bcc $2C4B    ; $2C46
                 jsr $2C5E    ; $2C48
                 rts    ; $2C4B
-                lda $24    ; $2C4C
-                jsr $2691    ; $2C4E
-                sta $24    ; $2C51
-                cmp $21    ; $2C53
+                lda CH    ; $2C4C
+                jsr TabBump    ; $2C4E
+                sta CH    ; $2C51
+                cmp WindowRgt    ; $2C53
                 bcc $2C5A    ; $2C55
                 jsr $2C5B    ; $2C57
                 rts    ; $2C5A
-                jsr $2862    ; $2C5B
-                lda $20    ; $2C5E
-                sta $24    ; $2C60
-                inc $25    ; $2C62
-                ldx $25    ; $2C64
+                jsr ClearEOL    ; $2C5B
+                lda WindowLft    ; $2C5E
+                sta CH    ; $2C60
+                inc CV    ; $2C62
+                ldx CV    ; $2C64
                 inx    ; $2C66
-                cpx $23    ; $2C67
+                cpx WindowBot    ; $2C67
                 bcc $2C79    ; $2C69
                 bne $2CA7    ; $2C6B
-                jsr $26E9    ; $2C6D
-                jsr $2862    ; $2C70
-                ldx $23    ; $2C73
-                stx $2A9B    ; $2C75
+                jsr vtab    ; $2C6D
+                jsr ClearEOL    ; $2C70
+                ldx WindowBot    ; $2C73
+                stx TypeoutMax    ; $2C75
                 rts    ; $2C78
-                lda $25    ; $2C79
+                lda CV    ; $2C79
                 pha    ; $2C7B
-                lda $24    ; $2C7C
+                lda CH    ; $2C7C
                 pha    ; $2C7E
-                jsr $26E9    ; $2C7F
-                jsr $2862    ; $2C82
-                inc $25    ; $2C85
-                lda $20    ; $2C87
-                sta $24    ; $2C89
-                jsr $26E9    ; $2C8B
+                jsr vtab    ; $2C7F
+                jsr ClearEOL    ; $2C82
+                inc CV    ; $2C85
+                lda WindowLft    ; $2C87
+                sta CH    ; $2C89
+                jsr vtab    ; $2C8B
                 lda #$DF    ; $2C8E
-                ldx $25    ; $2C90
-                cpx $2A9B    ; $2C92
+                ldx CV    ; $2C90
+                cpx TypeoutMax    ; $2C92
                 bcc $2C9D    ; $2C95
-                stx $2A9B    ; $2C97
-                jsr $2864    ; $2C9A
+                stx TypeoutMax    ; $2C97
+                jsr ClearEOL1    ; $2C9A
                 pla    ; $2C9D
-                sta $24    ; $2C9E
+                sta CH    ; $2C9E
                 pla    ; $2CA0
-                sta $25    ; $2CA1
-                jsr $26E9    ; $2CA3
+                sta CV    ; $2CA1
+                jsr vtab    ; $2CA3
                 rts    ; $2CA6
-                lda $52E6    ; $2CA7
-                sta $25    ; $2CAA
+                lda ModeLineCV    ; $2CA7
+                sta CV    ; $2CAA
                 lda $2D22    ; $2CAC
-                sta $24    ; $2CAF
-                jsr $26E9    ; $2CB1
-                ldy $24    ; $2CB4
+                sta CH    ; $2CAF
+                jsr vtab    ; $2CB1
+                ldy CH    ; $2CB4
                 jsr $2CE9    ; $2CB6
-                sty $24    ; $2CB9
-                jsr $292E    ; $2CBB
+                sty CH    ; $2CB9
+                jsr BlinkCursor    ; $2CBB
                 pha    ; $2CBE
                 ldy $2D22    ; $2CBF
-                sty $24    ; $2CC2
+                sty CH    ; $2CC2
                 jsr $2CE9    ; $2CC4
-                lda $22    ; $2CC7
+                lda WindowTop    ; $2CC7
                 sta $2AA0    ; $2CC9
-                sta $25    ; $2CCC
-                lda $20    ; $2CCE
-                sta $2A9F    ; $2CD0
-                sta $24    ; $2CD3
-                jsr $26E9    ; $2CD5
+                sta CV    ; $2CCC
+                lda WindowLft    ; $2CCE
+                sta TypeoutCH    ; $2CD0
+                sta CH    ; $2CD3
+                jsr vtab    ; $2CD5
                 pla    ; $2CD8
                 cmp #$A0    ; $2CD9
                 bne $2CE3    ; $2CDB
@@ -3501,22 +4642,22 @@
                 sta $2A9C    ; $2CDF
                 rts    ; $2CE2
                 jsr $2BC4    ; $2CE3
-                jmp ($2A97)    ; $2CE6
+                jmp (TypeoutAbort)    ; $2CE6
                 ldx #$00    ; $2CE9
-                ldy $24    ; $2CEB
-                jsr $271A    ; $2CED
+                ldy CH    ; $2CEB
+                jsr PickChar    ; $2CED
                 pha    ; $2CF0
                 lda $2D18,x    ; $2CF1
-                bit $52E7    ; $2CF4
+                bit ModeLineInv    ; $2CF4
                 bmi $2D06    ; $2CF7
-                bit $2605    ; $2CF9
+                bit IIcMode?    ; $2CF9
                 bpl $2D08    ; $2CFC
                 cmp #$4D    ; $2CFE
                 bne $2D08    ; $2D00
                 and #$3F    ; $2D02
                 bne $2D08    ; $2D04
                 ora #$80    ; $2D06
-                jsr $2703    ; $2D08
+                jsr StoreChar    ; $2D08
                 pla    ; $2D0B
                 and #$7F    ; $2D0C
                 sta $2D18,x    ; $2D0E
@@ -3531,27 +4672,29 @@
                 and $4220    ; $2D20
                 brk    ; $2D23
                 brk    ; $2D24
-                lda $24    ; $2D25
+;
+; === PointToCH ===
+                lda CH    ; $2D25
                 sta $2D23    ; $2D27
-                lda $25    ; $2D2A
+                lda CV    ; $2D2A
                 sta $2D24    ; $2D2C
-                lda $62    ; $2D2F
+                lda PageTop    ; $2D2F
                 sta $04    ; $2D31
                 lda $63    ; $2D33
                 sta $05    ; $2D35
-                jsr $289E    ; $2D37
+                jsr Home    ; $2D37
                 ldy #$00    ; $2D3A
-                lda $25    ; $2D3C
+                lda CV    ; $2D3C
                 cmp $2D24    ; $2D3E
                 bcc $2D58    ; $2D41
-                lda $24    ; $2D43
+                lda CH    ; $2D43
                 cmp $2D23    ; $2D45
                 bcc $2D58    ; $2D48
                 lda $04    ; $2D4A
-                sta $60    ; $2D4C
+                sta TheBuffer    ; $2D4C
                 lda $05    ; $2D4E
                 sta $61    ; $2D50
-                jsr $26E9    ; $2D52
+                jsr vtab    ; $2D52
                 lda #$00    ; $2D55
                 rts    ; $2D57
                 lda $05    ; $2D58
@@ -3559,36 +4702,40 @@
                 bcc $2D70    ; $2D5C
                 bne $2D6B    ; $2D5E
                 lda $04    ; $2D60
-                cmp $6A    ; $2D62
+                cmp GapTop    ; $2D62
                 bcc $2D70    ; $2D64
                 bne $2D6B    ; $2D66
                 jsr $2EE5    ; $2D68
                 jsr $2FC6    ; $2D6B
                 beq $2D4A    ; $2D6E
                 jsr $D012    ; $2D70
-                jsr $2DE0    ; $2D73
-                jsr $2E13    ; $2D76
+                jsr GetXCharLen    ; $2D73
+                jsr BumpXPos    ; $2D76
                 inc $04    ; $2D79
                 bne $2D7F    ; $2D7B
                 inc $05    ; $2D7D
-                lda $25    ; $2D7F
-                cmp $23    ; $2D81
+                lda CV    ; $2D7F
+                cmp WindowBot    ; $2D81
                 bcc $2D3C    ; $2D83
                 lda #$FF    ; $2D85
                 rts    ; $2D87
-                jsr $289E    ; $2D88
-                lda $62    ; $2D8B
+;
+; === FindPoint ===
+                jsr Home    ; $2D88
+                lda PageTop    ; $2D8B
                 sta $00    ; $2D8D
                 lda $63    ; $2D8F
                 sta $01    ; $2D91
+;
+; === FindPoint1 ===
                 ldy #$00    ; $2D93
                 lda $00    ; $2D95
-                cmp $60    ; $2D97
+                cmp TheBuffer    ; $2D97
                 bne $2DA7    ; $2D99
                 lda $01    ; $2D9B
                 cmp $61    ; $2D9D
                 bne $2DA7    ; $2D9F
-                jsr $26E9    ; $2DA1
+                jsr vtab    ; $2DA1
                 lda #$00    ; $2DA4
                 rts    ; $2DA6
                 lda $01    ; $2DA7
@@ -3596,12 +4743,12 @@
                 bcc $2DC9    ; $2DAB
                 bne $2DBA    ; $2DAD
                 lda $00    ; $2DAF
-                cmp $6A    ; $2DB1
+                cmp GapTop    ; $2DB1
                 bcc $2DC9    ; $2DB3
                 bne $2DBA    ; $2DB5
-                jsr $2EF3    ; $2DB7
+                jsr SetTempBot    ; $2DB7
                 lda $00    ; $2DBA
-                cmp $68    ; $2DBC
+                cmp BuffBot    ; $2DBC
                 bne $2DC9    ; $2DBE
                 lda $01    ; $2DC0
                 cmp $69    ; $2DC2
@@ -3609,15 +4756,17 @@
                 lda #$FF    ; $2DC6
                 rts    ; $2DC8
                 jsr $D000    ; $2DC9
-                jsr $2DE0    ; $2DCC
-                jsr $2E13    ; $2DCF
-                ldx $25    ; $2DD2
-                cpx $23    ; $2DD4
+                jsr GetXCharLen    ; $2DCC
+                jsr BumpXPos    ; $2DCF
+                ldx CV    ; $2DD2
+                cpx WindowBot    ; $2DD4
                 bcs $2DC6    ; $2DD6
                 inc $00    ; $2DD8
                 bne $2DDE    ; $2DDA
                 inc $01    ; $2DDC
                 bne $2D95    ; $2DDE
+;
+; === GetXCharLen ===
                 ldx #$01    ; $2DE0
                 cmp #$A0    ; $2DE2
                 bcs $2DF3    ; $2DE4
@@ -3629,50 +4778,54 @@
                 beq $2DFD    ; $2DF0
                 inx    ; $2DF2
                 rts    ; $2DF3
-                lda $21    ; $2DF4
+                lda WindowRgt    ; $2DF4
                 sec    ; $2DF6
-                sbc $24    ; $2DF7
+                sbc CH    ; $2DF7
                 tax    ; $2DF9
                 lda #$8D    ; $2DFA
                 rts    ; $2DFC
-                lda $24    ; $2DFD
-                jsr $2691    ; $2DFF
-                cmp $21    ; $2E02
+                lda CH    ; $2DFD
+                jsr TabBump    ; $2DFF
+                cmp WindowRgt    ; $2E02
                 bcc $2E0C    ; $2E04
                 jsr $2DF4    ; $2E06
                 lda #$89    ; $2E09
                 rts    ; $2E0B
                 sec    ; $2E0C
-                sbc $24    ; $2E0D
+                sbc CH    ; $2E0D
                 tax    ; $2E0F
                 lda #$89    ; $2E10
                 rts    ; $2E12
+;
+; === BumpXPos ===
                 cmp #$8D    ; $2E13
                 beq $2E2E    ; $2E15
                 txa    ; $2E17
                 clc    ; $2E18
-                adc $24    ; $2E19
-                sta $24    ; $2E1B
+                adc CH    ; $2E19
+                sta CH    ; $2E1B
                 adc #$01    ; $2E1D
-                cmp $21    ; $2E1F
+                cmp WindowRgt    ; $2E1F
                 bcc $2E2D    ; $2E21
-                sbc $21    ; $2E23
-                sta $24    ; $2E25
+                sbc WindowRgt    ; $2E23
+                sta CH    ; $2E25
                 lda #$00    ; $2E27
-                sta $24    ; $2E29
-                inc $25    ; $2E2B
+                sta CH    ; $2E29
+                inc CV    ; $2E2B
                 rts    ; $2E2D
                 lda #$00    ; $2E2E
-                sta $24    ; $2E30
-                inc $25    ; $2E32
+                sta CH    ; $2E30
+                inc CV    ; $2E32
                 rts    ; $2E34
+;
+; === BackLine ===
                 ldy #$00    ; $2E35
                 jsr $2FBB    ; $2E37
                 bne $2E3D    ; $2E3A
                 rts    ; $2E3C
                 jsr $2F9A    ; $2E3D
                 bne $2E4F    ; $2E40
-                lda $6A    ; $2E42
+                lda GapTop    ; $2E42
                 sta $04    ; $2E44
                 lda $6B    ; $2E46
                 sta $05    ; $2E48
@@ -3690,16 +4843,18 @@
                 brk    ; $2E60
                 brk    ; $2E61
                 brk    ; $2E62
-                lda $22    ; $2E63
-                sta $25    ; $2E65
-                lda $20    ; $2E67
-                sta $24    ; $2E69
+;
+; === BackScrLine ===
+                lda WindowTop    ; $2E63
+                sta CV    ; $2E65
+                lda WindowLft    ; $2E67
+                sta CH    ; $2E69
                 lda $04    ; $2E6B
                 sta $2E5F    ; $2E6D
                 lda $05    ; $2E70
                 sta $2E60    ; $2E72
-                jsr $2E35    ; $2E75
-                jsr $2F5C    ; $2E78
+                jsr BackLine    ; $2E75
+                jsr CheckTop    ; $2E78
                 beq $2E80    ; $2E7B
                 jsr $2ECC    ; $2E7D
                 lda $04    ; $2E80
@@ -3714,10 +4869,10 @@
                 beq $2EC1    ; $2E96
                 ldy #$00    ; $2E98
                 jsr $D012    ; $2E9A
-                jsr $2DE0    ; $2E9D
-                ldy $25    ; $2EA0
-                jsr $2E13    ; $2EA2
-                cpy $25    ; $2EA5
+                jsr GetXCharLen    ; $2E9D
+                ldy CV    ; $2EA0
+                jsr BumpXPos    ; $2EA2
+                cpy CV    ; $2EA5
                 beq $2EBB    ; $2EA7
                 lda $04    ; $2EA9
                 sta $2E61    ; $2EAB
@@ -3745,7 +4900,7 @@
                 rts    ; $2EE1
                 lda #$FF    ; $2EE2
                 rts    ; $2EE4
-                lda $6C    ; $2EE5
+                lda GapBot    ; $2EE5
                 clc    ; $2EE7
                 adc #$01    ; $2EE8
                 sta $04    ; $2EEA
@@ -3753,7 +4908,9 @@
                 adc #$00    ; $2EEE
                 sta $05    ; $2EF0
                 rts    ; $2EF2
-                lda $6C    ; $2EF3
+;
+; === SetTempBot ===
+                lda GapBot    ; $2EF3
                 clc    ; $2EF5
                 adc #$01    ; $2EF6
                 sta $00    ; $2EF8
@@ -3763,7 +4920,7 @@
                 rts    ; $2F00
                 jsr $2F9A    ; $2F01
                 bne $2F0E    ; $2F04
-                lda $6A    ; $2F06
+                lda GapTop    ; $2F06
                 sta $00    ; $2F08
                 lda $6B    ; $2F0A
                 sta $01    ; $2F0C
@@ -3777,11 +4934,13 @@
                 rts    ; $2F1D
                 lda #$FF    ; $2F1E
                 rts    ; $2F20
+;
+; === FixText ===
                 txa    ; $2F21
                 bpl $2F3C    ; $2F22
                 jsr $2FB0    ; $2F24
                 bne $2F36    ; $2F27
-                jsr $2F5C    ; $2F29
+                jsr CheckTop    ; $2F29
                 beq $2F39    ; $2F2C
                 lda $04    ; $2F2E
                 bne $2F34    ; $2F30
@@ -3794,7 +4953,7 @@
                 jsr $2FB0    ; $2F3C
                 bcc $2F59    ; $2F3F
                 bne $2F51    ; $2F41
-                lda $6C    ; $2F43
+                lda GapBot    ; $2F43
                 sta $04    ; $2F45
                 lda $6D    ; $2F47
                 sta $05    ; $2F49
@@ -3807,6 +4966,8 @@
                 rts    ; $2F58
                 lda #$00    ; $2F59
                 rts    ; $2F5B
+;
+; === CheckTop ===
                 ldy $05    ; $2F5C
                 ldx $04    ; $2F5E
                 bne $2F63    ; $2F60
@@ -3815,13 +4976,13 @@
                 cpy $6D    ; $2F64
                 bcc $2F81    ; $2F66
                 bne $2F70    ; $2F68
-                cpx $6C    ; $2F6A
+                cpx GapBot    ; $2F6A
                 beq $2F74    ; $2F6C
                 bcc $2F81    ; $2F6E
                 lda #$FF    ; $2F70
                 bmi $2F95    ; $2F72
-                lda $6A    ; $2F74
-                cmp $66    ; $2F76
+                lda GapTop    ; $2F74
+                cmp BuffTop    ; $2F76
                 bne $2F95    ; $2F78
                 lda $6B    ; $2F7A
                 cmp $67    ; $2F7C
@@ -3829,9 +4990,9 @@
                 cpy $67    ; $2F81
                 bcc $2F8B    ; $2F83
                 bne $2F95    ; $2F85
-                cpx $66    ; $2F87
+                cpx BuffTop    ; $2F87
                 bcs $2F95    ; $2F89
-                lda $66    ; $2F8B
+                lda BuffTop    ; $2F8B
                 sta $04    ; $2F8D
                 lda $67    ; $2F8F
                 sta $05    ; $2F91
@@ -3840,7 +5001,7 @@
                 ldy #$00    ; $2F96
                 plp    ; $2F98
                 rts    ; $2F99
-                lda $6C    ; $2F9A
+                lda GapBot    ; $2F9A
                 clc    ; $2F9C
                 adc #$01    ; $2F9D
                 php    ; $2F9F
@@ -3858,16 +5019,16 @@
                 cmp $6B    ; $2FB2
                 bne $2FBA    ; $2FB4
                 lda $04    ; $2FB6
-                cmp $6A    ; $2FB8
+                cmp GapTop    ; $2FB8
                 rts    ; $2FBA
                 lda $04    ; $2FBB
-                cmp $66    ; $2FBD
+                cmp BuffTop    ; $2FBD
                 bne $2FC5    ; $2FBF
                 lda $05    ; $2FC1
                 cmp $67    ; $2FC3
                 rts    ; $2FC5
                 lda $04    ; $2FC6
-                cmp $68    ; $2FC8
+                cmp BuffBot    ; $2FC8
                 bne $2FD0    ; $2FCA
                 lda $05    ; $2FCC
                 cmp $69    ; $2FCE
@@ -3875,10 +5036,10 @@
                 jsr $2FB0    ; $2FD1
                 bcc $2FFD    ; $2FD4
                 bne $2FED    ; $2FD6
-                lda $6C    ; $2FD8
+                lda GapBot    ; $2FD8
                 clc    ; $2FDA
                 adc #$01    ; $2FDB
-                cmp $68    ; $2FDD
+                cmp BuffBot    ; $2FDD
                 bne $2FFD    ; $2FDF
                 cmp #$00    ; $2FE1
                 beq $2FE6    ; $2FE3
@@ -3892,11 +5053,11 @@
                 bcc $2FFD    ; $2FF1
                 bne $2FFE    ; $2FF3
                 lda $04    ; $2FF5
-                cmp $68    ; $2FF7
+                cmp BuffBot    ; $2FF7
                 bcc $2FFD    ; $2FF9
                 bne $2FFE    ; $2FFB
                 rts    ; $2FFD
-                lda $68    ; $2FFE
+                lda BuffBot    ; $2FFE
                 sta $04    ; $3000
                 lda $69    ; $3002
                 sta $05    ; $3004
@@ -3904,21 +5065,29 @@
                 rts    ; $3008
                 brk    ; $3009
                 brk    ; $300A
+;
+; === EnableKDisp ===
                 brk    ; $300B
-                jsr $2AA1    ; $300C
-                jsr $5441    ; $300F
-                jsr $289E    ; $3012
-                lda $62    ; $3015
+;
+; === DisplayPage ===
+                jsr InitTypeout    ; $300C
+;
+; === DisplayPage1 ===
+                jsr ModeInfo    ; $300F
+                jsr Home    ; $3012
+                lda PageTop    ; $3015
                 sta $00    ; $3017
                 lda $63    ; $3019
                 sta $01    ; $301B
+;
+; === DisplayTemp ===
                 ldy #$00    ; $301D
                 bit $300A    ; $301F
                 bmi $3036    ; $3022
                 bit $3009    ; $3024
                 bpl $3036    ; $3027
                 lda $00    ; $3029
-                cmp $60    ; $302B
+                cmp TheBuffer    ; $302B
                 bne $3036    ; $302D
                 lda $01    ; $302F
                 cmp $61    ; $3031
@@ -3929,57 +5098,57 @@
                 bcc $3059    ; $303A
                 bne $3049    ; $303C
                 lda $00    ; $303E
-                cmp $6A    ; $3040
+                cmp GapTop    ; $3040
                 bcc $3059    ; $3042
                 bne $3049    ; $3044
-                jsr $2EF3    ; $3046
+                jsr SetTempBot    ; $3046
                 lda $00    ; $3049
-                cmp $68    ; $304B
+                cmp BuffBot    ; $304B
                 bne $3059    ; $304D
                 lda $01    ; $304F
                 cmp $69    ; $3051
                 bne $3059    ; $3053
-                jsr $2874    ; $3055
+                jsr ClearEOP    ; $3055
                 rts    ; $3058
                 jsr $D000    ; $3059
-                ldx $25    ; $305C
+                ldx CV    ; $305C
                 inx    ; $305E
-                cpx $23    ; $305F
+                cpx WindowBot    ; $305F
                 bcc $309B    ; $3061
                 cmp #$8D    ; $3063
                 bne $306B    ; $3065
-                jsr $2862    ; $3067
+                jsr ClearEOL    ; $3067
                 rts    ; $306A
-                jsr $2DE0    ; $306B
+                jsr GetXCharLen    ; $306B
                 txa    ; $306E
                 clc    ; $306F
-                adc $24    ; $3070
-                cmp $21    ; $3072
+                adc CH    ; $3070
+                cmp WindowRgt    ; $3072
                 bcs $308E    ; $3074
                 jsr $D000    ; $3076
-                jsr $2611    ; $3079
-                bit $300B    ; $307C
+                jsr CharOut    ; $3079
+                bit EnableKDisp    ; $307C
                 bpl $3086    ; $307F
                 pha    ; $3081
-                jsr $2843    ; $3082
+                jsr GatherTYI    ; $3082
                 pla    ; $3085
                 inc $00    ; $3086
                 bne $308C    ; $3088
                 inc $01    ; $308A
                 bne $3024    ; $308C
                 pha    ; $308E
-                ldx $21    ; $308F
+                ldx WindowRgt    ; $308F
                 dex    ; $3091
-                stx $24    ; $3092
+                stx CH    ; $3092
                 lda #$A1    ; $3094
-                jsr $2611    ; $3096
+                jsr CharOut    ; $3096
                 pla    ; $3099
                 rts    ; $309A
-                jsr $2DE0    ; $309B
+                jsr GetXCharLen    ; $309B
                 txa    ; $309E
                 clc    ; $309F
-                adc $24    ; $30A0
-                cmp $21    ; $30A2
+                adc CH    ; $30A0
+                cmp WindowRgt    ; $30A2
                 php    ; $30A4
                 jsr $D000    ; $30A5
                 plp    ; $30A8
@@ -3990,68 +5159,76 @@
                 cmp #$89    ; $30B2
                 bne $3079    ; $30B4
                 jmp $307C    ; $30B6
-                ldx $24    ; $30B9
+                ldx CH    ; $30B9
                 inx    ; $30BB
-                cpx $21    ; $30BC
+                cpx WindowRgt    ; $30BC
                 bcc $3079    ; $30BE
                 jsr $308E    ; $30C0
                 jmp $3024    ; $30C3
-                lda $25    ; $30C6
+;
+; === DisplayDown ===
+                lda CV    ; $30C6
                 pha    ; $30C8
-                lda $24    ; $30C9
+                lda CH    ; $30C9
                 pha    ; $30CB
-                lda $60    ; $30CC
+                lda TheBuffer    ; $30CC
                 sta $00    ; $30CE
                 lda $61    ; $30D0
                 sta $01    ; $30D2
-                jsr $301D    ; $30D4
+                jsr DisplayTemp    ; $30D4
                 pla    ; $30D7
-                sta $24    ; $30D8
+                sta CH    ; $30D8
                 pla    ; $30DA
-                sta $25    ; $30DB
-                jmp $26E9    ; $30DD
+                sta CV    ; $30DB
+                jmp vtab    ; $30DD
+;
+; === DispToPoint ===
                 lda #$FF    ; $30E0
                 sta $3009    ; $30E2
-                jsr $300F    ; $30E5
+                jsr DisplayPage1    ; $30E5
                 inc $3009    ; $30E8
                 rts    ; $30EB
-                lda $62    ; $30EC
+;
+; === DecrScreen ===
+                lda PageTop    ; $30EC
                 sta $04    ; $30EE
                 lda $63    ; $30F0
                 sta $05    ; $30F2
                 jsr $2F01    ; $30F4
                 bne $3106    ; $30F7
-                jsr $2E63    ; $30F9
+                jsr BackScrLine    ; $30F9
                 lda $04    ; $30FC
-                sta $62    ; $30FE
+                sta PageTop    ; $30FE
                 lda $05    ; $3100
                 sta $63    ; $3102
                 lda #$00    ; $3104
                 rts    ; $3106
-                lda $62    ; $3107
+;
+; === IncrScreen ===
+                lda PageTop    ; $3107
                 sta $04    ; $3109
                 lda $63    ; $310B
                 sta $05    ; $310D
                 jsr $2F3C    ; $310F
                 bne $3136    ; $3112
                 ldy #$00    ; $3114
-                lda $20    ; $3116
+                lda WindowLft    ; $3116
                 sta $3146    ; $3118
                 jsr $D012    ; $311B
                 cmp #$8D    ; $311E
                 beq $3140    ; $3120
-                jsr $2DE0    ; $3122
+                jsr GetXCharLen    ; $3122
                 txa    ; $3125
                 clc    ; $3126
                 adc $3146    ; $3127
-                cmp $21    ; $312A
+                cmp WindowRgt    ; $312A
                 bcs $3137    ; $312C
                 sta $3146    ; $312E
                 jsr $2ECC    ; $3131
                 beq $311B    ; $3134
                 rts    ; $3136
                 lda $04    ; $3137
-                sta $62    ; $3139
+                sta PageTop    ; $3139
                 lda $05    ; $313B
                 sta $63    ; $313D
                 rts    ; $313F
@@ -4059,71 +5236,77 @@
                 beq $3137    ; $3143
                 rts    ; $3145
                 brk    ; $3146
-                lda $60    ; $3147
+;
+; === DisplayLine ===
+                lda TheBuffer    ; $3147
                 sta $04    ; $3149
                 lda $61    ; $314B
                 sta $05    ; $314D
-                lda $25    ; $314F
+                lda CV    ; $314F
                 pha    ; $3151
-                lda $24    ; $3152
+                lda CH    ; $3152
                 pha    ; $3154
-                jsr $2E63    ; $3155
+                jsr BackScrLine    ; $3155
                 pla    ; $3158
-                sta $24    ; $3159
+                sta CH    ; $3159
                 pla    ; $315B
-                sta $25    ; $315C
-                jsr $3164    ; $315E
-                jmp $26E9    ; $3161
-                lda $25    ; $3164
+                sta CV    ; $315C
+                jsr PrintTextLine    ; $315E
+                jmp vtab    ; $3161
+;
+; === PrintTextLine ===
+                lda CV    ; $3164
                 pha    ; $3166
-                lda $24    ; $3167
+                lda CH    ; $3167
                 pha    ; $3169
-                lda $20    ; $316A
-                sta $24    ; $316C
-                jsr $26E9    ; $316E
-                ldx $23    ; $3171
+                lda WindowLft    ; $316A
+                sta CH    ; $316C
+                jsr vtab    ; $316E
+                ldx WindowBot    ; $3171
                 inx    ; $3173
-                stx $25    ; $3174
+                stx CV    ; $3174
                 lda $04    ; $3176
                 sta $00    ; $3178
                 lda $05    ; $317A
                 sta $01    ; $317C
                 dec $300A    ; $317E
-                jsr $301D    ; $3181
+                jsr DisplayTemp    ; $3181
                 inc $300A    ; $3184
                 pla    ; $3187
-                sta $24    ; $3188
+                sta CH    ; $3188
                 pla    ; $318A
-                sta $25    ; $318B
-                jsr $26E9    ; $318D
+                sta CV    ; $318B
+                jsr vtab    ; $318D
                 rts    ; $3190
+;
+; === LinesPastPnt ===
                 ldy #$01    ; $3191
                 ldx #$00    ; $3193
                 stx $00    ; $3195
-                lda $25    ; $3197
+                lda CV    ; $3197
                 pha    ; $3199
-                lda $24    ; $319A
+                lda CH    ; $319A
                 pha    ; $319C
                 tya    ; $319D
                 clc    ; $319E
-                adc $6C    ; $319F
+                adc GapBot    ; $319F
                 tax    ; $31A1
                 lda $6D    ; $31A2
                 adc #$00    ; $31A4
                 cmp $69    ; $31A6
                 bne $31AE    ; $31A8
-                cpx $68    ; $31AA
+                cpx BuffBot    ; $31AA
                 beq $31D9    ; $31AC
                 jsr $D03F    ; $31AE
                 cmp #$8D    ; $31B1
                 beq $31D9    ; $31B3
-                jsr $2DE0    ; $31B5
+                jsr GetXCharLen    ; $31B5
                 pha    ; $31B8
-                lda $25    ; $31B9
+                lda CV    ; $31B9
                 sta $00    ; $31BB
                 pla    ; $31BD
-                jsr $2E13    ; $31BE
-                lda $25    ; $31C1
+                jsr BumpXPos    ; $31BE
+                lda CV    ; $31C1
                 cmp $00    ; $31C3
                 beq $31C9    ; $31C5
                 inc $00    ; $31C7
@@ -4131,484 +5314,546 @@
                 bne $319D    ; $31CA
                 inc $31E2    ; $31CC
                 pla    ; $31CF
-                sta $24    ; $31D0
+                sta CH    ; $31D0
                 pla    ; $31D2
-                sta $25    ; $31D3
+                sta CV    ; $31D3
                 lda $31E2    ; $31D5
                 rts    ; $31D8
                 pla    ; $31D9
-                sta $24    ; $31DA
+                sta CH    ; $31DA
                 pla    ; $31DC
-                sta $25    ; $31DD
+                sta CV    ; $31DD
                 lda $00    ; $31DF
                 rts    ; $31E1
                 brk    ; $31E2
-                lda $25    ; $31E3
+;
+; === FindPointCol ===
+                lda CV    ; $31E3
                 pha    ; $31E5
-                lda $24    ; $31E6
+                lda CH    ; $31E6
                 pha    ; $31E8
-                jsr $2E63    ; $31E9
-                ldx $24    ; $31EC
+                jsr BackScrLine    ; $31E9
+                ldx CH    ; $31EC
                 pla    ; $31EE
-                sta $24    ; $31EF
+                sta CH    ; $31EF
                 pla    ; $31F1
-                sta $25    ; $31F2
+                sta CV    ; $31F2
                 rts    ; $31F4
+;
+; === CenterLine ===
                 ora #$08    ; $31F5
-                lda $22    ; $31F7
+;
+; === CenterPage ===
+                lda WindowTop    ; $31F7
                 clc    ; $31F9
-                adc $31F5    ; $31FA
-                cmp $23    ; $31FD
+                adc CenterLine    ; $31FA
+                cmp WindowBot    ; $31FD
                 bcc $320A    ; $31FF
-                lda $23    ; $3201
+                lda WindowBot    ; $3201
                 sec    ; $3203
-                sbc $22    ; $3204
+                sbc WindowTop    ; $3204
                 lsr    ; $3206
                 sec    ; $3207
                 sbc #$01    ; $3208
-                sta $31F6    ; $320A
-                lda $60    ; $320D
+                sta CenterPoint    ; $320A
+;
+; === CenterPage1 ===
+                lda TheBuffer    ; $320D
                 sta $04    ; $320F
                 lda $61    ; $3211
                 sta $05    ; $3213
-                jsr $2E63    ; $3215
+                jsr BackScrLine    ; $3215
                 lda $04    ; $3218
-                sta $62    ; $321A
+                sta PageTop    ; $321A
                 lda $05    ; $321C
                 sta $63    ; $321E
-                lda $31F6    ; $3220
+                lda CenterPoint    ; $3220
                 beq $322F    ; $3223
-                jsr $30EC    ; $3225
+                jsr DecrScreen    ; $3225
                 bne $322F    ; $3228
-                dec $31F6    ; $322A
+                dec CenterPoint    ; $322A
                 bne $3225    ; $322D
-                jsr $300C    ; $322F
-                jsr $2D88    ; $3232
+                jsr DisplayPage    ; $322F
+                jsr FindPoint    ; $3232
                 lda #$00    ; $3235
                 rts    ; $3237
-                bit $2A96    ; $3238
+;
+; === GenDisplay ===
+                bit TypeoutFlag    ; $3238
                 bpl $324B    ; $323B
                 pha    ; $323D
-                jsr $2AA1    ; $323E
+                jsr InitTypeout    ; $323E
                 pla    ; $3241
                 cmp #$06    ; $3242
                 bcs $324B    ; $3244
-                jsr $300C    ; $3246
+                jsr DisplayPage    ; $3246
                 lda #$01    ; $3249
                 asl    ; $324B
                 tax    ; $324C
                 cpx #$0E    ; $324D
                 bcs $325E    ; $324F
-                lda $3262,x    ; $3251
+                lda DispVects,x    ; $3251
                 sta $00    ; $3254
                 lda $3263,x    ; $3256
                 sta $01    ; $3259
                 jmp ($0000)    ; $325B
-                jsr $29B9    ; $325E
+                jsr Beep    ; $325E
                 rts    ; $3261
+;
+; === DispVects ===
         dfb $37        ; $3262  (data/65C02-bit)
-                and ($70)    ; $3263
+                and (PhysBuffBot)    ; $3263
                 and ($C6)    ; $3265
                 bmi $32B0    ; $3267
                 and ($E0),y    ; $3269
                 bmi $32E6    ; $326B
                 and ($F7)    ; $326D
-                and ($20),y    ; $326F
+                and (WindowLft),y    ; $326F
                 dey    ; $3271
                 and $03F0    ; $3272
-                jmp $31F7    ; $3275
+                jmp CenterPage    ; $3275
                 rts    ; $3278
-                jsr $4C52    ; $3279
-                lda $25    ; $327C
+;
+; === DispPointEnd ===
+                jsr SetGap    ; $3279
+                lda CV    ; $327C
                 pha    ; $327E
-                lda $24    ; $327F
+                lda CH    ; $327F
                 pha    ; $3281
                 lda $6D    ; $3282
                 pha    ; $3284
-                lda $6C    ; $3285
+                lda GapBot    ; $3285
                 pha    ; $3287
-                inc $6C    ; $3288
+                inc GapBot    ; $3288
                 bne $328E    ; $328A
                 inc $6D    ; $328C
                 ldy #$00    ; $328E
-                lda $6C    ; $3290
-                cmp $68    ; $3292
+                lda GapBot    ; $3290
+                cmp BuffBot    ; $3292
                 bne $32AF    ; $3294
                 lda $6D    ; $3296
                 cmp $69    ; $3298
                 bne $32AF    ; $329A
-                jsr $2862    ; $329C
+                jsr ClearEOL    ; $329C
                 pla    ; $329F
-                sta $6C    ; $32A0
+                sta GapBot    ; $32A0
                 pla    ; $32A2
                 sta $6D    ; $32A3
                 pla    ; $32A5
-                sta $24    ; $32A6
+                sta CH    ; $32A6
                 pla    ; $32A8
-                sta $25    ; $32A9
-                jsr $26E9    ; $32AB
+                sta CV    ; $32A9
+                jsr vtab    ; $32AB
                 rts    ; $32AE
                 jsr $D03F    ; $32AF
                 cmp #$8D    ; $32B2
                 beq $32ED    ; $32B4
-                jsr $2DE0    ; $32B6
+                jsr GetXCharLen    ; $32B6
                 txa    ; $32B9
                 clc    ; $32BA
-                adc $24    ; $32BB
-                cmp $21    ; $32BD
+                adc CH    ; $32BB
+                cmp WindowRgt    ; $32BD
                 bcs $32CF    ; $32BF
                 jsr $D03F    ; $32C1
-                jsr $2611    ; $32C4
-                inc $6C    ; $32C7
+                jsr CharOut    ; $32C4
+                inc GapBot    ; $32C7
                 bne $32CD    ; $32C9
                 inc $6D    ; $32CB
                 bne $3290    ; $32CD
-                jsr $2862    ; $32CF
+                jsr ClearEOL    ; $32CF
                 ldy #$00    ; $32D2
-                ldx $21    ; $32D4
+                ldx WindowRgt    ; $32D4
                 dex    ; $32D6
-                stx $24    ; $32D7
+                stx CH    ; $32D7
                 lda #$A1    ; $32D9
-                jsr $2611    ; $32DB
-                lda $25    ; $32DE
-                cmp $22    ; $32E0
+                jsr CharOut    ; $32DB
+                lda CV    ; $32DE
+                cmp WindowTop    ; $32E0
                 beq $329F    ; $32E2
                 jsr $D03F    ; $32E4
                 cmp #$89    ; $32E7
                 bne $32C1    ; $32E9
                 beq $32C7    ; $32EB
-                ldx $24    ; $32ED
+                ldx CH    ; $32ED
                 inx    ; $32EF
-                cpx $21    ; $32F0
+                cpx WindowRgt    ; $32F0
                 bcc $329C    ; $32F2
                 lda #$A1    ; $32F4
-                jsr $2611    ; $32F6
-                jsr $7DA3    ; $32F9
+                jsr CharOut    ; $32F6
+                jsr PrintReturn    ; $32F9
                 jmp $329F    ; $32FC
+;
+; === ScrollLineTop ===
                 brk    ; $32FF
+;
+; === ScrollLineBot ===
                 brk    ; $3300
+;
+; === ScrollDir ===
                 brk    ; $3301
+;
+; === ScrollDest ===
                 brk    ; $3302
                 brk    ; $3303
-                lda $21    ; $3304
+;
+; === Scroll ===
+                lda WindowRgt    ; $3304
                 lsr    ; $3306
                 sta $3303    ; $3307
-                lda $3301    ; $330A
+                lda ScrollDir    ; $330A
                 bpl $3337    ; $330D
-                lda $3302    ; $330F
-                jsr $26EB    ; $3312
-                lda $28    ; $3315
+                lda ScrollDest    ; $330F
+                jsr vtab1    ; $3312
+                lda BASL    ; $3315
                 sta $2A    ; $3317
-                lda $29    ; $3319
+                lda BASH    ; $3319
                 sta $2B    ; $331B
-                lda $32FF    ; $331D
-                jsr $26EB    ; $3320
+                lda ScrollLineTop    ; $331D
+                jsr vtab1    ; $3320
                 jsr $335F    ; $3323
-                inc $3302    ; $3326
-                inc $32FF    ; $3329
-                lda $32FF    ; $332C
-                cmp $3300    ; $332F
+                inc ScrollDest    ; $3326
+                inc ScrollLineTop    ; $3329
+                lda ScrollLineTop    ; $332C
+                cmp ScrollLineBot    ; $332F
                 bcc $330F    ; $3332
                 beq $330F    ; $3334
                 rts    ; $3336
-                lda $3302    ; $3337
-                jsr $26EB    ; $333A
-                lda $28    ; $333D
+                lda ScrollDest    ; $3337
+                jsr vtab1    ; $333A
+                lda BASL    ; $333D
                 sta $2A    ; $333F
-                lda $29    ; $3341
+                lda BASH    ; $3341
                 sta $2B    ; $3343
-                lda $3300    ; $3345
-                jsr $26EB    ; $3348
+                lda ScrollLineBot    ; $3345
+                jsr vtab1    ; $3348
                 jsr $335F    ; $334B
-                dec $3302    ; $334E
-                dec $3300    ; $3351
+                dec ScrollDest    ; $334E
+                dec ScrollLineBot    ; $3351
                 bmi $335E    ; $3354
-                lda $3300    ; $3356
-                cmp $32FF    ; $3359
+                lda ScrollLineBot    ; $3356
+                cmp ScrollLineTop    ; $3359
                 bcs $3337    ; $335C
                 rts    ; $335E
                 ldy #$00    ; $335F
-                sty $C055    ; $3361
-                lda ($28),y    ; $3364
+                sty Page2    ; $3361
+                lda (BASL),y    ; $3364
                 sta ($2A),y    ; $3366
                 iny    ; $3368
                 cpy $3303    ; $3369
                 bcc $3364    ; $336C
                 dey    ; $336E
-                sty $C054    ; $336F
-                lda ($28),y    ; $3372
+                sty Page1    ; $336F
+                lda (BASL),y    ; $3372
                 sta ($2A),y    ; $3374
                 dey    ; $3376
                 bpl $3372    ; $3377
                 rts    ; $3379
-                lda $25    ; $337A
-                sta $32FF    ; $337C
-                lda $23    ; $337F
+;
+; === TV:InsLine ===
+                lda CV    ; $337A
+;
+; === TV:InsLine1 ===
+                sta ScrollLineTop    ; $337C
+                lda WindowBot    ; $337F
                 sec    ; $3381
                 sbc #$02    ; $3382
-                sta $3300    ; $3384
-                sta $3302    ; $3387
-                inc $3302    ; $338A
-                cmp $32FF    ; $338D
+                sta ScrollLineBot    ; $3384
+                sta ScrollDest    ; $3387
+                inc ScrollDest    ; $338A
+                cmp ScrollLineTop    ; $338D
                 bcc $339B    ; $3390
-                lda $21    ; $3392
+                lda WindowRgt    ; $3392
                 lsr    ; $3394
                 sta $3303    ; $3395
                 jsr $3337    ; $3398
-                lda $32FF    ; $339B
-                sta $25    ; $339E
+                lda ScrollLineTop    ; $339B
+                sta CV    ; $339E
                 lda #$00    ; $33A0
-                sta $24    ; $33A2
-                jsr $26E9    ; $33A4
-                jsr $2862    ; $33A7
+                sta CH    ; $33A2
+                jsr vtab    ; $33A4
+                jsr ClearEOL    ; $33A7
                 rts    ; $33AA
-                lda $25    ; $33AB
-                sta $3302    ; $33AD
-                sta $32FF    ; $33B0
-                inc $32FF    ; $33B3
-                lda $23    ; $33B6
+;
+; === TV:DelLine ===
+                lda CV    ; $33AB
+;
+; === TV:DelLine1 ===
+                sta ScrollDest    ; $33AD
+                sta ScrollLineTop    ; $33B0
+                inc ScrollLineTop    ; $33B3
+                lda WindowBot    ; $33B6
                 sec    ; $33B8
                 sbc #$01    ; $33B9
-                sta $3300    ; $33BB
-                cmp $32FF    ; $33BE
+                sta ScrollLineBot    ; $33BB
+                cmp ScrollLineTop    ; $33BE
                 beq $33CC    ; $33C1
-                lda $21    ; $33C3
+                lda WindowRgt    ; $33C3
                 lsr    ; $33C5
                 sta $3303    ; $33C6
                 jsr $330F    ; $33C9
-                lda $3300    ; $33CC
-                sta $25    ; $33CF
+                lda ScrollLineBot    ; $33CC
+                sta CV    ; $33CF
                 lda #$00    ; $33D1
-                sta $24    ; $33D3
-                jsr $26E9    ; $33D5
-                jsr $2862    ; $33D8
+                sta CH    ; $33D3
+                jsr vtab    ; $33D5
+                jsr ClearEOL    ; $33D8
                 rts    ; $33DB
+;
+; === PointToCol ===
                 sta $3405    ; $33DC
-                jsr $34A6    ; $33DF
+                jsr BegOfLine    ; $33DF
                 ldy #$00    ; $33E2
-                sty $24    ; $33E4
-                lda $24    ; $33E6
+                sty CH    ; $33E4
+                lda CH    ; $33E6
                 cmp $3405    ; $33E8
                 bcs $3402    ; $33EB
                 jsr $D01B    ; $33ED
                 cmp #$8D    ; $33F0
                 beq $3402    ; $33F2
-                jsr $2DE0    ; $33F4
-                jsr $2E13    ; $33F7
-                jsr $7C68    ; $33FA
+                jsr GetXCharLen    ; $33F4
+                jsr BumpXPos    ; $33F7
+                jsr PointForward    ; $33FA
                 bne $3404    ; $33FD
                 jmp $33E6    ; $33FF
                 lda #$00    ; $3402
                 rts    ; $3404
                 brk    ; $3405
+;
+; === GoalColumn ===
                 brk    ; $3406
                 brk    ; $3407
+;
+; === UserGoal ===
                 brk    ; $3408
                 brk    ; $3409
-                lda $3408    ; $340A
+;
+; === GetGoalColumn ===
+                lda UserGoal    ; $340A
                 ora $3409    ; $340D
                 beq $3421    ; $3410
-                lda $3408    ; $3412
-                sta $3406    ; $3415
+                lda UserGoal    ; $3412
+                sta GoalColumn    ; $3415
                 lda $3409    ; $3418
                 sta $3407    ; $341B
                 jmp $3437    ; $341E
-                lda $3406    ; $3421
+                lda GoalColumn    ; $3421
                 ora $3407    ; $3424
                 bne $3437    ; $3427
-                lda $60    ; $3429
+                lda TheBuffer    ; $3429
                 sta $04    ; $342B
                 lda $61    ; $342D
                 sta $05    ; $342F
-                jsr $31E3    ; $3431
-                stx $3406    ; $3434
+                jsr FindPointCol    ; $3431
+                stx GoalColumn    ; $3434
                 rts    ; $3437
+;
+; === NewLineEOB ===
                 brk    ; $3438
-                jsr $7A60    ; $3439
-                bmi $3477    ; $343C
-                jsr $7AF6    ; $343E
+;
+; === DownRealLine ===
+                jsr GetArgSign    ; $3439
+                bmi UpRealLine    ; $343C
+                jsr ZeroArg?    ; $343E
                 beq $3462    ; $3441
-                jsr $340A    ; $3443
-                jsr $34BA    ; $3446
-                jsr $7C68    ; $3449
+                jsr GetGoalColumn    ; $3443
+                jsr EndOfLine    ; $3446
+                jsr PointForward    ; $3449
                 bne $3465    ; $344C
-                lda $3406    ; $344E
-                jsr $33DC    ; $3451
-                lda $7A5B    ; $3454
+                lda GoalColumn    ; $344E
+                jsr PointToCol    ; $3451
+                lda Argument    ; $3454
                 bne $345C    ; $3457
                 dec $7A5C    ; $3459
-                dec $7A5B    ; $345C
+                dec Argument    ; $345C
                 jmp $343E    ; $345F
                 lda #$01    ; $3462
                 rts    ; $3464
-                jsr $8BD3    ; $3465
-                lda $3438    ; $3468
+                jsr EndMacroExec    ; $3465
+                lda NewLineEOB    ; $3468
                 beq $3462    ; $346B
-                jsr $4C52    ; $346D
-                jsr $1969    ; $3470
+                jsr SetGap    ; $346D
+                jsr InsertReturn    ; $3470
                 jmp $3462    ; $3473
                 brk    ; $3476
-                jsr $7A60    ; $3477
-                bmi $3439    ; $347A
-                jsr $7AF6    ; $347C
+;
+; === UpRealLine ===
+                jsr GetArgSign    ; $3477
+                bmi DownRealLine    ; $347A
+                jsr ZeroArg?    ; $347C
                 beq $34A3    ; $347F
-                jsr $340A    ; $3481
-                jsr $34A6    ; $3484
-                jsr $7CCD    ; $3487
+                jsr GetGoalColumn    ; $3481
+                jsr BegOfLine    ; $3484
+                jsr PointBackward    ; $3487
                 bne $34A0    ; $348A
-                lda $3406    ; $348C
-                jsr $33DC    ; $348F
-                lda $7A5B    ; $3492
+                lda GoalColumn    ; $348C
+                jsr PointToCol    ; $348F
+                lda Argument    ; $3492
                 bne $349A    ; $3495
                 dec $7A5C    ; $3497
-                dec $7A5B    ; $349A
+                dec Argument    ; $349A
                 jmp $347C    ; $349D
-                jsr $8BD3    ; $34A0
+                jsr EndMacroExec    ; $34A0
                 lda #$01    ; $34A3
                 rts    ; $34A5
+;
+; === BegOfLine ===
                 ldy #$00    ; $34A6
-                jsr $7CCD    ; $34A8
+                jsr PointBackward    ; $34A8
                 bne $34B7    ; $34AB
                 jsr $D01B    ; $34AD
                 cmp #$8D    ; $34B0
                 bne $34A8    ; $34B2
-                jsr $7C68    ; $34B4
+                jsr PointForward    ; $34B4
                 lda #$01    ; $34B7
                 rts    ; $34B9
-                jsr $7C68    ; $34BA
+;
+; === EndOfLine ===
+                jsr PointForward    ; $34BA
                 bne $34D0    ; $34BD
-                jsr $7CCD    ; $34BF
+                jsr PointBackward    ; $34BF
                 ldy #$00    ; $34C2
                 jsr $D01B    ; $34C4
                 cmp #$8D    ; $34C7
                 beq $34D0    ; $34C9
-                jsr $7C68    ; $34CB
+                jsr PointForward    ; $34CB
                 beq $34C4    ; $34CE
                 lda #$01    ; $34D0
                 rts    ; $34D2
+;
+; === ContextLines ===
         dfb $02        ; $34D3  (data/65C02-bit)
-                jsr $7A60    ; $34D4
-                bmi $354C    ; $34D7
-                jsr $7A7F    ; $34D9
+;
+; === DownScreen ===
+                jsr GetArgSign    ; $34D4
+                bmi UpScreen    ; $34D7
+                jsr AnyArgument?    ; $34D9
                 bne $3512    ; $34DC
-                jsr $7AF6    ; $34DE
+                jsr ZeroArg?    ; $34DE
                 beq $34F4    ; $34E1
-                jsr $3107    ; $34E3
-                lda $7A5B    ; $34E6
+                jsr IncrScreen    ; $34E3
+                lda Argument    ; $34E6
                 bne $34EE    ; $34E9
                 dec $7A5C    ; $34EB
-                dec $7A5B    ; $34EE
+                dec Argument    ; $34EE
                 jmp $34DE    ; $34F1
-                jsr $2D88    ; $34F4
+                jsr FindPoint    ; $34F4
                 beq $350C    ; $34F7
-                lda $62    ; $34F9
-                sta $60    ; $34FB
+                lda PageTop    ; $34F9
+                sta TheBuffer    ; $34FB
                 lda $63    ; $34FD
                 sta $61    ; $34FF
-                jsr $4C52    ; $3501
-                lda $60    ; $3504
-                sta $62    ; $3506
+                jsr SetGap    ; $3501
+                lda TheBuffer    ; $3504
+                sta PageTop    ; $3506
                 lda $61    ; $3508
                 sta $63    ; $350A
-                jsr $300C    ; $350C
+                jsr DisplayPage    ; $350C
                 lda #$01    ; $350F
                 rts    ; $3511
-                lda $23    ; $3512
+                lda WindowBot    ; $3512
                 sec    ; $3514
-                sbc $34D3    ; $3515
-                sta $25    ; $3518
-                lda $20    ; $351A
-                sta $24    ; $351C
-                jsr $2D25    ; $351E
-                lda $60    ; $3521
-                cmp $68    ; $3523
+                sbc ContextLines    ; $3515
+                sta CV    ; $3518
+                lda WindowLft    ; $351A
+                sta CH    ; $351C
+                jsr PointToCH    ; $351E
+                lda TheBuffer    ; $3521
+                cmp BuffBot    ; $3523
                 bne $352D    ; $3525
                 lda $61    ; $3527
                 cmp $69    ; $3529
                 beq $3546    ; $352B
-                jsr $4C52    ; $352D
+                jsr SetGap    ; $352D
                 lda #$00    ; $3530
-                sta $31F6    ; $3532
-                jsr $320D    ; $3535
-                lda $60    ; $3538
-                sta $62    ; $353A
+                sta CenterPoint    ; $3532
+                jsr CenterPage1    ; $3535
+                lda TheBuffer    ; $3538
+                sta PageTop    ; $353A
                 lda $61    ; $353C
                 sta $63    ; $353E
-                jsr $289E    ; $3540
+                jsr Home    ; $3540
                 lda #$00    ; $3543
                 rts    ; $3545
-                jsr $4C52    ; $3546
-                jmp $31F7    ; $3549
-                jsr $7A60    ; $354C
+                jsr SetGap    ; $3546
+                jmp CenterPage    ; $3549
+;
+; === UpScreen ===
+                jsr GetArgSign    ; $354C
                 bpl $3554    ; $354F
-                jmp $34D4    ; $3551
-                jsr $7A7F    ; $3554
+                jmp DownScreen    ; $3551
+                jsr AnyArgument?    ; $3554
                 bne $3587    ; $3557
-                jsr $7AF6    ; $3559
+                jsr ZeroArg?    ; $3559
                 beq $356F    ; $355C
-                jsr $30EC    ; $355E
-                lda $7A5B    ; $3561
+                jsr DecrScreen    ; $355E
+                lda Argument    ; $3561
                 bne $3569    ; $3564
                 dec $7A5C    ; $3566
-                dec $7A5B    ; $3569
+                dec Argument    ; $3569
                 jmp $3559    ; $356C
-                jsr $2D88    ; $356F
+                jsr FindPoint    ; $356F
                 beq $3581    ; $3572
-                lda $23    ; $3574
-                sta $25    ; $3576
-                lda $20    ; $3578
-                sta $24    ; $357A
-                dec $25    ; $357C
-                jsr $2D25    ; $357E
-                jsr $300C    ; $3581
+                lda WindowBot    ; $3574
+                sta CV    ; $3576
+                lda WindowLft    ; $3578
+                sta CH    ; $357A
+                dec CV    ; $357C
+                jsr PointToCH    ; $357E
+                jsr DisplayPage    ; $3581
                 lda #$01    ; $3584
                 rts    ; $3586
-                lda $23    ; $3587
+                lda WindowBot    ; $3587
                 sec    ; $3589
-                sbc $22    ; $358A
-                sbc $34D3    ; $358C
+                sbc WindowTop    ; $358A
+                sbc ContextLines    ; $358C
                 pha    ; $358F
-                jsr $30EC    ; $3590
+                jsr DecrScreen    ; $3590
                 pla    ; $3593
                 sec    ; $3594
                 sbc #$01    ; $3595
                 bne $358F    ; $3597
-                jsr $300C    ; $3599
-                ldx $23    ; $359C
+                jsr DisplayPage    ; $3599
+                ldx WindowBot    ; $359C
                 dex    ; $359E
-                stx $25    ; $359F
-                lda $20    ; $35A1
-                sta $24    ; $35A3
-                jsr $2D25    ; $35A5
+                stx CV    ; $359F
+                lda WindowLft    ; $35A1
+                sta CH    ; $35A3
+                jsr PointToCH    ; $35A5
                 lda #$00    ; $35A8
                 rts    ; $35AA
-                jsr $7A7F    ; $35AB
+;
+; === SetPopMark ===
+                jsr AnyArgument?    ; $35AB
                 beq $35BC    ; $35AE
-                jsr $4C52    ; $35B0
-                jsr $4CFB    ; $35B3
-                jsr $4C52    ; $35B6
+                jsr SetGap    ; $35B0
+                jsr PushMark    ; $35B3
+                jsr SetGap    ; $35B6
                 lda #$01    ; $35B9
                 rts    ; $35BB
-                jsr $4D4A    ; $35BC
+                jsr PopMark    ; $35BC
                 jmp $35B6    ; $35BF
-                jsr $4C1E    ; $35C2
-                jsr $7A60    ; $35C5
-                bmi $361A    ; $35C8
-                jsr $7AF6    ; $35CA
+;
+; === LeftWord ===
+                jsr ClrLastKill    ; $35C2
+;
+; === IN:LeftWord ===
+                jsr GetArgSign    ; $35C5
+                bmi IN:RightWord    ; $35C8
+                jsr ZeroArg?    ; $35CA
                 beq $3611    ; $35CD
                 ldy #$00    ; $35CF
-                jsr $7CCD    ; $35D1
+                jsr PointBackward    ; $35D1
                 bne $3611    ; $35D4
                 jsr $D01B    ; $35D6
-                jsr $376A    ; $35D9
+                jsr Separator?    ; $35D9
                 beq $35D1    ; $35DC
-                jsr $7CCD    ; $35DE
+                jsr PointBackward    ; $35DE
                 bne $3611    ; $35E1
                 jsr $D01B    ; $35E3
-                jsr $376A    ; $35E6
+                jsr Separator?    ; $35E6
                 bne $35DE    ; $35E9
                 ldy #$40    ; $35EB
-                lda ($72),y    ; $35ED
+                lda (BuffData),y    ; $35ED
                 ldy #$00    ; $35EF
                 and #$10    ; $35F1
                 beq $3600    ; $35F3
@@ -4617,98 +5862,114 @@
                 bcc $3600    ; $35FA
                 cmp #$DB    ; $35FC
                 bcc $3603    ; $35FE
-                jsr $7C68    ; $3600
-                lda $7A5B    ; $3603
+                jsr PointForward    ; $3600
+                lda Argument    ; $3603
                 bne $360B    ; $3606
                 dec $7A5C    ; $3608
-                dec $7A5B    ; $360B
+                dec Argument    ; $360B
                 jmp $35CA    ; $360E
-                jsr $4C52    ; $3611
+                jsr SetGap    ; $3611
                 lda #$01    ; $3614
                 rts    ; $3616
-                jsr $4C1E    ; $3617
-                jsr $7A60    ; $361A
-                bmi $35C5    ; $361D
-                jsr $7AF6    ; $361F
+;
+; === RightWord ===
+                jsr ClrLastKill    ; $3617
+;
+; === IN:RightWord ===
+                jsr GetArgSign    ; $361A
+                bmi IN:LeftWord    ; $361D
+                jsr ZeroArg?    ; $361F
                 beq $365A    ; $3622
-                jsr $4C52    ; $3624
+                jsr SetGap    ; $3624
                 ldy #$01    ; $3627
                 jsr $D03F    ; $3629
                 dey    ; $362C
-                jsr $376A    ; $362D
+                jsr Separator?    ; $362D
                 bne $363F    ; $3630
-                jsr $7C68    ; $3632
+                jsr PointForward    ; $3632
                 bne $365A    ; $3635
                 jsr $D01B    ; $3637
-                jsr $376A    ; $363A
+                jsr Separator?    ; $363A
                 beq $3632    ; $363D
-                jsr $7C68    ; $363F
+                jsr PointForward    ; $363F
                 bne $365A    ; $3642
                 jsr $D01B    ; $3644
-                jsr $376A    ; $3647
+                jsr Separator?    ; $3647
                 bne $363F    ; $364A
-                lda $7A5B    ; $364C
+                lda Argument    ; $364C
                 bne $3654    ; $364F
                 dec $7A5C    ; $3651
-                dec $7A5B    ; $3654
+                dec Argument    ; $3654
                 jmp $361F    ; $3657
-                jsr $4C52    ; $365A
+                jsr SetGap    ; $365A
                 lda #$01    ; $365D
                 rts    ; $365F
+;
+; === UpperWord ===
                 jsr $3713    ; $3660
-                jsr $3686    ; $3663
-                jsr $4C3C    ; $3666
-                jsr $2D88    ; $3669
+                jsr IN:UpperReg    ; $3663
+                jsr SetModified    ; $3666
+                jsr FindPoint    ; $3669
                 beq $3671    ; $366C
                 lda #$06    ; $366E
                 rts    ; $3670
                 lda #$04    ; $3671
                 rts    ; $3673
+;
+; === LowerWord ===
                 jsr $3713    ; $3674
-                jsr $369F    ; $3677
+                jsr IN:LowerReg    ; $3677
                 jmp $3666    ; $367A
+;
+; === CapWord ===
                 jsr $3713    ; $367D
-                jsr $36B8    ; $3680
+                jsr IN:CapReg    ; $3680
                 jmp $3666    ; $3683
+;
+; === IN:UpperReg ===
                 ldy #$00    ; $3686
-                jsr $36F2    ; $3688
+                jsr EqTempPoint?    ; $3688
                 beq $369E    ; $368B
                 jsr $D000    ; $368D
-                jsr $36FD    ; $3690
+                jsr UpperCon    ; $3690
                 jsr $D054    ; $3693
                 inc $00    ; $3696
                 bne $369C    ; $3698
                 inc $01    ; $369A
                 bne $3688    ; $369C
                 rts    ; $369E
+;
+; === IN:LowerReg ===
                 ldy #$00    ; $369F
-                jsr $36F2    ; $36A1
+                jsr EqTempPoint?    ; $36A1
                 beq $36B7    ; $36A4
                 jsr $D000    ; $36A6
-                jsr $3708    ; $36A9
+                jsr LowerCon    ; $36A9
                 jsr $D054    ; $36AC
                 inc $00    ; $36AF
                 bne $36B5    ; $36B1
                 inc $01    ; $36B3
                 bne $36A1    ; $36B5
                 rts    ; $36B7
+;
+; === IN:CapReg ===
                 ldy #$00    ; $36B8
-                jsr $36F2    ; $36BA
+                jsr EqTempPoint?    ; $36BA
                 beq $36F1    ; $36BD
                 jsr $D000    ; $36BF
-                jsr $376A    ; $36C2
+                jsr Separator?    ; $36C2
                 beq $36E9    ; $36C5
-                jsr $36FD    ; $36C7
+                jsr UpperCon    ; $36C7
                 jsr $D054    ; $36CA
                 inc $00    ; $36CD
                 bne $36D3    ; $36CF
                 inc $01    ; $36D1
-                jsr $36F2    ; $36D3
+                jsr EqTempPoint?    ; $36D3
                 beq $36F1    ; $36D6
                 jsr $D000    ; $36D8
-                jsr $376A    ; $36DB
+                jsr Separator?    ; $36DB
                 beq $36BA    ; $36DE
-                jsr $3708    ; $36E0
+                jsr LowerCon    ; $36E0
                 jsr $D054    ; $36E3
                 jmp $36CD    ; $36E6
                 inc $00    ; $36E9
@@ -4716,32 +5977,38 @@
                 inc $01    ; $36ED
                 bne $36BA    ; $36EF
                 rts    ; $36F1
+;
+; === EqTempPoint? ===
                 lda $00    ; $36F2
-                cmp $60    ; $36F4
+                cmp TheBuffer    ; $36F4
                 bne $36FC    ; $36F6
                 lda $01    ; $36F8
                 cmp $61    ; $36FA
                 rts    ; $36FC
+;
+; === UpperCon ===
                 cmp #$E1    ; $36FD
                 bcc $3707    ; $36FF
                 cmp #$FB    ; $3701
                 bcs $3707    ; $3703
                 and #$DF    ; $3705
                 rts    ; $3707
+;
+; === LowerCon ===
                 cmp #$C1    ; $3708
                 bcc $3712    ; $370A
                 cmp #$DB    ; $370C
                 bcs $3712    ; $370E
                 adc #$20    ; $3710
                 rts    ; $3712
-                jsr $4C52    ; $3713
+                jsr SetGap    ; $3713
                 lda $61    ; $3716
                 pha    ; $3718
-                lda $60    ; $3719
+                lda TheBuffer    ; $3719
                 pha    ; $371B
-                lda $7A5E    ; $371C
+                lda ArgSign    ; $371C
                 pha    ; $371F
-                jsr $361A    ; $3720
+                jsr IN:RightWord    ; $3720
                 pla    ; $3723
                 bmi $372F    ; $3724
                 pla    ; $3726
@@ -4757,15 +6024,15 @@
                 sta $01    ; $3733
                 lda $00    ; $3735
                 sec    ; $3737
-                sbc $60    ; $3738
+                sbc TheBuffer    ; $3738
                 sta $00    ; $373A
                 lda $01    ; $373C
                 sbc $61    ; $373E
                 sta $01    ; $3740
-                lda $6C    ; $3742
+                lda GapBot    ; $3742
                 sec    ; $3744
                 adc $00    ; $3745
-                sta $60    ; $3747
+                sta TheBuffer    ; $3747
                 lda $6D    ; $3749
                 adc $01    ; $374B
                 sta $61    ; $374D
@@ -4773,8 +6040,8 @@
                 sta $372D    ; $3751
                 lda $01    ; $3754
                 sta $372E    ; $3756
-                jsr $4C52    ; $3759
-                lda $60    ; $375C
+                jsr SetGap    ; $3759
+                lda TheBuffer    ; $375C
                 sec    ; $375E
                 sbc $00    ; $375F
                 sta $00    ; $3761
@@ -4782,12 +6049,14 @@
                 sbc $01    ; $3765
                 sta $01    ; $3767
                 rts    ; $3769
+;
+; === Separator? ===
                 ldx #$00    ; $376A
                 sta $37A5    ; $376C
                 tya    ; $376F
                 pha    ; $3770
                 ldy #$40    ; $3771
-                lda ($72),y    ; $3773
+                lda (BuffData),y    ; $3773
                 and #$10    ; $3775
                 beq $378C    ; $3777
                 lda $37A5    ; $3779
@@ -4800,7 +6069,7 @@
                 lda $37A5    ; $3786
                 ldx #$00    ; $3789
                 rts    ; $378B
-                lda ($72),y    ; $378C
+                lda (BuffData),y    ; $378C
                 and #$01    ; $378E
                 beq $3794    ; $3790
                 ldx #$03    ; $3792
@@ -4816,17 +6085,23 @@
                 rts    ; $37A4
                 brk    ; $37A5
                 brk    ; $37A6
+;
+; === WhiteSpace? ===
                 ldx #$00    ; $37A7
                 bit $37A6    ; $37A9
-                bpl $37AF    ; $37AC
+                bpl WhiteSpace1    ; $37AC
                 inx    ; $37AE
+;
+; === WhiteSpace1 ===
                 cmp $37E4,x    ; $37AF
                 beq $37BA    ; $37B2
                 inx    ; $37B4
                 cpx #$03    ; $37B5
-                bcc $37AF    ; $37B7
+                bcc WhiteSpace1    ; $37B7
                 inx    ; $37B9
                 rts    ; $37BA
+;
+; === SentDel? ===
                 ldx #$00    ; $37BB
                 cmp $37E1,x    ; $37BD
                 beq $37C8    ; $37C0
@@ -4850,27 +6125,33 @@
         dfb $BF        ; $37E1  (data/65C02-bit)
                 lda ($AE,x)    ; $37E2
                 sta $A089    ; $37E4
-                jsr $7A60    ; $37E7
+;
+; === DeleteWord ===
+                jsr GetArgSign    ; $37E7
                 bpl $37EF    ; $37EA
-                jmp $37FE    ; $37EC
+                jmp RuboutWord    ; $37EC
                 jsr $3713    ; $37EF
                 lda #$00    ; $37F2
-                jsr $37FA    ; $37F4
+                jsr KillTempPoint    ; $37F4
                 lda #$02    ; $37F7
                 rts    ; $37F9
-                jsr $4F36    ; $37FA
+;
+; === KillTempPoint ===
+                jsr GenericKill    ; $37FA
                 rts    ; $37FD
-                jsr $7A60    ; $37FE
+;
+; === RuboutWord ===
+                jsr GetArgSign    ; $37FE
                 bpl $3806    ; $3801
-                jmp $37E7    ; $3803
+                jmp DeleteWord    ; $3803
                 lda #$FF    ; $3806
-                sta $7A5E    ; $3808
+                sta ArgSign    ; $3808
                 jsr $3713    ; $380B
-                jsr $36F2    ; $380E
+                jsr EqTempPoint?    ; $380E
                 beq $3823    ; $3811
                 lda #$FF    ; $3813
-                jsr $37FA    ; $3815
-                jsr $2D88    ; $3818
+                jsr KillTempPoint    ; $3815
+                jsr FindPoint    ; $3818
                 beq $3820    ; $381B
                 lda #$06    ; $381D
                 rts    ; $381F
@@ -4878,52 +6159,58 @@
                 rts    ; $3822
                 lda #$00    ; $3823
                 rts    ; $3825
+;
+; === KillLineBk ===
                 lda #$FF    ; $3826
-                eor $7A5E    ; $3828
-                sta $7A5E    ; $382B
-                jsr $7A7F    ; $382E
+                eor ArgSign    ; $3828
+                sta ArgSign    ; $382B
+;
+; === KillLine ===
+                jsr AnyArgument?    ; $382E
                 beq $3846    ; $3831
-                jsr $386E    ; $3833
-                bit $7A5E    ; $3836
+                jsr IN:KillLine    ; $3833
+                bit ArgSign    ; $3836
                 bpl $3843    ; $3839
-                jsr $2D88    ; $383B
+                jsr FindPoint    ; $383B
                 beq $3843    ; $383E
                 lda #$06    ; $3840
                 rts    ; $3842
                 lda #$02    ; $3843
                 rts    ; $3845
-                jsr $7AF6    ; $3846
+                jsr ZeroArg?    ; $3846
                 beq $3836    ; $3849
-                lda $4DE4    ; $384B
+                lda DeleteKill?    ; $384B
                 sta $386D    ; $384E
-                jsr $386E    ; $3851
+                jsr IN:KillLine    ; $3851
                 beq $385F    ; $3854
                 lda $386D    ; $3856
-                sta $4DE4    ; $3859
-                jsr $386E    ; $385C
-                lda $7A5B    ; $385F
+                sta DeleteKill?    ; $3859
+                jsr IN:KillLine    ; $385C
+                lda Argument    ; $385F
                 bne $3867    ; $3862
                 dec $7A5C    ; $3864
-                dec $7A5B    ; $3867
+                dec Argument    ; $3867
                 jmp $3846    ; $386A
                 brk    ; $386D
-                lda $7A5E    ; $386E
+;
+; === IN:KillLine ===
+                lda ArgSign    ; $386E
                 bpl $3876    ; $3871
                 jmp $38EE    ; $3873
-                jsr $4C52    ; $3876
+                jsr SetGap    ; $3876
                 lda $61    ; $3879
                 pha    ; $387B
-                lda $60    ; $387C
+                lda TheBuffer    ; $387C
                 pha    ; $387E
-                jsr $34BA    ; $387F
-                jsr $4C52    ; $3882
+                jsr EndOfLine    ; $387F
+                jsr SetGap    ; $3882
                 pla    ; $3885
                 sta $00    ; $3886
                 pla    ; $3888
                 sta $01    ; $3889
-                jsr $36F2    ; $388B
+                jsr EqTempPoint?    ; $388B
                 bne $38B7    ; $388E
-                lda $6C    ; $3890
+                lda GapBot    ; $3890
                 clc    ; $3892
                 adc #$01    ; $3893
                 tax    ; $3895
@@ -4931,17 +6218,17 @@
                 adc #$00    ; $3898
                 cmp $69    ; $389A
                 bne $38A3    ; $389C
-                cpx $68    ; $389E
+                cpx BuffBot    ; $389E
                 bne $38A3    ; $38A0
                 rts    ; $38A2
                 sta $61    ; $38A3
                 inx    ; $38A5
                 bne $38AA    ; $38A6
                 inc $61    ; $38A8
-                stx $60    ; $38AA
-                jsr $4C52    ; $38AC
+                stx TheBuffer    ; $38AA
+                jsr SetGap    ; $38AC
                 lda #$00    ; $38AF
-                jsr $37FA    ; $38B1
+                jsr KillTempPoint    ; $38B1
                 lda #$00    ; $38B4
                 rts    ; $38B6
                 ldy #$00    ; $38B7
@@ -4949,10 +6236,10 @@
                 pha    ; $38BB
                 lda $00    ; $38BC
                 pha    ; $38BE
-                jsr $36F2    ; $38BF
+                jsr EqTempPoint?    ; $38BF
                 beq $38D4    ; $38C2
                 jsr $D000    ; $38C4
-                jsr $37A7    ; $38C7
+                jsr WhiteSpace?    ; $38C7
                 bne $38E0    ; $38CA
                 inc $00    ; $38CC
                 bne $38D2    ; $38CE
@@ -4962,28 +6249,28 @@
                 sta $00    ; $38D5
                 pla    ; $38D7
                 sta $01    ; $38D8
-                jsr $3A0A    ; $38DA
+                jsr DelTempPoint    ; $38DA
                 jmp $3890    ; $38DD
                 pla    ; $38E0
                 sta $00    ; $38E1
                 pla    ; $38E3
                 sta $01    ; $38E4
                 lda #$00    ; $38E6
-                jsr $37FA    ; $38E8
+                jsr KillTempPoint    ; $38E8
                 lda #$FF    ; $38EB
                 rts    ; $38ED
-                jsr $4C52    ; $38EE
+                jsr SetGap    ; $38EE
                 lda $61    ; $38F1
                 pha    ; $38F3
-                lda $60    ; $38F4
+                lda TheBuffer    ; $38F4
                 pha    ; $38F6
-                jsr $34A6    ; $38F7
-                lda $60    ; $38FA
+                jsr BegOfLine    ; $38F7
+                lda TheBuffer    ; $38FA
                 sta $00    ; $38FC
                 lda $61    ; $38FE
                 sta $01    ; $3900
                 pla    ; $3902
-                sta $60    ; $3903
+                sta TheBuffer    ; $3903
                 pla    ; $3905
                 sta $61    ; $3906
                 lda $01    ; $3908
@@ -4991,259 +6278,293 @@
                 bcc $3934    ; $390C
                 bne $3918    ; $390E
                 lda $00    ; $3910
-                cmp $60    ; $3912
+                cmp TheBuffer    ; $3912
                 bcc $3934    ; $3914
                 beq $3934    ; $3916
                 lda $61    ; $3918
                 pha    ; $391A
-                lda $60    ; $391B
+                lda TheBuffer    ; $391B
                 pha    ; $391D
-                jsr $7CCD    ; $391E
+                jsr PointBackward    ; $391E
                 bne $3939    ; $3921
-                jsr $34A6    ; $3923
-                lda $60    ; $3926
+                jsr BegOfLine    ; $3923
+                lda TheBuffer    ; $3926
                 sta $00    ; $3928
                 lda $61    ; $392A
                 sta $01    ; $392C
                 pla    ; $392E
-                sta $60    ; $392F
+                sta TheBuffer    ; $392F
                 pla    ; $3931
                 sta $61    ; $3932
                 lda #$FF    ; $3934
-                jsr $37FA    ; $3936
+                jsr KillTempPoint    ; $3936
                 lda #$00    ; $3939
                 rts    ; $393B
+;
+; === DeleteSpace ===
                 dec $37A6    ; $393C
-                jsr $39BF    ; $393F
-                jsr $39DA    ; $3942
+;
+; === GenSpaceDel ===
+                jsr DelForSpace    ; $393F
+                jsr DelBacSpace    ; $3942
                 lda #$00    ; $3945
                 sta $37A6    ; $3947
-                jsr $2D88    ; $394A
+                jsr FindPoint    ; $394A
                 beq $3952    ; $394D
                 lda #$06    ; $394F
                 rts    ; $3951
                 lda #$02    ; $3952
                 rts    ; $3954
-                jsr $3B0D    ; $3955
+;
+; === DeleteLines ===
+                jsr BlankLine?    ; $3955
                 beq $3970    ; $3958
-                jsr $34BA    ; $395A
-                jsr $393C    ; $395D
-                jsr $7C68    ; $3960
+                jsr EndOfLine    ; $395A
+                jsr DeleteSpace    ; $395D
+                jsr PointForward    ; $3960
                 bne $396D    ; $3963
-                jsr $3B0D    ; $3965
+                jsr BlankLine?    ; $3965
                 beq $3970    ; $3968
-                jsr $7CCD    ; $396A
+                jsr PointBackward    ; $396A
                 lda #$01    ; $396D
                 rts    ; $396F
-                jsr $39DA    ; $3970
-                jsr $1969    ; $3973
+                jsr DelBacSpace    ; $3970
+                jsr InsertReturn    ; $3973
                 lda $61    ; $3976
                 pha    ; $3978
-                lda $60    ; $3979
+                lda TheBuffer    ; $3979
                 pha    ; $397B
                 ldy #$00    ; $397C
-                jsr $7C68    ; $397E
+                jsr PointForward    ; $397E
                 bne $398E    ; $3981
                 jsr $D01B    ; $3983
-                jsr $37A7    ; $3986
+                jsr WhiteSpace?    ; $3986
                 beq $397E    ; $3989
-                jsr $34A6    ; $398B
-                jsr $4C52    ; $398E
+                jsr BegOfLine    ; $398B
+                jsr SetGap    ; $398E
                 pla    ; $3991
                 sta $00    ; $3992
                 pla    ; $3994
                 sta $01    ; $3995
-                jsr $3A0A    ; $3997
-                jsr $1969    ; $399A
-                lda $60    ; $399D
+                jsr DelTempPoint    ; $3997
+                jsr InsertReturn    ; $399A
+                lda TheBuffer    ; $399D
                 bne $39A3    ; $399F
                 dec $61    ; $39A1
-                dec $60    ; $39A3
-                jsr $2D88    ; $39A5
+                dec TheBuffer    ; $39A3
+                jsr FindPoint    ; $39A5
                 beq $39AD    ; $39A8
                 lda #$06    ; $39AA
                 rts    ; $39AC
                 lda #$02    ; $39AD
                 rts    ; $39AF
-                ldx $6C    ; $39B0
+                ldx GapBot    ; $39B0
                 ldy $6D    ; $39B2
                 inx    ; $39B4
                 bne $39B8    ; $39B5
                 iny    ; $39B7
                 cpy $69    ; $39B8
                 bcc $39BE    ; $39BA
-                cpx $68    ; $39BC
+                cpx BuffBot    ; $39BC
                 rts    ; $39BE
-                jsr $4C52    ; $39BF
+;
+; === DelForSpace ===
+                jsr SetGap    ; $39BF
                 jsr $39B0    ; $39C2
                 bcs $39D9    ; $39C5
                 ldy #$01    ; $39C7
                 jsr $D03F    ; $39C9
-                jsr $37A7    ; $39CC
+                jsr WhiteSpace?    ; $39CC
                 bne $39D9    ; $39CF
-                inc $6C    ; $39D1
+                inc GapBot    ; $39D1
                 bne $39D7    ; $39D3
                 inc $6D    ; $39D5
                 bne $39C2    ; $39D7
                 rts    ; $39D9
-                jsr $4C52    ; $39DA
+;
+; === DelBacSpace ===
+                jsr SetGap    ; $39DA
                 ldy #$00    ; $39DD
-                lda $60    ; $39DF
-                cmp $66    ; $39E1
+                lda TheBuffer    ; $39DF
+                cmp BuffTop    ; $39E1
                 bne $39EB    ; $39E3
                 lda $61    ; $39E5
                 cmp $67    ; $39E7
                 beq $3A01    ; $39E9
-                lda $60    ; $39EB
+                lda TheBuffer    ; $39EB
                 bne $39F1    ; $39ED
                 dec $61    ; $39EF
-                dec $60    ; $39F1
+                dec TheBuffer    ; $39F1
                 jsr $D01B    ; $39F3
-                jsr $37A7    ; $39F6
+                jsr WhiteSpace?    ; $39F6
                 beq $39DF    ; $39F9
-                inc $60    ; $39FB
+                inc TheBuffer    ; $39FB
                 bne $3A01    ; $39FD
                 inc $61    ; $39FF
-                lda $60    ; $3A01
-                sta $6A    ; $3A03
+                lda TheBuffer    ; $3A01
+                sta GapTop    ; $3A03
                 lda $61    ; $3A05
                 sta $6B    ; $3A07
                 rts    ; $3A09
+;
+; === DelTempPoint ===
                 lda $00    ; $3A0A
-                sta $60    ; $3A0C
-                sta $6A    ; $3A0E
+                sta TheBuffer    ; $3A0C
+                sta GapTop    ; $3A0E
                 lda $01    ; $3A10
                 sta $61    ; $3A12
                 sta $6B    ; $3A14
-                jsr $4C52    ; $3A16
+                jsr SetGap    ; $3A16
                 rts    ; $3A19
-                jsr $4C52    ; $3A1A
+                jsr SetGap    ; $3A1A
                 lda $61    ; $3A1D
                 pha    ; $3A1F
-                lda $60    ; $3A20
+                lda TheBuffer    ; $3A20
                 pha    ; $3A22
-                lda $7A5E    ; $3A23
+                lda ArgSign    ; $3A23
                 pha    ; $3A26
-                jsr $3A31    ; $3A27
+                jsr IN:RightSent    ; $3A27
                 pla    ; $3A2A
                 jmp $3724    ; $3A2B
-                jsr $4C1E    ; $3A2E
-                jsr $7A60    ; $3A31
-                bmi $3A71    ; $3A34
-                jsr $4C52    ; $3A36
+;
+; === RightSent ===
+                jsr ClrLastKill    ; $3A2E
+;
+; === IN:RightSent ===
+                jsr GetArgSign    ; $3A31
+                bmi IN:LeftSent    ; $3A34
+                jsr SetGap    ; $3A36
                 ldy #$00    ; $3A39
-                jsr $7AF6    ; $3A3B
+                jsr ZeroArg?    ; $3A3B
                 bne $3A46    ; $3A3E
-                jsr $4C52    ; $3A40
+                jsr SetGap    ; $3A40
                 lda #$01    ; $3A43
                 rts    ; $3A45
-                jsr $7C68    ; $3A46
+                jsr PointForward    ; $3A46
                 bne $3A40    ; $3A49
                 jsr $D01B    ; $3A4B
-                jsr $37BB    ; $3A4E
+                jsr SentDel?    ; $3A4E
                 bne $3A46    ; $3A51
-                jsr $7C68    ; $3A53
+                jsr PointForward    ; $3A53
                 bne $3A40    ; $3A56
                 jsr $D01B    ; $3A58
-                jsr $37A7    ; $3A5B
+                jsr WhiteSpace?    ; $3A5B
                 bne $3A46    ; $3A5E
-                lda $7A5B    ; $3A60
+                lda Argument    ; $3A60
                 bne $3A68    ; $3A63
                 dec $7A5C    ; $3A65
-                dec $7A5B    ; $3A68
+                dec Argument    ; $3A68
                 jmp $3A3B    ; $3A6B
-                jsr $4C1E    ; $3A6E
-                jsr $7A60    ; $3A71
-                bmi $3A31    ; $3A74
-                jsr $4C52    ; $3A76
+;
+; === LeftSent ===
+                jsr ClrLastKill    ; $3A6E
+;
+; === IN:LeftSent ===
+                jsr GetArgSign    ; $3A71
+                bmi IN:RightSent    ; $3A74
+                jsr SetGap    ; $3A76
                 ldy #$00    ; $3A79
-                jsr $7AF6    ; $3A7B
+                jsr ZeroArg?    ; $3A7B
                 bne $3A86    ; $3A7E
-                jsr $4C52    ; $3A80
+                jsr SetGap    ; $3A80
                 lda #$01    ; $3A83
                 rts    ; $3A85
-                jsr $7CCD    ; $3A86
+                jsr PointBackward    ; $3A86
                 bne $3A80    ; $3A89
                 jsr $D01B    ; $3A8B
-                jsr $37A7    ; $3A8E
+                jsr WhiteSpace?    ; $3A8E
                 beq $3A86    ; $3A91
-                jsr $7CCD    ; $3A93
+                jsr PointBackward    ; $3A93
                 bne $3A80    ; $3A96
                 jsr $D01B    ; $3A98
-                jsr $37A7    ; $3A9B
+                jsr WhiteSpace?    ; $3A9B
                 bne $3A93    ; $3A9E
                 cmp #$8D    ; $3AA0
                 bne $3AB0    ; $3AA2
-                jsr $7CCD    ; $3AA4
+                jsr PointBackward    ; $3AA4
                 jsr $D01B    ; $3AA7
                 cmp #$8D    ; $3AAA
                 beq $3AC2    ; $3AAC
                 bne $3AB8    ; $3AAE
-                jsr $7CCD    ; $3AB0
+                jsr PointBackward    ; $3AB0
                 bne $3A80    ; $3AB3
                 jsr $D01B    ; $3AB5
-                jsr $37A7    ; $3AB8
+                jsr WhiteSpace?    ; $3AB8
                 beq $3AB0    ; $3ABB
-                jsr $37BB    ; $3ABD
+                jsr SentDel?    ; $3ABD
                 bne $3A93    ; $3AC0
-                jsr $7C68    ; $3AC2
+                jsr PointForward    ; $3AC2
                 bne $3ACF    ; $3AC5
                 jsr $D01B    ; $3AC7
-                jsr $37A7    ; $3ACA
+                jsr WhiteSpace?    ; $3ACA
                 beq $3AC2    ; $3ACD
-                jsr $4C52    ; $3ACF
-                lda $7A5B    ; $3AD2
+                jsr SetGap    ; $3ACF
+                lda Argument    ; $3AD2
                 bne $3ADA    ; $3AD5
                 dec $7A5C    ; $3AD7
-                dec $7A5B    ; $3ADA
+                dec Argument    ; $3ADA
                 jmp $3A7B    ; $3ADD
-                jsr $7A60    ; $3AE0
-                bmi $3AF0    ; $3AE3
+;
+; === KillSent ===
+                jsr GetArgSign    ; $3AE0
+                bmi KillSentB    ; $3AE3
                 jsr $3A1A    ; $3AE5
                 lda #$00    ; $3AE8
-                jsr $37FA    ; $3AEA
+                jsr KillTempPoint    ; $3AEA
                 lda #$02    ; $3AED
                 rts    ; $3AEF
-                jsr $7A60    ; $3AF0
-                bmi $3AE0    ; $3AF3
+;
+; === KillSentB ===
+                jsr GetArgSign    ; $3AF0
+                bmi KillSent    ; $3AF3
                 lda #$FF    ; $3AF5
-                sta $7A5E    ; $3AF7
+                sta ArgSign    ; $3AF7
                 jsr $3A1A    ; $3AFA
                 lda #$FF    ; $3AFD
-                jsr $37FA    ; $3AFF
-                jsr $2D88    ; $3B02
+                jsr KillTempPoint    ; $3AFF
+                jsr FindPoint    ; $3B02
                 beq $3B0A    ; $3B05
                 lda #$06    ; $3B07
                 rts    ; $3B09
                 lda #$02    ; $3B0A
                 rts    ; $3B0C
-                jsr $2526    ; $3B0D
-                jsr $4C52    ; $3B10
+;
+; === BlankLine? ===
+                jsr BackToIndent    ; $3B0D
+                jsr SetGap    ; $3B10
                 jsr $39B0    ; $3B13
                 bcs $3B1F    ; $3B16
                 ldy #$01    ; $3B18
                 jsr $D03F    ; $3B1A
                 cmp #$8D    ; $3B1D
                 rts    ; $3B1F
+;
+; === ReadLineHelp ===
         dfb $22        ; $3B20  (data/65C02-bit)
         dfb $3B        ; $3B21  (data/65C02-bit)
                 rts    ; $3B22
+;
+; === ReadArgLine ===
                 lda #$D2    ; $3B23
-                sta $3B20    ; $3B25
+                sta ReadLineHelp    ; $3B25
                 lda #$3C    ; $3B28
                 sta $3B21    ; $3B2A
+;
+; === ReadLine ===
                 lda #$00    ; $3B2D
-                sta $3F6D    ; $3B2F
-                lda $24    ; $3B32
-                sta $3F18    ; $3B34
-                lda $25    ; $3B37
+;
+; === IN:ReadLine ===
+                sta CharIndex    ; $3B2F
+                lda CH    ; $3B32
+                sta ReadLineCH    ; $3B34
+                lda CV    ; $3B37
                 sta $3F19    ; $3B39
-                jsr $26E9    ; $3B3C
-                jsr $3FC9    ; $3B3F
-                jsr $292E    ; $3B42
+                jsr vtab    ; $3B3C
+                jsr TypeLine    ; $3B3F
+                jsr BlinkCursor    ; $3B42
                 jsr $3B69    ; $3B45
                 jmp $3B51    ; $3B48
-                jsr $29B9    ; $3B4B
+                jsr Beep    ; $3B4B
                 jmp $3B3F    ; $3B4E
                 pha    ; $3B51
                 txa    ; $3B52
@@ -5290,30 +6611,32 @@
                 bit $3D88,x    ; $3B9B
                 sta $BC3D    ; $3B9E
         dfb $3B        ; $3BA1  (data/65C02-bit)
-                lda $3F6D    ; $3BA2
+                lda CharIndex    ; $3BA2
                 beq $3BAD    ; $3BA5
-                dec $3F6D    ; $3BA7
-                jmp $3FC9    ; $3BAA
-                jmp $29B9    ; $3BAD
+                dec CharIndex    ; $3BA7
+                jmp TypeLine    ; $3BAA
+                jmp Beep    ; $3BAD
+;
+; === QuestionH? ===
         dfb $FF        ; $3BB0  (data/65C02-bit)
-                ldx $3F6D    ; $3BB1
-                jmp ($3B20)    ; $3BB4
-                bit $3BB0    ; $3BB7
+                ldx CharIndex    ; $3BB1
+                jmp (ReadLineHelp)    ; $3BB4
+                bit QuestionH?    ; $3BB7
                 bmi $3BB1    ; $3BBA
                 cmp #$80    ; $3BBC
                 bcc $3BAD    ; $3BBE
-                ldx $3F6D    ; $3BC0
+                ldx CharIndex    ; $3BC0
                 cpx #$4F    ; $3BC3
                 beq $3BAD    ; $3BC5
                 sta $0200,x    ; $3BC7
-                jsr $2611    ; $3BCA
-                inc $3F6D    ; $3BCD
+                jsr CharOut    ; $3BCA
+                inc CharIndex    ; $3BCD
                 rts    ; $3BD0
                 ldy #$01    ; $3BD1
-                ldx $3F6D    ; $3BD3
+                ldx CharIndex    ; $3BD3
                 tya    ; $3BD6
                 clc    ; $3BD7
-                adc $6C    ; $3BD8
+                adc GapBot    ; $3BD8
                 sta $3C06    ; $3BDA
                 lda $6D    ; $3BDD
                 adc #$00    ; $3BDF
@@ -5321,7 +6644,7 @@
                 bcc $3BEE    ; $3BE3
                 bne $3C00    ; $3BE5
                 lda $3C06    ; $3BE7
-                cmp $68    ; $3BEA
+                cmp BuffBot    ; $3BEA
                 bcs $3C00    ; $3BEC
                 jsr $D03F    ; $3BEE
                 cmp #$8D    ; $3BF1
@@ -5332,14 +6655,14 @@
                 inx    ; $3BFC
                 iny    ; $3BFD
                 bne $3BD6    ; $3BFE
-                stx $3F6D    ; $3C00
-                jmp $3FC9    ; $3C03
+                stx CharIndex    ; $3C00
+                jmp TypeLine    ; $3C03
                 brk    ; $3C06
                 jsr $3C46    ; $3C07
                 jsr $3C4A    ; $3C0A
                 lda $61    ; $3C0D
                 pha    ; $3C0F
-                lda $60    ; $3C10
+                lda TheBuffer    ; $3C10
                 pha    ; $3C12
                 jsr $3C46    ; $3C13
                 pla    ; $3C16
@@ -5347,9 +6670,9 @@
                 pla    ; $3C19
                 sta $01    ; $3C1A
                 ldy #$00    ; $3C1C
-                ldx $3F6D    ; $3C1E
+                ldx CharIndex    ; $3C1E
                 lda $00    ; $3C21
-                cmp $60    ; $3C23
+                cmp TheBuffer    ; $3C23
                 bne $3C2D    ; $3C25
                 lda $01    ; $3C27
                 cmp $61    ; $3C29
@@ -5363,78 +6686,78 @@
                 inc $01    ; $3C3B
                 inx    ; $3C3D
                 bne $3C21    ; $3C3E
-                stx $3F6D    ; $3C40
-                jmp $3FC9    ; $3C43
+                stx CharIndex    ; $3C40
+                jmp TypeLine    ; $3C43
                 ldx #$00    ; $3C46
                 beq $3C4C    ; $3C48
                 ldx #$FF    ; $3C4A
                 lda $7A5C    ; $3C4C
                 pha    ; $3C4F
-                lda $7A5B    ; $3C50
+                lda Argument    ; $3C50
                 pha    ; $3C53
-                lda $7A5E    ; $3C54
+                lda ArgSign    ; $3C54
                 pha    ; $3C57
-                stx $7A5E    ; $3C58
+                stx ArgSign    ; $3C58
                 lda #$00    ; $3C5B
                 sta $7A5C    ; $3C5D
                 lda #$01    ; $3C60
-                sta $7A5B    ; $3C62
-                jsr $361A    ; $3C65
-                jsr $4C52    ; $3C68
+                sta Argument    ; $3C62
+                jsr IN:RightWord    ; $3C65
+                jsr SetGap    ; $3C68
                 pla    ; $3C6B
-                sta $7A5E    ; $3C6C
+                sta ArgSign    ; $3C6C
                 pla    ; $3C6F
-                sta $7A5B    ; $3C70
+                sta Argument    ; $3C70
                 pla    ; $3C73
                 sta $7A5C    ; $3C74
                 rts    ; $3C77
                 lda #$00    ; $3C78
-                sta $3F6D    ; $3C7A
-                jsr $3FC9    ; $3C7D
+                sta CharIndex    ; $3C7A
+                jsr TypeLine    ; $3C7D
                 jmp $3BAD    ; $3C80
-                ldx $3F6D    ; $3C83
+                ldx CharIndex    ; $3C83
                 sta $0200,x    ; $3C86
                 pla    ; $3C89
                 pla    ; $3C8A
                 lda #$00    ; $3C8B
-                sta $3D86    ; $3C8D
-                sta $3D87    ; $3C90
+                sta BufferRead    ; $3C8D
+                sta FileRead    ; $3C90
                 rts    ; $3C93
-                lda $3F6D    ; $3C94
+                lda CharIndex    ; $3C94
                 bne $3C78    ; $3C97
                 lda #$87    ; $3C99
-                jsr $2611    ; $3C9B
-                lda $3F18    ; $3C9E
-                sta $24    ; $3CA1
+                jsr CharOut    ; $3C9B
+                lda ReadLineCH    ; $3C9E
+                sta CH    ; $3CA1
                 lda $3F19    ; $3CA3
-                sta $25    ; $3CA6
-                jsr $26E9    ; $3CA8
+                sta CV    ; $3CA6
+                jsr vtab    ; $3CA8
                 lda #$00    ; $3CAB
-                sta $3F6D    ; $3CAD
-                sta $3D86    ; $3CB0
-                sta $3D87    ; $3CB3
+                sta CharIndex    ; $3CAD
+                sta BufferRead    ; $3CB0
+                sta FileRead    ; $3CB3
                 pla    ; $3CB6
                 pla    ; $3CB7
                 lda #$FF    ; $3CB8
                 rts    ; $3CBA
-                jsr $292E    ; $3CBB
-                ldx $3F6D    ; $3CBE
+                jsr BlinkCursor    ; $3CBB
+                ldx CharIndex    ; $3CBE
                 cpx #$4F    ; $3CC1
                 bcs $3CCE    ; $3CC3
                 sta $0200,x    ; $3CC5
-                inc $3F6D    ; $3CC8
-                jmp $2611    ; $3CCB
-                jmp $29B9    ; $3CCE
+                inc CharIndex    ; $3CC8
+                jmp CharOut    ; $3CCB
+                jmp Beep    ; $3CCE
                 brk    ; $3CD1
                 tsx    ; $3CD2
                 stx $3CD1    ; $3CD3
-                jsr $57FA    ; $3CD6
-                jsr $2AC4    ; $3CD9
+                jsr CloseEchoArea    ; $3CD6
+                jsr OpenTypeout    ; $3CD9
                 lda #$6C    ; $3CDC
-                sta $2A97    ; $3CDE
+                sta TypeoutAbort    ; $3CDE
                 lda #$3D    ; $3CE1
                 sta $2A98    ; $3CE3
-                jsr $5968    ; $3CE6
+                jsr PrintMessage    ; $3CE6
                 cmp $F5EF,y    ; $3CE9
                 ldy #$E1    ; $3CEC
                 sbc ($E5)    ; $3CEE
@@ -5468,21 +6791,21 @@
                 inc $A0E4    ; $3D24
                 sbc #$F3    ; $3D27
                 ldy #$00    ; $3D29
-                lda $7834    ; $3D2B
-                sta $7E95    ; $3D2E
+                lda CommandVector    ; $3D2B
+                sta FunPtr    ; $3D2E
                 lda $7835    ; $3D31
                 sta $7E96    ; $3D34
-                jsr $7EC2    ; $3D37
+                jsr GetFunName    ; $3D37
                 bne $3D76    ; $3D3A
-                jsr $598F    ; $3D3C
-                jsr $5968    ; $3D3F
+                jsr DCIStringOut    ; $3D3C
+                jsr PrintMessage    ; $3D3F
         dfb $BB        ; $3D42  (data/65C02-bit)
                 ldy #$A0    ; $3D43
                 brk    ; $3D45
-                jsr $5A12    ; $3D46
-                lda $20    ; $3D49
-                jsr $5991    ; $3D4B
-                jsr $5968    ; $3D4E
+                jsr DocRef    ; $3D46
+                lda WindowLft    ; $3D49
+                jsr DCIStringOut1    ; $3D4B
+                jsr PrintMessage    ; $3D4E
                 ldx $8D8D    ; $3D51
                 dec $F7EF    ; $3D54
                 ldy #$F4    ; $3D57
@@ -5498,62 +6821,68 @@
                 ldx: $008D    ; $3D69
                 ldx $3CD1    ; $3D6C
                 txs    ; $3D6F
-                jsr $2B19    ; $3D70
-                jmp $57D8    ; $3D73
-                jsr $5968    ; $3D76
+                jsr CloseTypeout1    ; $3D70
+                jmp OpenEchoArea    ; $3D73
+                jsr PrintMessage    ; $3D76
                 inc $F4EF    ; $3D79
                 ldy #$EE    ; $3D7C
                 sbc ($ED,x)    ; $3D7E
                 sbc $E4    ; $3D80
                 brk    ; $3D82
                 jmp $3D4E    ; $3D83
+;
+; === BufferRead ===
                 brk    ; $3D86
+;
+; === FileRead ===
                 brk    ; $3D87
-                bit $3D86    ; $3D88
+                bit BufferRead    ; $3D88
                 bmi $3D95    ; $3D8B
-                bit $3D87    ; $3D8D
+                bit FileRead    ; $3D8D
                 bmi $3DA5    ; $3D90
                 jmp $3BBC    ; $3D92
-                jsr $3DE1    ; $3D95
+                jsr MakeBuffList    ; $3D95
                 lda #$00    ; $3D98
-                sta $5987    ; $3D9A
+                sta CompList    ; $3D9A
                 lda #$A5    ; $3D9D
                 sta $5988    ; $3D9F
                 jmp $3DC4    ; $3DA2
-                jsr $3E37    ; $3DA5
+                jsr MakeFileList    ; $3DA5
                 lda #$C0    ; $3DA8
-                sta $5987    ; $3DAA
+                sta CompList    ; $3DAA
                 lda #$D1    ; $3DAD
                 sta $5988    ; $3DAF
-                ldx $3F6D    ; $3DB2
+                ldx CharIndex    ; $3DB2
                 bne $3DBE    ; $3DB5
-                jsr $6B9D    ; $3DB7
-                stx $3F6D    ; $3DBA
+                jsr SelfPath    ; $3DB7
+                stx CharIndex    ; $3DBA
                 inx    ; $3DBD
-                jsr $6BAC    ; $3DBE
-                stx $5989    ; $3DC1
-                ldx $3F6D    ; $3DC4
+                jsr BackPath    ; $3DBE
+                stx CompOffset    ; $3DC1
+                ldx CharIndex    ; $3DC4
                 lda #$9B    ; $3DC7
                 sta $0200,x    ; $3DC9
-                bit $C08B    ; $3DCC
-                sta $C009    ; $3DCF
-                jsr $5AE9    ; $3DD2
-                jsr $3F10    ; $3DD5
-                sta $C008    ; $3DD8
-                stx $3F6D    ; $3DDB
-                jmp $3FC9    ; $3DDE
+                bit RdWrBank1    ; $3DCC
+                sta UseAuxZP    ; $3DCF
+                jsr SI:CompleteSp    ; $3DD2
+                jsr GetBank2    ; $3DD5
+                sta UseMainZP    ; $3DD8
+                stx CharIndex    ; $3DDB
+                jmp TypeLine    ; $3DDE
+;
+; === MakeBuffList ===
                 ldx #$00    ; $3DE1
                 stx $3E35    ; $3DE3
                 lda #$00    ; $3DE6
                 sta $00    ; $3DE8
                 lda #$A5    ; $3DEA
                 sta $01    ; $3DEC
-                jsr $42FC    ; $3DEE
+                jsr PointToBInfo    ; $3DEE
                 ldy #$66    ; $3DF1
-                lda ($5E),y    ; $3DF3
+                lda (BuffPoint),y    ; $3DF3
                 beq $3E2A    ; $3DF5
                 ldx #$00    ; $3DF7
-                lda ($5E),y    ; $3DF9
+                lda (BuffPoint),y    ; $3DF9
                 sta ($00,x)    ; $3DFB
                 beq $3E08    ; $3DFD
                 inc $00    ; $3DFF
@@ -5586,15 +6915,17 @@
                 rts    ; $3E34
                 brk    ; $3E35
                 brk    ; $3E36
-                ldx $3F6D    ; $3E37
+;
+; === MakeFileList ===
+                ldx CharIndex    ; $3E37
                 lda #$8D    ; $3E3A
                 sta $0200,x    ; $3E3C
-                jsr $6BAC    ; $3E3F
+                jsr BackPath    ; $3E3F
                 bit $3E36    ; $3E42
                 bpl $3E73    ; $3E45
-                sta $C009    ; $3E47
+                sta UseAuxZP    ; $3E47
                 stx $02    ; $3E4A
-                jsr $3F09    ; $3E4C
+                jsr GetBank1    ; $3E4C
                 lda #$80    ; $3E4F
                 sta $00    ; $3E51
                 lda #$D1    ; $3E53
@@ -5605,50 +6936,50 @@
                 dey    ; $3E5D
                 bmi $3E6D    ; $3E5E
                 lda $0200,y    ; $3E60
-                jsr $36FD    ; $3E63
+                jsr UpperCon    ; $3E63
                 cmp $D180,y    ; $3E66
                 bne $3E73    ; $3E69
                 beq $3E5D    ; $3E6B
-                sta $C008    ; $3E6D
-                jmp $3F10    ; $3E70
-                sta $C009    ; $3E73
-                jsr $3F09    ; $3E76
+                sta UseMainZP    ; $3E6D
+                jmp GetBank2    ; $3E70
+                sta UseAuxZP    ; $3E73
+                jsr GetBank1    ; $3E76
                 ldy $02    ; $3E79
                 lda #$00    ; $3E7B
                 sta ($00),y    ; $3E7D
                 dey    ; $3E7F
                 bmi $3E8C    ; $3E80
                 lda $0200,y    ; $3E82
-                jsr $36FD    ; $3E85
+                jsr UpperCon    ; $3E85
                 sta ($00),y    ; $3E88
                 bne $3E7F    ; $3E8A
                 sty $3E36    ; $3E8C
-                sta $C008    ; $3E8F
-                jsr $3F10    ; $3E92
-                sta $C009    ; $3E95
+                sta UseMainZP    ; $3E8F
+                jsr GetBank2    ; $3E92
+                sta UseAuxZP    ; $3E95
                 lda #$C0    ; $3E98
                 sta $00    ; $3E9A
                 lda #$D1    ; $3E9C
                 sta $01    ; $3E9E
-                sta $C008    ; $3EA0
-                jsr $715F    ; $3EA3
+                sta UseMainZP    ; $3EA0
+                jsr GetDirInfo    ; $3EA3
                 bcs $3EF7    ; $3EA6
-                jsr $71DC    ; $3EA8
+                jsr NextFile    ; $3EA8
                 bcs $3EF7    ; $3EAB
-                lda $707E    ; $3EAD
+                lda FileInfo    ; $3EAD
                 and #$0F    ; $3EB0
                 sta $3F08    ; $3EB2
-                sta $C009    ; $3EB5
-                jsr $3F09    ; $3EB8
+                sta UseAuxZP    ; $3EB5
+                jsr GetBank1    ; $3EB8
                 ldy #$00    ; $3EBB
                 lda $707F,y    ; $3EBD
                 ora #$80    ; $3EC0
-                jsr $3708    ; $3EC2
+                jsr LowerCon    ; $3EC2
                 sta ($00),y    ; $3EC5
                 iny    ; $3EC7
                 cpy $3F08    ; $3EC8
                 bcc $3EBD    ; $3ECB
-                lda $707E    ; $3ECD
+                lda FileInfo    ; $3ECD
                 and #$F0    ; $3ED0
                 cmp #$D0    ; $3ED2
                 bcc $3EDB    ; $3ED4
@@ -5666,110 +6997,136 @@
                 sta $00    ; $3EE8
                 bcc $3EEE    ; $3EEA
                 inc $01    ; $3EEC
-                sta $C008    ; $3EEE
-                jsr $3F10    ; $3EF1
+                sta UseMainZP    ; $3EEE
+                jsr GetBank2    ; $3EF1
                 jmp $3EA8    ; $3EF4
-                sta $C009    ; $3EF7
-                jsr $3F09    ; $3EFA
+                sta UseAuxZP    ; $3EF7
+                jsr GetBank1    ; $3EFA
                 ldy #$00    ; $3EFD
                 tya    ; $3EFF
                 sta ($00),y    ; $3F00
-                sta $C008    ; $3F02
-                jmp $3F10    ; $3F05
+                sta UseMainZP    ; $3F02
+                jmp GetBank2    ; $3F05
                 brk    ; $3F08
-                bit $C08B    ; $3F09
-                bit $C08B    ; $3F0C
+;
+; === GetBank1 ===
+                bit RdWrBank1    ; $3F09
+                bit RdWrBank1    ; $3F0C
                 rts    ; $3F0F
-                bit $C083    ; $3F10
-                bit $C083    ; $3F13
+;
+; === GetBank2 ===
+                bit RdWrBank2    ; $3F10
+                bit RdWrBank2    ; $3F13
                 rts    ; $3F16
+;
+; === MustComplete ===
                 brk    ; $3F17
+;
+; === ReadLineCH ===
                 brk    ; $3F18
                 brk    ; $3F19
+;
+; === CommandList ===
         dfb $37        ; $3F1A  (data/65C02-bit)
         dfb $9B        ; $3F1B  (data/65C02-bit)
+;
+; === CompLineHelp ===
                 and ($41)    ; $3F1C
                 brk    ; $3F1E
-                lda $3F1A    ; $3F1F
-                sta $5987    ; $3F22
+;
+; === MetaX ===
+                lda CommandList    ; $3F1F
+                sta CompList    ; $3F22
                 lda $3F1B    ; $3F25
                 sta $5988    ; $3F28
-                jsr $57CC    ; $3F2B
-                jsr $7A7F    ; $3F2E
+                jsr NewEchoArea    ; $3F2B
+                jsr AnyArgument?    ; $3F2E
                 bne $3F43    ; $3F31
-                lda $7A5E    ; $3F33
+                lda ArgSign    ; $3F33
                 bpl $3F3D    ; $3F36
                 lda #$AD    ; $3F38
-                jsr $2611    ; $3F3A
-                jsr $7B9A    ; $3F3D
-                jsr $7DA7    ; $3F40
-                jsr $5968    ; $3F43
+                jsr CharOut    ; $3F3A
+                jsr PrintArgument    ; $3F3D
+                jsr PrintSpace    ; $3F40
+                jsr PrintMessage    ; $3F43
                 cmp $D8AD    ; $3F46
                 ldy #$00    ; $3F49
                 lda #$32    ; $3F4B
-                sta $3F1C    ; $3F4D
+                sta CompLineHelp    ; $3F4D
                 lda #$41    ; $3F50
                 sta $3F1D    ; $3F52
-                jsr $3FA9    ; $3F55
+                jsr ReadComplete    ; $3F55
                 bne $3F6A    ; $3F58
-                jsr $5A2E    ; $3F5A
+                jsr FunctionRef    ; $3F5A
                 lda $00    ; $3F5D
-                sta $7834    ; $3F5F
+                sta CommandVector    ; $3F5F
                 lda $01    ; $3F62
                 sta $7835    ; $3F64
-                jmp $7898    ; $3F67
+                jmp CallTemp    ; $3F67
                 lda #$01    ; $3F6A
                 rts    ; $3F6C
+;
+; === CharIndex ===
                 brk    ; $3F6D
                 brk    ; $3F6E
                 brk    ; $3F6F
+;
+; === ReadVariable ===
                 lda #$5D    ; $3F70
-                sta $5987    ; $3F72
+                sta CompList    ; $3F72
                 lda #$97    ; $3F75
                 sta $5988    ; $3F77
-                jsr $57CC    ; $3F7A
-                jsr $5968    ; $3F7D
+                jsr NewEchoArea    ; $3F7A
+                jsr PrintMessage    ; $3F7D
                 dec $E1,x    ; $3F80
                 sbc ($E9)    ; $3F82
                 sbc ($E2,x)    ; $3F84
                 cpx $BAE5    ; $3F86
                 brk    ; $3F89
-                jmp $3FA9    ; $3F8A
-                lda $3F1A    ; $3F8D
-                sta $5987    ; $3F90
+                jmp ReadComplete    ; $3F8A
+;
+; === ReadFunction ===
+                lda CommandList    ; $3F8D
+                sta CompList    ; $3F90
                 lda $3F1B    ; $3F93
                 sta $5988    ; $3F96
-                jsr $57CC    ; $3F99
-                jsr $5968    ; $3F9C
+                jsr NewEchoArea    ; $3F99
+                jsr PrintMessage    ; $3F9C
                 dec $F5    ; $3F9F
                 inc $F4E3    ; $3FA1
                 sbc #$EF    ; $3FA4
                 inc: $00BA    ; $3FA6
+;
+; === ReadComplete ===
                 lda #$FF    ; $3FA9
-                sta $3F17    ; $3FAB
-                lda $24    ; $3FAE
-                sta $3F18    ; $3FB0
-                lda $25    ; $3FB3
+                sta MustComplete    ; $3FAB
+;
+; === ReadCompLine ===
+                lda CH    ; $3FAE
+                sta ReadLineCH    ; $3FB0
+                lda CV    ; $3FB3
                 sta $3F19    ; $3FB5
                 lda #$00    ; $3FB8
-                sta $3F6D    ; $3FBA
+                sta CharIndex    ; $3FBA
                 sta $3F6E    ; $3FBD
-                jsr $292E    ; $3FC0
+                jsr BlinkCursor    ; $3FC0
                 jsr $3FE9    ; $3FC3
                 jmp $3FC0    ; $3FC6
-                lda $3F18    ; $3FC9
-                sta $24    ; $3FCC
+;
+; === TypeLine ===
+                lda ReadLineCH    ; $3FC9
+                sta CH    ; $3FCC
                 lda $3F19    ; $3FCE
-                sta $25    ; $3FD1
-                jsr $26E9    ; $3FD3
+                sta CV    ; $3FD1
+                jsr vtab    ; $3FD3
                 ldx #$00    ; $3FD6
                 lda $0200,x    ; $3FD8
-                cpx $3F6D    ; $3FDB
+                cpx CharIndex    ; $3FDB
                 bcs $3FE6    ; $3FDE
-                jsr $2611    ; $3FE0
+                jsr CharOut    ; $3FE0
                 inx    ; $3FE3
                 bne $3FD8    ; $3FE4
-                jmp $2874    ; $3FE6
+                jmp ClearEOP    ; $3FE6
                 ldx #$00    ; $3FE9
                 cmp $4007,x    ; $3FEB
                 beq $3FF5    ; $3FEE
@@ -5785,7 +7142,7 @@
                 lda $4014,x    ; $3FFE
                 sta $01    ; $4001
                 pla    ; $4003
-                jmp $7898    ; $4004
+                jmp CallTemp    ; $4004
         dfb $9B        ; $4007  (data/65C02-bit)
                 ldy #$BF    ; $4008
         dfb $9F        ; $400A  (data/65C02-bit)
@@ -5819,14 +7176,14 @@
         dfb $FF        ; $4035  (data/65C02-bit)
                 beq $4042    ; $4036
                 sta $0200,x    ; $4038
-                inc $3F6D    ; $403B
-                jsr $2611    ; $403E
+                inc CharIndex    ; $403B
+                jsr CharOut    ; $403E
                 rts    ; $4041
-                jmp $29B9    ; $4042
-                jsr $292E    ; $4045
+                jmp Beep    ; $4042
+                jsr BlinkCursor    ; $4045
                 jmp $402D    ; $4048
-                jsr $29B9    ; $404B
-                ldx $3F6D    ; $404E
+                jsr Beep    ; $404B
+                ldx CharIndex    ; $404E
                 beq $4067    ; $4051
                 dex    ; $4053
                 dex    ; $4054
@@ -5835,13 +7192,13 @@
                 cmp #$9B    ; $405A
                 bne $4054    ; $405C
                 inx    ; $405E
-                stx $3F6D    ; $405F
+                stx CharIndex    ; $405F
                 bne $4067    ; $4062
                 stx $3F6E    ; $4064
-                jmp $3FC9    ; $4067
-                jsr $29B9    ; $406A
+                jmp TypeLine    ; $4067
+                jsr Beep    ; $406A
                 lda #$87    ; $406D
-                jsr $2611    ; $406F
+                jsr CharOut    ; $406F
                 lda #$FF    ; $4072
                 sta $3F6F    ; $4074
                 pla    ; $4077
@@ -5850,20 +7207,20 @@
                 pha    ; $407B
                 lda $00    ; $407C
                 pha    ; $407E
-                jsr $57FA    ; $407F
+                jsr CloseEchoArea    ; $407F
                 pla    ; $4082
                 sta $00    ; $4083
                 pla    ; $4085
                 sta $01    ; $4086
-                ldx $3F6D    ; $4088
+                ldx CharIndex    ; $4088
                 lda $3F6F    ; $408B
                 rts    ; $408E
-                ldx $3F6D    ; $408F
+                ldx CharIndex    ; $408F
                 beq $40B1    ; $4092
-                dec $3F6D    ; $4094
+                dec CharIndex    ; $4094
                 ldx #$00    ; $4097
                 lda $0200,x    ; $4099
-                cpx $3F6D    ; $409C
+                cpx CharIndex    ; $409C
                 bcs $40A8    ; $409F
                 cmp #$9B    ; $40A1
                 beq $40AD    ; $40A3
@@ -5871,16 +7228,16 @@
                 bne $4099    ; $40A6
                 lda #$00    ; $40A8
                 sta $3F6E    ; $40AA
-                jsr $3FC9    ; $40AD
+                jsr TypeLine    ; $40AD
                 rts    ; $40B0
-                jsr $2871    ; $40B1
+                jsr ClearPage    ; $40B1
                 lda #$FF    ; $40B4
                 jmp $4074    ; $40B6
                 bit $3F6E    ; $40B9
                 bpl $40C1    ; $40BC
                 jmp $402D    ; $40BE
                 jsr $425F    ; $40C1
-                jsr $5AE5    ; $40C4
+                jsr SI:CompleteMe    ; $40C4
                 bne $40EE    ; $40C7
                 lda #$FF    ; $40C9
                 sta $3F6E    ; $40CB
@@ -5888,55 +7245,55 @@
                 sta $40E4    ; $40D0
                 lda $01    ; $40D3
                 sta $40E5    ; $40D5
-                stx $3F6D    ; $40D8
+                stx CharIndex    ; $40D8
                 jsr $425F    ; $40DB
-                inc $3F6D    ; $40DE
-                jmp $3FC9    ; $40E1
+                inc CharIndex    ; $40DE
+                jmp TypeLine    ; $40E1
                 brk    ; $40E4
                 brk    ; $40E5
                 bit $3F6E    ; $40E6
                 bpl $40EE    ; $40E9
                 jmp $402D    ; $40EB
                 jsr $425F    ; $40EE
-                jsr $5AE9    ; $40F1
+                jsr SI:CompleteSp    ; $40F1
                 beq $410D    ; $40F4
-                ldx $3F6D    ; $40F6
+                ldx CharIndex    ; $40F6
                 lda #$A0    ; $40F9
                 sta $0200,x    ; $40FB
                 lda #$9B    ; $40FE
                 sta $0201,x    ; $4100
-                jsr $5AE9    ; $4103
+                jsr SI:CompleteSp    ; $4103
                 beq $410D    ; $4106
-                cpx $3F6D    ; $4108
+                cpx CharIndex    ; $4108
                 beq $411E    ; $410B
-                stx $3F6D    ; $410D
-                jsr $3FC9    ; $4110
-                lda $598B    ; $4113
+                stx CharIndex    ; $410D
+                jsr TypeLine    ; $4110
+                lda CompCount    ; $4113
                 cmp #$01    ; $4116
                 bne $411D    ; $4118
                 jmp $40B9    ; $411A
                 rts    ; $411D
-                jsr $29B9    ; $411E
-                jmp $3FC9    ; $4121
-                jmp ($3F1C)    ; $4124
+                jsr Beep    ; $411E
+                jmp TypeLine    ; $4121
+                jmp (CompLineHelp)    ; $4124
                 ldx $3F1E    ; $4127
                 txs    ; $412A
-                jsr $2B19    ; $412B
-                jsr $57D8    ; $412E
+                jsr CloseTypeout1    ; $412B
+                jsr OpenEchoArea    ; $412E
                 rts    ; $4131
                 tsx    ; $4132
                 stx $3F1E    ; $4133
-                jsr $57FA    ; $4136
-                jsr $2AC4    ; $4139
+                jsr CloseEchoArea    ; $4136
+                jsr OpenTypeout    ; $4139
                 lda #$27    ; $413C
-                sta $2A97    ; $413E
+                sta TypeoutAbort    ; $413E
                 lda #$41    ; $4141
                 sta $2A98    ; $4143
                 jsr $425F    ; $4146
-                jsr $5AE5    ; $4149
-                lda $598B    ; $414C
+                jsr SI:CompleteMe    ; $4149
+                lda CompCount    ; $414C
                 bne $417F    ; $414F
-                jsr $5968    ; $4151
+                jsr PrintMessage    ; $4151
         dfb $D4        ; $4154  (data/65C02-bit)
                 inx    ; $4155
                 sbc $F2    ; $4156
@@ -5963,7 +7320,7 @@
                 cmp #$01    ; $417F
                 beq $4186    ; $4181
                 jmp $41EA    ; $4183
-                jsr $5968    ; $4186
+                jsr PrintMessage    ; $4186
                 sta $E8D4    ; $4189
                 sbc $A0    ; $418C
         dfb $EF        ; $418E  (data/65C02-bit)
@@ -5996,23 +7353,23 @@
                 sbc #$F3    ; $41BE
                 tsx    ; $41C0
                 sta: $008D    ; $41C1
-                jsr $5A3D    ; $41C4
-                lda $598C    ; $41C7
+                jsr PopCompPoint    ; $41C4
+                lda PrintCompDoc    ; $41C7
                 pha    ; $41CA
-                lda $598B    ; $41CB
+                lda CompCount    ; $41CB
                 pha    ; $41CE
-                jsr $598F    ; $41CF
+                jsr DCIStringOut    ; $41CF
                 lda #$1E    ; $41D2
-                sta $24    ; $41D4
-                sta $2A9F    ; $41D6
+                sta CH    ; $41D4
+                sta TypeoutCH    ; $41D6
                 pla    ; $41D9
-                sta $598B    ; $41DA
+                sta CompCount    ; $41DA
                 pla    ; $41DD
-                sta $598C    ; $41DE
-                jsr $598C    ; $41E1
-                jsr $7DA3    ; $41E4
+                sta PrintCompDoc    ; $41DE
+                jsr PrintCompDoc    ; $41E1
+                jsr PrintReturn    ; $41E4
                 jmp $4178    ; $41E7
-                jsr $5968    ; $41EA
+                jsr PrintMessage    ; $41EA
         dfb $D4        ; $41ED  (data/65C02-bit)
                 inx    ; $41EE
                 sbc $A0    ; $41EF
@@ -6046,40 +7403,40 @@
                 sta: $008D    ; $4221
                 lda #$00    ; $4224
                 sta $425E    ; $4226
-                jsr $5A3D    ; $4229
+                jsr PopCompPoint    ; $4229
                 bne $424C    ; $422C
-                jsr $598F    ; $422E
+                jsr DCIStringOut    ; $422E
                 lda $425E    ; $4231
                 eor #$FF    ; $4234
                 sta $425E    ; $4236
                 bne $4241    ; $4239
-                jsr $7DA3    ; $423B
+                jsr PrintReturn    ; $423B
                 jmp $4229    ; $423E
-                lda $21    ; $4241
+                lda WindowRgt    ; $4241
                 lsr    ; $4243
-                sta $24    ; $4244
-                sta $2A9F    ; $4246
+                sta CH    ; $4244
+                sta TypeoutCH    ; $4246
                 jmp $4229    ; $4249
                 lda $425E    ; $424C
                 beq $4254    ; $424F
-                jsr $7DA3    ; $4251
-                jsr $7D97    ; $4254
-                jsr $2B19    ; $4257
-                jsr $57D8    ; $425A
+                jsr PrintReturn    ; $4251
+                jsr PrintDone    ; $4254
+                jsr CloseTypeout1    ; $4257
+                jsr OpenEchoArea    ; $425A
                 rts    ; $425D
                 brk    ; $425E
-                ldx $3F6D    ; $425F
+                ldx CharIndex    ; $425F
                 lda #$9B    ; $4262
                 sta $0200,x    ; $4264
                 rts    ; $4267
                 jsr $425F    ; $4268
                 lda $3F6E    ; $426B
                 bmi $4281    ; $426E
-                jsr $5AE5    ; $4270
+                jsr SI:CompleteMe    ; $4270
                 bne $42A1    ; $4273
-                stx $3F6D    ; $4275
+                stx CharIndex    ; $4275
                 jsr $425F    ; $4278
-                jsr $5A3D    ; $427B
+                jsr PopCompPoint    ; $427B
                 jmp $428B    ; $427E
                 lda $40E4    ; $4281
                 sta $00    ; $4284
@@ -6090,30 +7447,34 @@
                 lda $00    ; $428E
                 pha    ; $4290
                 lda #$FF    ; $4291
-                jsr $42B8    ; $4293
+                jsr GiveArgs    ; $4293
                 pla    ; $4296
                 sta $00    ; $4297
                 pla    ; $4299
                 sta $01    ; $429A
                 lda #$00    ; $429C
                 jmp $4074    ; $429E
-                lda $3F17    ; $42A1
+                lda MustComplete    ; $42A1
                 bmi $42AA    ; $42A4
                 lda #$FF    ; $42A6
                 bne $429E    ; $42A8
-                jsr $29B9    ; $42AA
+                jsr Beep    ; $42AA
                 rts    ; $42AD
-                stx $3F6D    ; $42AE
+;
+; === PushArg ===
+                stx CharIndex    ; $42AE
                 jsr $425F    ; $42B1
                 ldx #$FF    ; $42B4
                 ldy #$00    ; $42B6
+;
+; === GiveArgs ===
                 php    ; $42B8
-                jsr $7C29    ; $42B9
+                jsr InitStrArgs    ; $42B9
                 plp    ; $42BC
                 beq $42D1    ; $42BD
                 ldx #$00    ; $42BF
                 lda $0200,x    ; $42C1
-                cpx $3F6D    ; $42C4
+                cpx CharIndex    ; $42C4
                 bcs $42D0    ; $42C7
                 cmp #$9B    ; $42C9
                 beq $42D1    ; $42CB
@@ -6122,63 +7483,71 @@
                 rts    ; $42D0
                 ldy #$00    ; $42D1
                 inx    ; $42D3
-                cpx $3F6D    ; $42D4
+                cpx CharIndex    ; $42D4
                 beq $42EF    ; $42D7
-                inc $7C27    ; $42D9
+                inc ArgCount    ; $42D9
                 lda $0200,x    ; $42DC
-                sta $7BA7,y    ; $42DF
+                sta StringArgs,y    ; $42DF
                 iny    ; $42E2
                 bmi $42F5    ; $42E3
                 inx    ; $42E5
                 cmp #$9B    ; $42E6
                 beq $42D4    ; $42E8
-                cpx $3F6D    ; $42EA
+                cpx CharIndex    ; $42EA
                 bcc $42DC    ; $42ED
                 lda #$9B    ; $42EF
-                sta $7BA7,y    ; $42F1
+                sta StringArgs,y    ; $42F1
                 rts    ; $42F4
                 dey    ; $42F5
                 bne $42EF    ; $42F6
+;
+; === BotOfRam ===
                 ora ($08,x)    ; $42F8
+;
+; === TopOfRam ===
         dfb $FF        ; $42FA  (data/65C02-bit)
         dfb $BF        ; $42FB  (data/65C02-bit)
+;
+; === PointToBInfo ===
                 lda #$01    ; $42FC
-                sta $5E    ; $42FE
+                sta BuffPoint    ; $42FE
                 lda #$08    ; $4300
                 sta $5F    ; $4302
                 txa    ; $4304
                 beq $4315    ; $4305
-                lda $5E    ; $4307
+                lda BuffPoint    ; $4307
                 clc    ; $4309
                 adc #$84    ; $430A
-                sta $5E    ; $430C
+                sta BuffPoint    ; $430C
                 bcc $4312    ; $430E
                 inc $5F    ; $4310
                 dex    ; $4312
                 bne $4307    ; $4313
                 rts    ; $4315
+;
+; === InitBuffers ===
                 ldx #$00    ; $4316
                 stx $00    ; $4318
-                stx $0F3B    ; $431A
-                stx $0F3A    ; $431D
+                stx LastBuffer    ; $431A
+                stx SelectedBuff    ; $431D
                 lda #$00    ; $4320
-                sta $0F3C,x    ; $4322
-                jsr $42FC    ; $4325
+                sta BuffActList,x    ; $4322
+                jsr PointToBInfo    ; $4325
                 ldy #$00    ; $4328
                 tya    ; $432A
-                sta ($5E),y    ; $432B
+                sta (BuffPoint),y    ; $432B
                 iny    ; $432D
                 cpy #$84    ; $432E
                 bcc $432B    ; $4330
                 ldy #$12    ; $4332
                 lda #$14    ; $4334
                 clc    ; $4336
-                adc $5E    ; $4337
-                sta ($5E),y    ; $4339
+                adc BuffPoint    ; $4337
+                sta (BuffPoint),y    ; $4339
                 iny    ; $433B
                 lda $5F    ; $433C
                 adc #$00    ; $433E
-                sta ($5E),y    ; $4340
+                sta (BuffPoint),y    ; $4340
                 inc $00    ; $4342
                 ldx $00    ; $4344
                 cpx #$0E    ; $4346
@@ -6186,111 +7555,117 @@
                 rts    ; $434A
                 brk    ; $434B
                 brk    ; $434C
-                jsr $42FC    ; $434D
+                jsr PointToBInfo    ; $434D
                 ldy #$0E    ; $4350
                 jsr $4357    ; $4352
                 ldy #$10    ; $4355
-                lda ($5E),y    ; $4357
+                lda (BuffPoint),y    ; $4357
                 sec    ; $4359
                 sbc $434B    ; $435A
-                sta ($5E),y    ; $435D
+                sta (BuffPoint),y    ; $435D
                 iny    ; $435F
-                lda ($5E),y    ; $4360
+                lda (BuffPoint),y    ; $4360
                 sbc $434C    ; $4362
-                sta ($5E),y    ; $4365
+                sta (BuffPoint),y    ; $4365
                 rts    ; $4367
-                jsr $42FC    ; $4368
+                jsr PointToBInfo    ; $4368
                 ldy #$0E    ; $436B
                 jsr $4372    ; $436D
                 ldy #$10    ; $4370
-                lda ($5E),y    ; $4372
+                lda (BuffPoint),y    ; $4372
                 clc    ; $4374
                 adc $434B    ; $4375
-                sta ($5E),y    ; $4378
+                sta (BuffPoint),y    ; $4378
                 iny    ; $437A
-                lda ($5E),y    ; $437B
+                lda (BuffPoint),y    ; $437B
                 adc $434C    ; $437D
-                sta ($5E),y    ; $4380
+                sta (BuffPoint),y    ; $4380
                 rts    ; $4382
-                jsr $42FC    ; $4383
+;
+; === LogBuffer ===
+                jsr PointToBInfo    ; $4383
                 ldy #$06    ; $4386
                 lda #$00    ; $4388
-                sta ($5E),y    ; $438A
+                sta (BuffPoint),y    ; $438A
                 iny    ; $438C
-                sta ($5E),y    ; $438D
+                sta (BuffPoint),y    ; $438D
                 ldy #$00    ; $438F
                 jsr $439B    ; $4391
                 ldy #$0A    ; $4394
                 jsr $439B    ; $4396
                 ldy #$02    ; $4399
-                sty $60    ; $439B
-                lda ($5E),y    ; $439D
+                sty TheBuffer    ; $439B
+                lda (BuffPoint),y    ; $439D
                 sec    ; $439F
                 ldy #$0E    ; $43A0
-                sbc ($5E),y    ; $43A2
-                ldy $60    ; $43A4
-                sta ($5E),y    ; $43A6
+                sbc (BuffPoint),y    ; $43A2
+                ldy TheBuffer    ; $43A4
+                sta (BuffPoint),y    ; $43A6
                 iny    ; $43A8
-                sty $60    ; $43A9
-                lda ($5E),y    ; $43AB
+                sty TheBuffer    ; $43A9
+                lda (BuffPoint),y    ; $43AB
                 ldy #$0F    ; $43AD
-                sbc ($5E),y    ; $43AF
-                ldy $60    ; $43B1
-                sta ($5E),y    ; $43B3
+                sbc (BuffPoint),y    ; $43AF
+                ldy TheBuffer    ; $43B1
+                sta (BuffPoint),y    ; $43B3
                 rts    ; $43B5
-                jsr $42FC    ; $43B6
+;
+; === PhysBuffer ===
+                jsr PointToBInfo    ; $43B6
                 ldy #$0E    ; $43B9
-                lda ($5E),y    ; $43BB
+                lda (BuffPoint),y    ; $43BB
                 pha    ; $43BD
                 iny    ; $43BE
-                lda ($5E),y    ; $43BF
+                lda (BuffPoint),y    ; $43BF
                 ldy #$07    ; $43C1
-                sta ($5E),y    ; $43C3
+                sta (BuffPoint),y    ; $43C3
                 dey    ; $43C5
                 pla    ; $43C6
-                sta ($5E),y    ; $43C7
+                sta (BuffPoint),y    ; $43C7
                 ldy #$00    ; $43C9
                 jsr $43D5    ; $43CB
                 ldy #$0A    ; $43CE
                 jsr $43D5    ; $43D0
                 ldy #$02    ; $43D3
-                sty $60    ; $43D5
-                lda ($5E),y    ; $43D7
+                sty TheBuffer    ; $43D5
+                lda (BuffPoint),y    ; $43D7
                 clc    ; $43D9
                 ldy #$0E    ; $43DA
-                adc ($5E),y    ; $43DC
-                ldy $60    ; $43DE
-                sta ($5E),y    ; $43E0
+                adc (BuffPoint),y    ; $43DC
+                ldy TheBuffer    ; $43DE
+                sta (BuffPoint),y    ; $43E0
                 iny    ; $43E2
-                sty $60    ; $43E3
-                lda ($5E),y    ; $43E5
+                sty TheBuffer    ; $43E3
+                lda (BuffPoint),y    ; $43E5
                 ldy #$0F    ; $43E7
-                adc ($5E),y    ; $43E9
-                ldy $60    ; $43EB
-                sta ($5E),y    ; $43ED
+                adc (BuffPoint),y    ; $43E9
+                ldy TheBuffer    ; $43EB
+                sta (BuffPoint),y    ; $43ED
                 rts    ; $43EF
-                jsr $4CBE    ; $43F0
-                ldx $0F3A    ; $43F3
-                stx $0F3B    ; $43F6
-                jsr $42FC    ; $43F9
-                lda $4CFA    ; $43FC
-                sta $64    ; $43FF
+;
+; === Deselect ===
+                jsr KillGap    ; $43F0
+                ldx SelectedBuff    ; $43F3
+                stx LastBuffer    ; $43F6
+                jsr PointToBInfo    ; $43F9
+                lda MarkStackPntr    ; $43FC
+                sta MarkPnt    ; $43FF
                 ldy #$00    ; $4401
-                lda: $0060,y    ; $4403
-                sta ($5E),y    ; $4406
+                lda: TheBuffer,y    ; $4403
+                sta (BuffPoint),y    ; $4406
                 iny    ; $4408
                 cpy #$12    ; $4409
                 bcc $4403    ; $440B
                 ldy #$10    ; $440D
-                lda $6A    ; $440F
-                sta ($5E),y    ; $4411
+                lda GapTop    ; $440F
+                sta (BuffPoint),y    ; $4411
                 iny    ; $4413
                 lda $6B    ; $4414
-                sta ($5E),y    ; $4416
+                sta (BuffPoint),y    ; $4416
                 ldy #$56    ; $4418
                 ldx #$00    ; $441A
-                lda $4CEA,x    ; $441C
-                sta ($5E),y    ; $441F
+                lda MarkStack,x    ; $441C
+                sta (BuffPoint),y    ; $441F
                 iny    ; $4421
                 inx    ; $4422
                 cpx #$10    ; $4423
@@ -6298,42 +7673,44 @@
                 jsr $4386    ; $4427
                 rts    ; $442A
                 brk    ; $442B
-                cpx $0F3A    ; $442C
-                bne $4432    ; $442F
+                cpx SelectedBuff    ; $442C
+                bne ForceSelect    ; $442F
                 rts    ; $4431
+;
+; === ForceSelect ===
                 clv    ; $4432
                 stx $442B    ; $4433
                 jmp $4442    ; $4436
-                ldx $0F3A    ; $4439
+                ldx SelectedBuff    ; $4439
                 stx $442B    ; $443C
                 bit $4431    ; $443F
                 bvs $44A9    ; $4442
                 bcs $4449    ; $4444
                 jmp $452B    ; $4446
-                ldx $0F3A    ; $4449
-                jsr $42FC    ; $444C
+                ldx SelectedBuff    ; $4449
+                jsr PointToBInfo    ; $444C
                 ldy #$10    ; $444F
-                lda ($5E),y    ; $4451
+                lda (BuffPoint),y    ; $4451
                 sta $475E    ; $4453
                 iny    ; $4456
-                lda ($5E),y    ; $4457
+                lda (BuffPoint),y    ; $4457
                 sta $475F    ; $4459
-                ldx $0F3A    ; $445C
+                ldx SelectedBuff    ; $445C
                 inx    ; $445F
-                jsr $42FC    ; $4460
+                jsr PointToBInfo    ; $4460
                 ldy #$0E    ; $4463
-                lda ($5E),y    ; $4465
+                lda (BuffPoint),y    ; $4465
                 sta $475A    ; $4467
                 iny    ; $446A
-                lda ($5E),y    ; $446B
+                lda (BuffPoint),y    ; $446B
                 sta $475B    ; $446D
                 ldx $442B    ; $4470
-                jsr $42FC    ; $4473
+                jsr PointToBInfo    ; $4473
                 ldy #$10    ; $4476
-                lda ($5E),y    ; $4478
+                lda (BuffPoint),y    ; $4478
                 sta $475C    ; $447A
                 iny    ; $447D
-                lda ($5E),y    ; $447E
+                lda (BuffPoint),y    ; $447E
                 sta $475D    ; $4480
                 lda $475A    ; $4483
                 sec    ; $4486
@@ -6343,7 +7720,7 @@
                 sbc $475F    ; $4490
                 sta $434C    ; $4493
                 jsr $4760    ; $4496
-                ldx $0F3A    ; $4499
+                ldx SelectedBuff    ; $4499
                 inx    ; $449C
                 txa    ; $449D
                 pha    ; $449E
@@ -6353,82 +7730,82 @@
                 cpx $442B    ; $44A4
                 bcc $449C    ; $44A7
                 ldx $442B    ; $44A9
-                stx $0F3A    ; $44AC
-                jsr $43B6    ; $44AF
-                ldx $0F3A    ; $44B2
+                stx SelectedBuff    ; $44AC
+                jsr PhysBuffer    ; $44AF
+                ldx SelectedBuff    ; $44B2
                 inx    ; $44B5
-                lda $42FA    ; $44B6
+                lda TopOfRam    ; $44B6
                 sta $00    ; $44B9
                 lda $42FB    ; $44BB
                 sta $01    ; $44BE
                 cpx #$0E    ; $44C0
                 bcs $44D7    ; $44C2
-                lda $0F3C,x    ; $44C4
+                lda BuffActList,x    ; $44C4
                 beq $44D7    ; $44C7
-                jsr $42FC    ; $44C9
+                jsr PointToBInfo    ; $44C9
                 ldy #$0E    ; $44CC
-                lda ($5E),y    ; $44CE
+                lda (BuffPoint),y    ; $44CE
                 sta $00    ; $44D0
                 iny    ; $44D2
-                lda ($5E),y    ; $44D3
+                lda (BuffPoint),y    ; $44D3
                 sta $01    ; $44D5
-                ldx $0F3A    ; $44D7
-                jsr $42FC    ; $44DA
+                ldx SelectedBuff    ; $44D7
+                jsr PointToBInfo    ; $44DA
                 ldy #$00    ; $44DD
-                lda ($5E),y    ; $44DF
-                sta: $0060,y    ; $44E1
+                lda (BuffPoint),y    ; $44DF
+                sta: TheBuffer,y    ; $44E1
                 iny    ; $44E4
                 cpy #$14    ; $44E5
                 bcc $44DF    ; $44E7
                 ldy #$56    ; $44E9
                 ldx #$00    ; $44EB
-                lda ($5E),y    ; $44ED
-                sta $4CEA,x    ; $44EF
+                lda (BuffPoint),y    ; $44ED
+                sta MarkStack,x    ; $44EF
                 iny    ; $44F2
                 inx    ; $44F3
                 cpx #$10    ; $44F4
                 bcc $44ED    ; $44F6
-                lda $64    ; $44F8
-                sta $4CFA    ; $44FA
+                lda MarkPnt    ; $44F8
+                sta MarkStackPntr    ; $44FA
                 ldx #$FF    ; $44FD
                 lda #$02    ; $44FF
-                jsr $4C35    ; $4501
+                jsr BuffFlagOff?    ; $4501
                 beq $4507    ; $4504
                 txa    ; $4506
-                sta $4B83    ; $4507
+                sta Modified?    ; $4507
                 lda $00    ; $450A
                 bne $4510    ; $450C
                 dec $01    ; $450E
                 dec $00    ; $4510
                 lda $00    ; $4512
-                sta $68    ; $4514
-                sta $70    ; $4516
-                sta $6C    ; $4518
+                sta BuffBot    ; $4514
+                sta PhysBuffBot    ; $4516
+                sta GapBot    ; $4518
                 lda $01    ; $451A
                 sta $69    ; $451C
                 sta $71    ; $451E
                 sta $6D    ; $4520
-                lda $6C    ; $4522
+                lda GapBot    ; $4522
                 bne $4528    ; $4524
                 dec $6D    ; $4526
-                dec $6C    ; $4528
+                dec GapBot    ; $4528
                 rts    ; $452A
-                ldx $0F3A    ; $452B
+                ldx SelectedBuff    ; $452B
                 inx    ; $452E
-                lda $42FA    ; $452F
+                lda TopOfRam    ; $452F
                 sta $00    ; $4532
                 lda $42FB    ; $4534
                 sta $01    ; $4537
                 cpx #$0E    ; $4539
                 bcs $4558    ; $453B
-                lda $0F3C,x    ; $453D
+                lda BuffActList,x    ; $453D
                 beq $4558    ; $4540
-                jsr $42FC    ; $4542
+                jsr PointToBInfo    ; $4542
                 ldy #$0E    ; $4545
-                lda ($5E),y    ; $4547
+                lda (BuffPoint),y    ; $4547
                 sta $00    ; $4549
                 iny    ; $454B
-                lda ($5E),y    ; $454C
+                lda (BuffPoint),y    ; $454C
                 sta $01    ; $454E
                 lda $00    ; $4550
                 bne $4556    ; $4552
@@ -6438,21 +7815,21 @@
                 sta $475E    ; $455A
                 lda $01    ; $455D
                 sta $475F    ; $455F
-                ldx $0F3A    ; $4562
-                jsr $42FC    ; $4565
+                ldx SelectedBuff    ; $4562
+                jsr PointToBInfo    ; $4565
                 ldy #$10    ; $4568
-                lda ($5E),y    ; $456A
+                lda (BuffPoint),y    ; $456A
                 sta $475A    ; $456C
                 iny    ; $456F
-                lda ($5E),y    ; $4570
+                lda (BuffPoint),y    ; $4570
                 sta $475B    ; $4572
                 ldx $442B    ; $4575
-                jsr $42FC    ; $4578
+                jsr PointToBInfo    ; $4578
                 ldy #$10    ; $457B
-                lda ($5E),y    ; $457D
+                lda (BuffPoint),y    ; $457D
                 sta $475C    ; $457F
                 iny    ; $4582
-                lda ($5E),y    ; $4583
+                lda (BuffPoint),y    ; $4583
                 sta $475D    ; $4585
                 lda $475E    ; $4588
                 sec    ; $458B
@@ -6462,7 +7839,7 @@
                 sbc $475B    ; $4595
                 sta $434C    ; $4598
                 jsr $4796    ; $459B
-                ldx $0F3A    ; $459E
+                ldx SelectedBuff    ; $459E
                 txa    ; $45A1
                 pha    ; $45A2
                 jsr $4368    ; $45A3
@@ -6472,68 +7849,80 @@
                 cpx $442B    ; $45A9
                 bne $45A1    ; $45AC
                 jmp $44A9    ; $45AE
+;
+; === SelectBuffer ===
                 lda #$00    ; $45B1
                 beq $45B7    ; $45B3
+;
+; === SelectNamed ===
                 lda #$FF    ; $45B5
                 bmi $45E0    ; $45B7
-                jsr $7C32    ; $45B9
+                jsr GetStrArg    ; $45B9
                 beq $45D2    ; $45BC
-                jsr $4B02    ; $45BE
+                jsr DefBuffer    ; $45BE
                 jsr $4B2A    ; $45C1
         dfb $D3        ; $45C4  (data/65C02-bit)
                 sbc $EC    ; $45C5
                 sbc $E3    ; $45C7
                 stz $F0,x    ; $45C9
-                asl $20    ; $45CB
+                asl WindowLft    ; $45CB
                 lda $A929,y    ; $45CD
-                ora ($60,x)    ; $45D0
+                ora (TheBuffer,x)    ; $45D0
                 lda #$00    ; $45D2
                 sta $0200,x    ; $45D4
                 txa    ; $45D7
                 bne $45E0    ; $45D8
-                ldx $0F3B    ; $45DA
-                jmp $45EB    ; $45DD
-                jsr $47E7    ; $45E0
-                beq $45EB    ; $45E3
-                jsr $43F0    ; $45E5
-                jmp $4624    ; $45E8
-                jsr $45F4    ; $45EB
-                jsr $300C    ; $45EE
+                ldx LastBuffer    ; $45DA
+                jmp SI:OpenBuff    ; $45DD
+                jsr FindBuffer    ; $45E0
+                beq SI:OpenBuff    ; $45E3
+                jsr Deselect    ; $45E5
+                jmp CreateBuffer    ; $45E8
+;
+; === SI:OpenBuff ===
+                jsr IN:OpenBuff    ; $45EB
+                jsr DisplayPage    ; $45EE
                 lda #$01    ; $45F1
                 rts    ; $45F3
-                jsr $460F    ; $45F4
-                jsr $4C52    ; $45F7
+;
+; === IN:OpenBuff ===
+                jsr SI:SelectB    ; $45F4
+                jsr SetGap    ; $45F7
                 ldy #$40    ; $45FA
-                lda ($72),y    ; $45FC
+                lda (BuffData),y    ; $45FC
                 pha    ; $45FE
                 ldy #$3F    ; $45FF
-                lda ($72),y    ; $4601
-                jsr $829C    ; $4603
+                lda (BuffData),y    ; $4601
+                jsr SelectMode    ; $4603
                 ldy #$40    ; $4606
                 pla    ; $4608
-                sta ($72),y    ; $4609
-                jsr $537E    ; $460B
+                sta (BuffData),y    ; $4609
+                jsr MakeModeLine    ; $460B
                 rts    ; $460E
+;
+; === SI:SelectB ===
                 txa    ; $460F
                 pha    ; $4610
-                jsr $4C1E    ; $4611
+                jsr ClrLastKill    ; $4611
                 pla    ; $4614
-                cmp $0F3A    ; $4615
+                cmp SelectedBuff    ; $4615
                 beq $4623    ; $4618
                 pha    ; $461A
-                jsr $43F0    ; $461B
+                jsr Deselect    ; $461B
                 pla    ; $461E
                 tax    ; $461F
                 jsr $442C    ; $4620
                 rts    ; $4623
-                lda $0F3A    ; $4624
+;
+; === CreateBuffer ===
+                lda SelectedBuff    ; $4624
                 sta $472C    ; $4627
                 ldy #$3F    ; $462A
-                lda ($72),y    ; $462C
+                lda (BuffData),y    ; $462C
                 sta $472B    ; $462E
                 ldx #$00    ; $4631
                 stx $472D    ; $4633
-                lda $0F3C,x    ; $4636
+                lda BuffActList,x    ; $4636
                 ora $472D    ; $4639
                 sta $472D    ; $463C
                 inx    ; $463F
@@ -6542,51 +7931,51 @@
                 lda $472D    ; $4644
                 bmi $4651    ; $4647
                 lda #$00    ; $4649
-                sta $0F3B,x    ; $464B
+                sta LastBuffer,x    ; $464B
                 dex    ; $464E
                 bne $464B    ; $464F
                 ldx #$00    ; $4651
-                lda $0F3C,x    ; $4653
+                lda BuffActList,x    ; $4653
                 bpl $4666    ; $4656
                 inx    ; $4658
                 cpx #$0E    ; $4659
                 bcc $4653    ; $465B
-                jsr $29B9    ; $465D
+                jsr Beep    ; $465D
                 jsr $4439    ; $4660
                 lda #$01    ; $4663
                 rts    ; $4665
                 lda #$FF    ; $4666
-                sta $0F3C,x    ; $4668
+                sta BuffActList,x    ; $4668
                 stx $472E    ; $466B
                 txa    ; $466E
                 bne $467E    ; $466F
-                lda $8147    ; $4671
+                lda DefMajor    ; $4671
                 sta $472B    ; $4674
                 bit $472D    ; $4677
                 bpl $468A    ; $467A
                 bmi $4684    ; $467C
                 dex    ; $467E
-                cpx $0F3A    ; $467F
+                cpx SelectedBuff    ; $467F
                 beq $468A    ; $4682
                 jsr $442C    ; $4684
-                jsr $43F0    ; $4687
+                jsr Deselect    ; $4687
                 ldx $472E    ; $468A
                 bne $4699    ; $468D
-                lda $42F8    ; $468F
-                sta $6A    ; $4692
+                lda BotOfRam    ; $468F
+                sta GapTop    ; $4692
                 lda $42F9    ; $4694
                 sta $6B    ; $4697
-                lda $6A    ; $4699
-                sta $66    ; $469B
-                sta $60    ; $469D
-                sta $62    ; $469F
-                sta $6E    ; $46A1
+                lda GapTop    ; $4699
+                sta BuffTop    ; $469B
+                sta TheBuffer    ; $469D
+                sta PageTop    ; $469F
+                sta PhysBuffTop    ; $46A1
                 lda $6B    ; $46A3
                 sta $67    ; $46A5
                 sta $61    ; $46A7
                 sta $63    ; $46A9
                 sta $6F    ; $46AB
-                lda $42FA    ; $46AD
+                lda TopOfRam    ; $46AD
                 sta $00    ; $46B0
                 lda $42FB    ; $46B2
                 sta $01    ; $46B5
@@ -6594,53 +7983,53 @@
                 inx    ; $46BA
                 cpx #$0E    ; $46BB
                 beq $46D2    ; $46BD
-                lda $0F3C,x    ; $46BF
+                lda BuffActList,x    ; $46BF
                 beq $46D2    ; $46C2
-                jsr $42FC    ; $46C4
+                jsr PointToBInfo    ; $46C4
                 ldy #$0E    ; $46C7
-                lda ($5E),y    ; $46C9
+                lda (BuffPoint),y    ; $46C9
                 sta $00    ; $46CB
                 iny    ; $46CD
-                lda ($5E),y    ; $46CE
+                lda (BuffPoint),y    ; $46CE
                 sta $01    ; $46D0
                 lda $01    ; $46D2
                 sta $71    ; $46D4
                 sta $6D    ; $46D6
                 sta $69    ; $46D8
                 lda $00    ; $46DA
-                sta $70    ; $46DC
-                sta $6C    ; $46DE
-                sta $68    ; $46E0
-                lda $6C    ; $46E2
+                sta PhysBuffBot    ; $46DC
+                sta GapBot    ; $46DE
+                sta BuffBot    ; $46E0
+                lda GapBot    ; $46E2
                 bne $46E8    ; $46E4
                 dec $6D    ; $46E6
-                dec $6C    ; $46E8
+                dec GapBot    ; $46E8
                 lda $472C    ; $46EA
-                sta $0F3B    ; $46ED
+                sta LastBuffer    ; $46ED
                 ldx $472E    ; $46F0
-                stx $0F3A    ; $46F3
-                jsr $42FC    ; $46F6
+                stx SelectedBuff    ; $46F3
+                jsr PointToBInfo    ; $46F6
                 ldy #$00    ; $46F9
-                lda: $0060,y    ; $46FB
-                sta ($5E),y    ; $46FE
+                lda: TheBuffer,y    ; $46FB
+                sta (BuffPoint),y    ; $46FE
                 iny    ; $4700
                 cpy #$12    ; $4701
                 bcc $46FB    ; $4703
-                lda ($5E),y    ; $4705
-                sta $72    ; $4707
+                lda (BuffPoint),y    ; $4705
+                sta BuffData    ; $4707
                 iny    ; $4709
-                lda ($5E),y    ; $470A
+                lda (BuffPoint),y    ; $470A
                 sta $73    ; $470C
                 lda #$00    ; $470E
                 ldy #$40    ; $4710
-                sta ($72),y    ; $4712
+                sta (BuffData),y    ; $4712
                 ldy #$41    ; $4714
-                sta ($72),y    ; $4716
+                sta (BuffData),y    ; $4716
                 ldy #$00    ; $4718
-                sta ($72),y    ; $471A
-                sta $4B83    ; $471C
+                sta (BuffData),y    ; $471A
+                sta Modified?    ; $471C
                 lda $472B    ; $471F
-                jsr $829C    ; $4722
+                jsr SelectMode    ; $4722
                 jsr $472F    ; $4725
                 lda #$06    ; $4728
                 rts    ; $472A
@@ -6654,15 +8043,17 @@
                 beq $4742    ; $4736
                 cpx #$1D    ; $4738
                 bcs $4742    ; $473A
-                sta ($72),y    ; $473C
+                sta (BuffData),y    ; $473C
                 inx    ; $473E
                 iny    ; $473F
                 bne $4733    ; $4740
                 lda #$00    ; $4742
-                sta ($72),y    ; $4744
-                jsr $537E    ; $4746
+                sta (BuffData),y    ; $4744
+                jsr MakeModeLine    ; $4746
                 rts    ; $4749
-                jsr $7C32    ; $474A
+;
+; === RenameBuffer ===
+                jsr GetStrArg    ; $474A
                 bne $4757    ; $474D
                 lda #$00    ; $474F
                 sta $0200,x    ; $4751
@@ -6729,26 +8120,28 @@
                 jmp $47B8    ; $47CE
                 jsr $D009    ; $47D1
                 jsr $D054    ; $47D4
-                jsr $2843    ; $47D7
+                jsr GatherTYI    ; $47D7
                 lda $02    ; $47DA
                 cmp $475C    ; $47DC
                 bne $47E6    ; $47DF
                 lda $03    ; $47E1
                 cmp $475D    ; $47E3
                 rts    ; $47E6
+;
+; === FindBuffer ===
                 ldx #$00    ; $47E7
                 stx $4828    ; $47E9
                 ldx $4828    ; $47EC
-                lda $0F3C,x    ; $47EF
+                lda BuffActList,x    ; $47EF
                 bpl $481A    ; $47F2
-                jsr $42FC    ; $47F4
+                jsr PointToBInfo    ; $47F4
                 ldy #$66    ; $47F7
                 ldx #$00    ; $47F9
                 lda $0200,x    ; $47FB
-                jsr $36FD    ; $47FE
+                jsr UpperCon    ; $47FE
                 sta $4827    ; $4801
-                lda ($5E),y    ; $4804
-                jsr $36FD    ; $4806
+                lda (BuffPoint),y    ; $4804
+                jsr UpperCon    ; $4806
                 cmp $4827    ; $4809
                 bne $481A    ; $480C
                 inx    ; $480E
@@ -6766,24 +8159,26 @@
                 rts    ; $4826
                 brk    ; $4827
                 brk    ; $4828
+;
+; === FindBuffFile ===
                 ldx #$00    ; $4829
                 stx $4828    ; $482B
                 ldx $4828    ; $482E
-                lda $0F3C,x    ; $4831
+                lda BuffActList,x    ; $4831
                 bpl $4867    ; $4834
-                jsr $42FC    ; $4836
+                jsr PointToBInfo    ; $4836
                 ldx #$00    ; $4839
                 ldy #$14    ; $483B
-                lda ($5E),y    ; $483D
+                lda (BuffPoint),y    ; $483D
                 bne $484A    ; $483F
                 lda $0200,x    ; $4841
                 cmp #$8D    ; $4844
                 beq $4861    ; $4846
-                lda ($5E),y    ; $4848
-                jsr $36FD    ; $484A
+                lda (BuffPoint),y    ; $4848
+                jsr UpperCon    ; $484A
                 sta $4827    ; $484D
                 lda $0200,x    ; $4850
-                jsr $36FD    ; $4853
+                jsr UpperCon    ; $4853
                 cmp $4827    ; $4856
                 bne $4867    ; $4859
                 iny    ; $485B
@@ -6799,24 +8194,26 @@
                 bcc $482E    ; $486F
                 lda #$FF    ; $4871
                 rts    ; $4873
+;
+; === ListBuffers ===
                 lda #$00    ; $4874
                 sta $49A1    ; $4876
-                jsr $2B93    ; $4879
+                jsr PrepTO    ; $4879
                 lda #$A0    ; $487C
-                sta $7A54    ; $487E
+                sta PD:Justify    ; $487E
                 ldx #$00    ; $4881
                 stx $4828    ; $4883
                 stx $49A2    ; $4886
-                jsr $5968    ; $4889
+                jsr PrintMessage    ; $4889
                 ldy #$A0    ; $488C
         dfb $C2        ; $488E  (data/65C02-bit)
                 sbc $E6,x    ; $488F
                 inc $E5    ; $4891
                 sbc ($00)    ; $4893
                 lda #$24    ; $4895
-                sta $24    ; $4897
-                sta $2A9F    ; $4899
-                jsr $5968    ; $489C
+                sta CH    ; $4897
+                sta TypeoutCH    ; $4899
+                jsr PrintMessage    ; $489C
                 dec $E9,x    ; $489F
         dfb $F3        ; $48A1  (data/65C02-bit)
                 sbc #$F4    ; $48A2
@@ -6826,72 +8223,72 @@
                 sbc #$EC    ; $48A9
                 sbc $00    ; $48AB
                 lda #$43    ; $48AD
-                sta $24    ; $48AF
-                sta $2A9F    ; $48B1
-                jsr $5968    ; $48B4
+                sta CH    ; $48AF
+                sta TypeoutCH    ; $48B1
+                jsr PrintMessage    ; $48B4
         dfb $D3        ; $48B7  (data/65C02-bit)
                 sbc #$FA    ; $48B8
                 sbc $8D    ; $48BA
                 sta $AE00    ; $48BC
                 plp    ; $48BF
                 pha    ; $48C0
-                lda $0F3C,x    ; $48C1
+                lda BuffActList,x    ; $48C1
                 bpl $492B    ; $48C4
                 inc $49A1    ; $48C6
-                jsr $42FC    ; $48C9
+                jsr PointToBInfo    ; $48C9
                 lda #$A0    ; $48CC
                 ldx $4828    ; $48CE
-                cpx $0F3A    ; $48D1
+                cpx SelectedBuff    ; $48D1
                 bne $48D8    ; $48D4
                 lda #$AE    ; $48D6
-                jsr $2611    ; $48D8
+                jsr CharOut    ; $48D8
                 lda #$A0    ; $48DB
-                jsr $2611    ; $48DD
+                jsr CharOut    ; $48DD
                 ldy #$55    ; $48E0
-                lda ($5E),y    ; $48E2
+                lda (BuffPoint),y    ; $48E2
                 and #$02    ; $48E4
                 php    ; $48E6
                 lda #$A0    ; $48E7
                 plp    ; $48E9
                 beq $48EE    ; $48EA
                 lda #$AA    ; $48EC
-                jsr $2611    ; $48EE
+                jsr CharOut    ; $48EE
                 lda #$A0    ; $48F1
-                jsr $2611    ; $48F3
-                jsr $49DF    ; $48F6
+                jsr CharOut    ; $48F3
+                jsr PBuffName1    ; $48F6
                 ldy #$66    ; $48F9
                 lda #$1E    ; $48FB
-                sta $24    ; $48FD
-                sta $2A9F    ; $48FF
+                sta CH    ; $48FD
+                sta TypeoutCH    ; $48FF
                 lda #$A0    ; $4902
-                jsr $2611    ; $4904
-                jsr $49EF    ; $4907
+                jsr CharOut    ; $4904
+                jsr PBuffFile1    ; $4907
                 lda #$42    ; $490A
-                sta $24    ; $490C
-                sta $2A9F    ; $490E
+                sta CH    ; $490C
+                sta TypeoutCH    ; $490E
                 lda #$A0    ; $4911
-                jsr $2611    ; $4913
+                jsr CharOut    ; $4913
                 ldx $4828    ; $4916
-                jsr $49A4    ; $4919
+                jsr MySize    ; $4919
                 pha    ; $491C
                 clc    ; $491D
                 adc $49A2    ; $491E
                 sta $49A2    ; $4921
                 pla    ; $4924
-                jsr $7A01    ; $4925
-                jsr $7DA3    ; $4928
+                jsr PrintDec    ; $4925
+                jsr PrintReturn    ; $4928
                 inc $4828    ; $492B
                 lda $4828    ; $492E
                 cmp #$0E    ; $4931
                 bcc $48BE    ; $4933
-                jsr $7DA3    ; $4935
+                jsr PrintReturn    ; $4935
                 lda $49A2    ; $4938
                 lsr    ; $493B
                 lsr    ; $493C
                 tax    ; $493D
-                jsr $7A55    ; $493E
-                jsr $7A01    ; $4941
-                jsr $5968    ; $4944
+                jsr ZeroJustify    ; $493E
+                jsr PrintDec    ; $4941
+                jsr PrintMessage    ; $4944
         dfb $EB        ; $4947  (data/65C02-bit)
                 ldy #$E9    ; $4948
                 inc $F5A0    ; $494A
@@ -6901,8 +8298,8 @@
                 sbc: $00A0,y    ; $4951
                 lda #$00    ; $4954
                 ldx $49A1    ; $4956
-                jsr $7A01    ; $4959
-                jsr $5968    ; $495C
+                jsr PrintDec    ; $4959
+                jsr PrintMessage    ; $495C
                 ldy #$E2    ; $495F
                 sbc $E6,x    ; $4961
                 inc $E5    ; $4963
@@ -6911,8 +8308,8 @@
                 dex    ; $496A
                 beq $4972    ; $496B
                 lda #$F3    ; $496D
-                jsr $2611    ; $496F
-                jsr $5968    ; $4972
+                jsr CharOut    ; $496F
+                jsr PrintMessage    ; $4972
                 ldy: $00A0    ; $4975
                 sec    ; $4978
                 lda $42FB    ; $4979
@@ -6922,8 +8319,8 @@
                 lsr    ; $4983
                 tax    ; $4984
                 lda #$00    ; $4985
-                jsr $7A01    ; $4987
-                jsr $5968    ; $498A
+                jsr PrintDec    ; $4987
+                jsr PrintMessage    ; $498A
         dfb $EB        ; $498D  (data/65C02-bit)
                 ldy #$F2    ; $498E
                 sbc $ED    ; $4990
@@ -6931,30 +8328,32 @@
                 inc $EEE9    ; $4994
         dfb $E7        ; $4997  (data/65C02-bit)
                 ldx: $008D    ; $4998
-                jsr $7D97    ; $499B
-                jmp $2BB7    ; $499E
+                jsr PrintDone    ; $499B
+                jmp UnPrepTO    ; $499E
                 brk    ; $49A1
                 brk    ; $49A2
                 brk    ; $49A3
-                cpx $0F3A    ; $49A4
+;
+; === MySize ===
+                cpx SelectedBuff    ; $49A4
                 beq $49B5    ; $49A7
-                jsr $42FC    ; $49A9
+                jsr PointToBInfo    ; $49A9
                 ldy #$0A    ; $49AC
-                lda ($5E),y    ; $49AE
+                lda (BuffPoint),y    ; $49AE
                 tax    ; $49B0
                 iny    ; $49B1
-                lda ($5E),y    ; $49B2
+                lda (BuffPoint),y    ; $49B2
                 rts    ; $49B4
-                lda $6A    ; $49B5
+                lda GapTop    ; $49B5
                 sec    ; $49B7
-                sbc $6E    ; $49B8
+                sbc PhysBuffTop    ; $49B8
                 tax    ; $49BA
                 lda $6B    ; $49BB
                 sbc $6F    ; $49BD
                 pha    ; $49BF
-                lda $70    ; $49C0
+                lda PhysBuffBot    ; $49C0
                 clc    ; $49C2
-                sbc $6C    ; $49C3
+                sbc GapBot    ; $49C3
                 sta $49A3    ; $49C5
                 lda $71    ; $49C8
                 sbc $6D    ; $49CA
@@ -6968,57 +8367,73 @@
                 pla    ; $49D7
                 adc $49A3    ; $49D8
                 rts    ; $49DB
-                jsr $42FC    ; $49DC
+;
+; === PBuffName ===
+                jsr PointToBInfo    ; $49DC
+;
+; === PBuffName1 ===
                 ldy #$66    ; $49DF
-                lda ($5E),y    ; $49E1
+;
+; === PBuffPoint ===
+                lda (BuffPoint),y    ; $49E1
                 beq $49EB    ; $49E3
-                jsr $2611    ; $49E5
+                jsr CharOut    ; $49E5
                 iny    ; $49E8
-                bne $49E1    ; $49E9
+                bne PBuffPoint    ; $49E9
                 rts    ; $49EB
-                jsr $42FC    ; $49EC
+;
+; === PBuffFile ===
+                jsr PointToBInfo    ; $49EC
+;
+; === PBuffFile1 ===
                 ldy #$14    ; $49EF
-                bne $49E1    ; $49F1
-                jsr $460F    ; $49F3
-                lda $6E    ; $49F6
-                sta $66    ; $49F8
-                sta $6A    ; $49FA
-                sta $60    ; $49FC
-                sta $62    ; $49FE
+                bne PBuffPoint    ; $49F1
+;
+; === IN:KillBuff ===
+                jsr SI:SelectB    ; $49F3
+;
+; === ZapBuff ===
+                lda PhysBuffTop    ; $49F6
+                sta BuffTop    ; $49F8
+                sta GapTop    ; $49FA
+                sta TheBuffer    ; $49FC
+                sta PageTop    ; $49FE
                 lda $6F    ; $4A00
                 sta $67    ; $4A02
                 sta $6B    ; $4A04
                 sta $61    ; $4A06
                 sta $63    ; $4A08
-                lda $70    ; $4A0A
-                sta $68    ; $4A0C
-                sta $6C    ; $4A0E
+                lda PhysBuffBot    ; $4A0A
+                sta BuffBot    ; $4A0C
+                sta GapBot    ; $4A0E
                 lda $71    ; $4A10
                 sta $69    ; $4A12
                 sta $6D    ; $4A14
-                lda $6C    ; $4A16
+                lda GapBot    ; $4A16
                 bne $4A1C    ; $4A18
                 dec $6D    ; $4A1A
-                dec $6C    ; $4A1C
+                dec GapBot    ; $4A1C
                 rts    ; $4A1E
-                ldx $0F3A    ; $4A1F
+;
+; === KillBuffer ===
+                ldx SelectedBuff    ; $4A1F
                 stx $4A86    ; $4A22
-                jsr $7C32    ; $4A25
+                jsr GetStrArg    ; $4A25
                 beq $4A3C    ; $4A28
                 ldx $4A86    ; $4A2A
                 jsr $4B2A    ; $4A2D
         dfb $CB        ; $4A30  (data/65C02-bit)
                 sbc #$EC    ; $4A31
                 jmp ($06F0)    ; $4A33
-                jsr $29B9    ; $4A36
+                jsr Beep    ; $4A36
                 lda #$01    ; $4A39
                 rts    ; $4A3B
                 lda #$00    ; $4A3C
                 sta $0200,x    ; $4A3E
                 txa    ; $4A41
                 bne $4A87    ; $4A42
-                jsr $57CC    ; $4A44
-                jsr $5968    ; $4A47
+                jsr NewEchoArea    ; $4A44
+                jsr PrintMessage    ; $4A47
         dfb $CB        ; $4A4A  (data/65C02-bit)
                 sbc #$EC    ; $4A4B
                 cpx $EEE9    ; $4A4D
@@ -7035,9 +8450,9 @@
                 inc $E5    ; $4A61
                 sbc ($AE)    ; $4A63
                 brk    ; $4A65
-                jsr $4B02    ; $4A66
+                jsr DefBuffer    ; $4A66
                 stx $4B82    ; $4A69
-                jsr $5968    ; $4A6C
+                jsr PrintMessage    ; $4A6C
                 ldy #$A0    ; $4A6F
         dfb $D3        ; $4A71  (data/65C02-bit)
                 sbc $EC    ; $4A72
@@ -7051,64 +8466,66 @@
                 txa    ; $4A82
                 jmp $4AD0    ; $4A83
                 brk    ; $4A86
-                jsr $47E7    ; $4A87
+                jsr FindBuffer    ; $4A87
                 bne $4A36    ; $4A8A
                 cpx $4A86    ; $4A8C
                 beq $4A44    ; $4A8F
                 stx $4A86    ; $4A91
-                cpx $0F3A    ; $4A94
+                cpx SelectedBuff    ; $4A94
                 bne $4A9C    ; $4A97
                 jmp $4A44    ; $4A99
-                cpx $0F3B    ; $4A9C
+                cpx LastBuffer    ; $4A9C
                 bne $4AA7    ; $4A9F
-                lda $0F3A    ; $4AA1
-                sta $0F3B    ; $4AA4
-                lda $0F3B    ; $4AA7
+                lda SelectedBuff    ; $4AA1
+                sta LastBuffer    ; $4AA4
+                lda LastBuffer    ; $4AA7
                 pha    ; $4AAA
-                jsr $49F3    ; $4AAB
-                ldx $0F3B    ; $4AAE
-                jsr $460F    ; $4AB1
+                jsr IN:KillBuff    ; $4AAB
+                ldx LastBuffer    ; $4AAE
+                jsr SI:SelectB    ; $4AB1
                 pla    ; $4AB4
-                sta $0F3B    ; $4AB5
+                sta LastBuffer    ; $4AB5
                 ldx $4A86    ; $4AB8
                 lda #$01    ; $4ABB
-                sta $0F3C,x    ; $4ABD
-                jsr $42FC    ; $4AC0
+                sta BuffActList,x    ; $4ABD
+                jsr PointToBInfo    ; $4AC0
                 lda #$00    ; $4AC3
                 ldy #$14    ; $4AC5
-                sta ($5E),y    ; $4AC7
+                sta (BuffPoint),y    ; $4AC7
                 ldy #$66    ; $4AC9
-                sta ($5E),y    ; $4ACB
+                sta (BuffPoint),y    ; $4ACB
                 lda #$01    ; $4ACD
                 rts    ; $4ACF
                 php    ; $4AD0
                 ldx $4A86    ; $4AD1
-                jsr $49F3    ; $4AD4
+                jsr IN:KillBuff    ; $4AD4
                 plp    ; $4AD7
                 bne $4AF5    ; $4AD8
-                ldx $0F3B    ; $4ADA
-                jsr $42FC    ; $4ADD
+                ldx LastBuffer    ; $4ADA
+                jsr PointToBInfo    ; $4ADD
                 ldy #$66    ; $4AE0
                 ldx #$00    ; $4AE2
-                lda ($5E),y    ; $4AE4
+                lda (BuffPoint),y    ; $4AE4
                 sta $0200,x    ; $4AE6
                 iny    ; $4AE9
                 inx    ; $4AEA
                 cmp #$00    ; $4AEB
                 bne $4AE4    ; $4AED
-                ldx $0F3A    ; $4AEF
-                stx $0F3B    ; $4AF2
+                ldx SelectedBuff    ; $4AEF
+                stx LastBuffer    ; $4AF2
                 jsr $4AB8    ; $4AF5
-                jsr $45B5    ; $4AF8
-                ldx $0F3A    ; $4AFB
-                stx $0F3B    ; $4AFE
+                jsr SelectNamed    ; $4AF8
+                ldx SelectedBuff    ; $4AFB
+                stx LastBuffer    ; $4AFE
                 rts    ; $4B01
-                ldx $0F3B    ; $4B02
-                cpx $0F3A    ; $4B05
+;
+; === DefBuffer ===
+                ldx LastBuffer    ; $4B02
+                cpx SelectedBuff    ; $4B05
                 beq $4B0B    ; $4B08
                 rts    ; $4B0A
                 stx $B0    ; $4B0B
-                ldx $0F3B    ; $4B0D
+                ldx LastBuffer    ; $4B0D
                 cpx $B0    ; $4B10
                 bne $4B26    ; $4B12
                 ldx $B0    ; $4B14
@@ -7117,15 +8534,15 @@
                 ldx #$0D    ; $4B19
                 cpx $B0    ; $4B1B
                 beq $4B26    ; $4B1D
-                lda $0F3C,x    ; $4B1F
+                lda BuffActList,x    ; $4B1F
                 bpl $4B16    ; $4B22
                 bmi $4B26    ; $4B24
-                stx $0F3B    ; $4B26
+                stx LastBuffer    ; $4B26
                 rts    ; $4B29
                 stx $4B82    ; $4B2A
-                jsr $57CC    ; $4B2D
+                jsr NewEchoArea    ; $4B2D
                 lda #$74    ; $4B30
-                sta $3B20    ; $4B32
+                sta ReadLineHelp    ; $4B32
                 lda #$48    ; $4B35
                 sta $3B21    ; $4B37
                 pla    ; $4B3A
@@ -7139,14 +8556,14 @@
                 lda ($00),y    ; $4B48
                 pha    ; $4B4A
                 ora #$80    ; $4B4B
-                jsr $2611    ; $4B4D
+                jsr CharOut    ; $4B4D
                 pla    ; $4B50
                 bmi $4B42    ; $4B51
                 lda $01    ; $4B53
                 pha    ; $4B55
                 lda $00    ; $4B56
                 pha    ; $4B58
-                jsr $5968    ; $4B59
+                jsr PrintMessage    ; $4B59
                 ldy #$C2    ; $4B5C
                 sbc $E6,x    ; $4B5E
                 inc $E5    ; $4B60
@@ -7154,188 +8571,220 @@
                 tay    ; $4B64
                 brk    ; $4B65
                 ldx $4B82    ; $4B66
-                jsr $49DC    ; $4B69
-                jsr $5968    ; $4B6C
+                jsr PBuffName    ; $4B69
+                jsr PrintMessage    ; $4B6C
                 lda #$BA    ; $4B6F
                 brk    ; $4B71
-                dec $3D86    ; $4B72
-                jsr $3B2D    ; $4B75
+                dec BufferRead    ; $4B72
+                jsr ReadLine    ; $4B75
                 php    ; $4B78
                 txa    ; $4B79
                 pha    ; $4B7A
-                jsr $57FA    ; $4B7B
+                jsr CloseEchoArea    ; $4B7B
                 pla    ; $4B7E
                 tax    ; $4B7F
                 plp    ; $4B80
                 rts    ; $4B81
                 brk    ; $4B82
+;
+; === Modified? ===
                 brk    ; $4B83
+;
+; === BuffInsert ===
                 pha    ; $4B84
-                jsr $4C52    ; $4B85
-                inc $6A    ; $4B88
+                jsr SetGap    ; $4B85
+                inc GapTop    ; $4B88
                 bne $4B8E    ; $4B8A
                 inc $6B    ; $4B8C
                 lda $6B    ; $4B8E
                 cmp $6D    ; $4B90
                 bcc $4B9C    ; $4B92
                 bne $4BB1    ; $4B94
-                lda $6A    ; $4B96
-                cmp $6C    ; $4B98
+                lda GapTop    ; $4B96
+                cmp GapBot    ; $4B98
                 bcs $4BB1    ; $4B9A
                 pla    ; $4B9C
                 jsr $D06F    ; $4B9D
-                inc $60    ; $4BA0
+                inc TheBuffer    ; $4BA0
                 bne $4BA6    ; $4BA2
                 inc $61    ; $4BA4
-                bit $4B83    ; $4BA6
+                bit Modified?    ; $4BA6
                 bmi $4BAE    ; $4BA9
-                jsr $4C3C    ; $4BAB
+                jsr SetModified    ; $4BAB
                 lda #$00    ; $4BAE
                 rts    ; $4BB0
                 pla    ; $4BB1
-                lda $6A    ; $4BB2
+                lda GapTop    ; $4BB2
                 bne $4BB8    ; $4BB4
                 dec $6B    ; $4BB6
-                dec $6A    ; $4BB8
+                dec GapTop    ; $4BB8
                 lda #$FF    ; $4BBA
                 rts    ; $4BBC
-                jsr $4C52    ; $4BBD
-                lda $6A    ; $4BC0
-                cmp $66    ; $4BC2
+;
+; === BuffRubout ===
+                jsr SetGap    ; $4BBD
+                lda GapTop    ; $4BC0
+                cmp BuffTop    ; $4BC2
                 bne $4BCC    ; $4BC4
                 lda $6B    ; $4BC6
                 cmp $67    ; $4BC8
                 beq $4C12    ; $4BCA
-                lda $60    ; $4BCC
+                lda TheBuffer    ; $4BCC
                 bne $4BD2    ; $4BCE
                 dec $61    ; $4BD0
-                dec $60    ; $4BD2
-                lda $6A    ; $4BD4
+                dec TheBuffer    ; $4BD2
+                lda GapTop    ; $4BD4
                 bne $4BDA    ; $4BD6
                 dec $6B    ; $4BD8
-                dec $6A    ; $4BDA
-                bit $4B83    ; $4BDC
+                dec GapTop    ; $4BDA
+                bit Modified?    ; $4BDC
                 bmi $4BE4    ; $4BDF
-                jsr $4C3C    ; $4BE1
+                jsr SetModified    ; $4BE1
                 lda #$00    ; $4BE4
                 rts    ; $4BE6
-                jsr $4C52    ; $4BE7
-                inc $6C    ; $4BEA
+;
+; === BuffDelete ===
+                jsr SetGap    ; $4BE7
+                inc GapBot    ; $4BEA
                 bne $4BF0    ; $4BEC
                 inc $6D    ; $4BEE
-                lda $6C    ; $4BF0
-                cmp $68    ; $4BF2
+                lda GapBot    ; $4BF0
+                cmp BuffBot    ; $4BF2
                 bne $4C07    ; $4BF4
                 lda $6D    ; $4BF6
                 cmp $69    ; $4BF8
                 bne $4C07    ; $4BFA
-                lda $6C    ; $4BFC
+                lda GapBot    ; $4BFC
                 bne $4C02    ; $4BFE
                 dec $6D    ; $4C00
-                dec $6C    ; $4C02
+                dec GapBot    ; $4C02
                 jmp $4C12    ; $4C04
-                bit $4B83    ; $4C07
+                bit Modified?    ; $4C07
                 bmi $4C0F    ; $4C0A
-                jsr $4C3C    ; $4C0C
+                jsr SetModified    ; $4C0C
                 lda #$00    ; $4C0F
                 rts    ; $4C11
                 lda #$FF    ; $4C12
                 rts    ; $4C14
+;
+; === SetLastKill ===
                 lda #$04    ; $4C15
+;
+; === SetBuffFlag ===
                 ldy #$41    ; $4C17
-                ora ($72),y    ; $4C19
-                sta ($72),y    ; $4C1B
+                ora (BuffData),y    ; $4C19
+                sta (BuffData),y    ; $4C1B
                 rts    ; $4C1D
+;
+; === ClrLastKill ===
                 lda #$04    ; $4C1E
+;
+; === ClrBuffFlag ===
                 ldy #$41    ; $4C20
                 eor #$FF    ; $4C22
-                and ($72),y    ; $4C24
-                sta ($72),y    ; $4C26
+                and (BuffData),y    ; $4C24
+                sta (BuffData),y    ; $4C26
                 rts    ; $4C28
+;
+; === OldKill? ===
                 lda #$04    ; $4C29
-                jsr $4C35    ; $4C2B
+;
+; === BuffFlagOn? ===
+                jsr BuffFlagOff?    ; $4C2B
                 beq $4C33    ; $4C2E
                 lda #$00    ; $4C30
                 rts    ; $4C32
                 iny    ; $4C33
                 rts    ; $4C34
+;
+; === BuffFlagOff? ===
                 ldy #$41    ; $4C35
-                and ($72),y    ; $4C37
+                and (BuffData),y    ; $4C37
                 rts    ; $4C39
-                bpl $4C45    ; $4C3A
+;
+; === SetAModified ===
+                bpl ClrModified    ; $4C3A
+;
+; === SetModified ===
                 lda #$02    ; $4C3C
-                jsr $4C17    ; $4C3E
+                jsr SetBuffFlag    ; $4C3E
                 lda #$FF    ; $4C41
                 bmi $4C4C    ; $4C43
+;
+; === ClrModified ===
                 lda #$02    ; $4C45
-                jsr $4C20    ; $4C47
+                jsr ClrBuffFlag    ; $4C47
                 lda #$00    ; $4C4A
-                sta $4B83    ; $4C4C
-                jmp $5441    ; $4C4F
+                sta Modified?    ; $4C4C
+                jmp ModeInfo    ; $4C4F
+;
+; === SetGap ===
                 ldy #$00    ; $4C52
                 lda $61    ; $4C54
                 cmp $6B    ; $4C56
                 bcc $4C64    ; $4C58
                 bne $4C8A    ; $4C5A
-                lda $60    ; $4C5C
-                cmp $6A    ; $4C5E
+                lda TheBuffer    ; $4C5C
+                cmp GapTop    ; $4C5E
                 beq $4CBD    ; $4C60
                 bcs $4C8A    ; $4C62
-                lda $6A    ; $4C64
+                lda GapTop    ; $4C64
                 bne $4C6A    ; $4C66
                 dec $6B    ; $4C68
-                dec $6A    ; $4C6A
+                dec GapTop    ; $4C6A
                 jsr $D036    ; $4C6C
                 jsr $D093    ; $4C6F
-                jsr $2843    ; $4C72
-                lda $6C    ; $4C75
+                jsr GatherTYI    ; $4C72
+                lda GapBot    ; $4C75
                 bne $4C7B    ; $4C77
                 dec $6D    ; $4C79
-                dec $6C    ; $4C7B
+                dec GapBot    ; $4C7B
                 lda $6B    ; $4C7D
                 cmp $61    ; $4C7F
                 bne $4C64    ; $4C81
-                lda $6A    ; $4C83
-                cmp $60    ; $4C85
+                lda GapTop    ; $4C83
+                cmp TheBuffer    ; $4C85
                 bne $4C64    ; $4C87
                 rts    ; $4C89
-                inc $6C    ; $4C8A
+                inc GapBot    ; $4C8A
                 bne $4C90    ; $4C8C
                 inc $6D    ; $4C8E
                 lda $6D    ; $4C90
                 cmp $61    ; $4C92
                 bcc $4C9C    ; $4C94
-                lda $6C    ; $4C96
-                cmp $60    ; $4C98
+                lda GapBot    ; $4C96
+                cmp TheBuffer    ; $4C98
                 bcs $4CAD    ; $4C9A
                 jsr $D03F    ; $4C9C
                 jsr $D08A    ; $4C9F
-                jsr $2843    ; $4CA2
-                inc $6A    ; $4CA5
+                jsr GatherTYI    ; $4CA2
+                inc GapTop    ; $4CA5
                 bne $4CAB    ; $4CA7
                 inc $6B    ; $4CA9
                 bne $4C8A    ; $4CAB
-                lda $6C    ; $4CAD
+                lda GapBot    ; $4CAD
                 bne $4CB3    ; $4CAF
                 dec $6D    ; $4CB1
-                dec $6C    ; $4CB3
-                lda $6A    ; $4CB5
-                sta $60    ; $4CB7
+                dec GapBot    ; $4CB3
+                lda GapTop    ; $4CB5
+                sta TheBuffer    ; $4CB7
                 lda $6B    ; $4CB9
                 sta $61    ; $4CBB
                 rts    ; $4CBD
+;
+; === KillGap ===
                 jsr $4CDE    ; $4CBE
                 lda $61    ; $4CC1
                 pha    ; $4CC3
-                lda $60    ; $4CC4
+                lda TheBuffer    ; $4CC4
                 pha    ; $4CC6
-                lda $68    ; $4CC7
-                sta $60    ; $4CC9
+                lda BuffBot    ; $4CC7
+                sta TheBuffer    ; $4CC9
                 lda $69    ; $4CCB
                 sta $61    ; $4CCD
-                jsr $4C52    ; $4CCF
+                jsr SetGap    ; $4CCF
                 pla    ; $4CD2
-                sta $60    ; $4CD3
+                sta TheBuffer    ; $4CD3
                 pla    ; $4CD5
                 sta $61    ; $4CD6
                 lda #$FF    ; $4CD8
@@ -7346,6 +8795,8 @@
                 lda #$20    ; $4CE4
                 sta $07F7    ; $4CE6
                 rts    ; $4CE9
+;
+; === MarkStack ===
                 brk    ; $4CEA
                 brk    ; $4CEB
                 brk    ; $4CEC
@@ -7362,67 +8813,79 @@
                 brk    ; $4CF7
                 brk    ; $4CF8
                 brk    ; $4CF9
+;
+; === MarkStackPntr ===
                 brk    ; $4CFA
-                lda $60    ; $4CFB
+;
+; === PushMark ===
+                lda TheBuffer    ; $4CFB
                 sta $00    ; $4CFD
                 lda $61    ; $4CFF
                 sta $01    ; $4D01
+;
+; === MarkTemp ===
                 lda $00    ; $4D03
                 sec    ; $4D05
-                sbc $6E    ; $4D06
+                sbc PhysBuffTop    ; $4D06
                 sta $00    ; $4D08
                 lda $01    ; $4D0A
                 sbc $6F    ; $4D0C
                 sta $01    ; $4D0E
-                lda $4CFA    ; $4D10
+;
+; === IN:MarkTemp ===
+                lda MarkStackPntr    ; $4D10
                 asl    ; $4D13
                 tax    ; $4D14
                 lda $00    ; $4D15
-                sta $4CEA,x    ; $4D17
+                sta MarkStack,x    ; $4D17
                 lda $01    ; $4D1A
                 sta $4CEB,x    ; $4D1C
-                inc $4CFA    ; $4D1F
-                lda $4CFA    ; $4D22
+                inc MarkStackPntr    ; $4D1F
+                lda MarkStackPntr    ; $4D22
                 cmp #$08    ; $4D25
                 bcc $4D2E    ; $4D27
                 lda #$00    ; $4D29
-                sta $4CFA    ; $4D2B
+                sta MarkStackPntr    ; $4D2B
                 rts    ; $4D2E
-                ldx $0F3A    ; $4D2F
-                jsr $49A4    ; $4D32
+;
+; === MarkBuffer ===
+                ldx SelectedBuff    ; $4D2F
+                jsr MySize    ; $4D32
                 sta $01    ; $4D35
                 stx $00    ; $4D37
-                jsr $4D10    ; $4D39
-                lda $66    ; $4D3C
-                sta $60    ; $4D3E
+                jsr IN:MarkTemp    ; $4D39
+                lda BuffTop    ; $4D3C
+                sta TheBuffer    ; $4D3E
                 lda $67    ; $4D40
                 sta $61    ; $4D42
-                jsr $4C52    ; $4D44
+                jsr SetGap    ; $4D44
                 lda #$06    ; $4D47
                 rts    ; $4D49
+;
+; === PopMark ===
                 lda $01    ; $4D4A
                 pha    ; $4D4C
                 lda $00    ; $4D4D
                 pha    ; $4D4F
-                jsr $4D9C    ; $4D50
+                jsr PopTempMark    ; $4D50
                 lda $01    ; $4D53
                 cmp $6B    ; $4D55
                 bcc $4D8D    ; $4D57
                 bne $4D63    ; $4D59
                 lda $00    ; $4D5B
-                cmp $6A    ; $4D5D
+                cmp GapTop    ; $4D5D
                 bcc $4D8D    ; $4D5F
                 beq $4D8D    ; $4D61
                 lda $00    ; $4D63
                 sec    ; $4D65
-                sbc $6A    ; $4D66
+                sbc GapTop    ; $4D66
                 tax    ; $4D68
                 lda $01    ; $4D69
                 sbc $6B    ; $4D6B
                 pha    ; $4D6D
                 txa    ; $4D6E
                 sec    ; $4D6F
-                adc $6C    ; $4D70
+                adc GapBot    ; $4D70
                 sta $00    ; $4D72
                 pla    ; $4D74
                 adc $6D    ; $4D75
@@ -7431,14 +8894,14 @@
                 bcc $4D8D    ; $4D7B
                 bne $4D85    ; $4D7D
                 lda $00    ; $4D7F
-                cmp $68    ; $4D81
+                cmp BuffBot    ; $4D81
                 bcc $4D8D    ; $4D83
-                lda $68    ; $4D85
+                lda BuffBot    ; $4D85
                 sta $00    ; $4D87
                 lda $69    ; $4D89
                 sta $01    ; $4D8B
                 lda $00    ; $4D8D
-                sta $60    ; $4D8F
+                sta TheBuffer    ; $4D8F
                 lda $01    ; $4D91
                 sta $61    ; $4D93
                 pla    ; $4D95
@@ -7446,48 +8909,56 @@
                 pla    ; $4D98
                 sta $01    ; $4D99
                 rts    ; $4D9B
-                ldx $4CFA    ; $4D9C
+;
+; === PopTempMark ===
+                ldx MarkStackPntr    ; $4D9C
                 bne $4DA3    ; $4D9F
                 ldx #$08    ; $4DA1
                 dex    ; $4DA3
-                stx $4CFA    ; $4DA4
+                stx MarkStackPntr    ; $4DA4
                 txa    ; $4DA7
                 asl    ; $4DA8
                 tax    ; $4DA9
-                lda $4CEA,x    ; $4DAA
+                lda MarkStack,x    ; $4DAA
                 clc    ; $4DAD
-                adc $6E    ; $4DAE
+                adc PhysBuffTop    ; $4DAE
                 sta $00    ; $4DB0
                 lda $4CEB,x    ; $4DB2
                 adc $6F    ; $4DB5
                 sta $01    ; $4DB7
                 rts    ; $4DB9
-                jsr $4D9C    ; $4DBA
+;
+; === GetTempMark ===
+                jsr PopTempMark    ; $4DBA
                 lda $01    ; $4DBD
                 pha    ; $4DBF
                 lda $00    ; $4DC0
                 pha    ; $4DC2
-                jsr $4D03    ; $4DC3
+                jsr MarkTemp    ; $4DC3
                 pla    ; $4DC6
                 sta $00    ; $4DC7
                 pla    ; $4DC9
                 sta $01    ; $4DCA
                 rts    ; $4DCC
+;
+; === SwapPointMark ===
                 lda $61    ; $4DCD
                 pha    ; $4DCF
-                lda $60    ; $4DD0
+                lda TheBuffer    ; $4DD0
                 pha    ; $4DD2
-                jsr $4D4A    ; $4DD3
+                jsr PopMark    ; $4DD3
                 pla    ; $4DD6
                 sta $00    ; $4DD7
                 pla    ; $4DD9
                 sta $01    ; $4DDA
-                jsr $4D03    ; $4DDC
+                jsr MarkTemp    ; $4DDC
                 rts    ; $4DDF
                 brk    ; $4DE0
                 cld    ; $4DE1
                 brk    ; $4DE2
                 cld    ; $4DE3
+;
+; === DeleteKill? ===
                 brk    ; $4DE4
                 brk    ; $4DE5
                 inc $B0    ; $4DE6
@@ -7520,10 +8991,10 @@
                 dec $B1    ; $4E1B
                 dec $B0    ; $4E1D
                 rts    ; $4E1F
-                jsr $36F2    ; $4E20
+                jsr EqTempPoint?    ; $4E20
                 bne $4E2C    ; $4E23
                 rts    ; $4E25
-                jsr $36F2    ; $4E26
+                jsr EqTempPoint?    ; $4E26
                 bne $4E38    ; $4E29
                 rts    ; $4E2B
                 lda $4DE2    ; $4E2C
@@ -7540,12 +9011,12 @@
                 sta $4DE5    ; $4E48
                 lda $B1    ; $4E4B
                 ldx $B0    ; $4E4D
-                sta $C009    ; $4E4F
+                sta UseAuxZP    ; $4E4F
                 sta $B1    ; $4E52
                 stx $B0    ; $4E54
                 lda $4DE5    ; $4E56
                 sta ($B0),y    ; $4E59
-                sta $C008    ; $4E5B
+                sta UseMainZP    ; $4E5B
                 plp    ; $4E5E
                 jsr $4DE6    ; $4E5F
                 lda $B0    ; $4E62
@@ -7554,30 +9025,30 @@
                 lda $B1    ; $4E69
                 cmp $4DE3    ; $4E6B
                 bne $4E82    ; $4E6E
-                jsr $29B9    ; $4E70
+                jsr Beep    ; $4E70
                 jsr $4E03    ; $4E73
                 jsr $4E8D    ; $4E76
-                jsr $4C1E    ; $4E79
+                jsr ClrLastKill    ; $4E79
                 lda #$FF    ; $4E7C
-                sta $4DE4    ; $4E7E
+                sta DeleteKill?    ; $4E7E
                 rts    ; $4E81
                 inc $00    ; $4E82
                 bne $4E88    ; $4E84
                 inc $01    ; $4E86
-                jsr $36F2    ; $4E88
+                jsr EqTempPoint?    ; $4E88
                 bne $4E44    ; $4E8B
                 lda $B0    ; $4E8D
                 sta $4DE0    ; $4E8F
                 lda $B1    ; $4E92
                 sta $4DE1    ; $4E94
-                jsr $4C15    ; $4E97
-                jsr $4C3C    ; $4E9A
+                jsr SetLastKill    ; $4E97
+                jsr SetModified    ; $4E9A
                 rts    ; $4E9D
                 lda $4DE1    ; $4E9E
                 pha    ; $4EA1
                 lda $4DE0    ; $4EA2
                 pha    ; $4EA5
-                lda $60    ; $4EA6
+                lda TheBuffer    ; $4EA6
                 sec    ; $4EA8
                 sbc $00    ; $4EA9
                 sta $B2    ; $4EAB
@@ -7609,7 +9080,9 @@
                 pla    ; $4EE8
                 sta $4DE1    ; $4EE9
                 rts    ; $4EEC
-                jsr $4CFB    ; $4EED
+;
+; === YankKill ===
+                jsr PushMark    ; $4EED
                 lda $4DE2    ; $4EF0
                 sta $B0    ; $4EF3
                 lda $4DE3    ; $4EF5
@@ -7620,29 +9093,31 @@
                 lda $B0    ; $4F01
                 cmp $4DE0    ; $4F03
                 bne $4F19    ; $4F06
-                jsr $4C1E    ; $4F08
-                jsr $2D88    ; $4F0B
+                jsr ClrLastKill    ; $4F08
+                jsr FindPoint    ; $4F0B
                 beq $4F13    ; $4F0E
                 lda #$06    ; $4F10
                 rts    ; $4F12
-                jsr $300C    ; $4F13
+                jsr DisplayPage    ; $4F13
                 lda #$01    ; $4F16
                 rts    ; $4F18
                 ldy #$00    ; $4F19
                 ldx $B0    ; $4F1B
                 lda $B1    ; $4F1D
-                sta $C009    ; $4F1F
+                sta UseAuxZP    ; $4F1F
                 sta $B1    ; $4F22
                 stx $B0    ; $4F24
                 lda ($B0),y    ; $4F26
-                sta $C008    ; $4F28
-                jsr $4B84    ; $4F2B
+                sta UseMainZP    ; $4F28
+                jsr BuffInsert    ; $4F2B
                 bne $4F08    ; $4F2E
                 jsr $4DE6    ; $4F30
                 jmp $4EFA    ; $4F33
+;
+; === GenericKill ===
                 sta $4F7D    ; $4F36
                 lda #$04    ; $4F39
-                jsr $4C2B    ; $4F3B
+                jsr BuffFlagOn?    ; $4F3B
                 beq $4F60    ; $4F3E
                 lda $01    ; $4F40
                 pha    ; $4F42
@@ -7653,12 +9128,12 @@
                 sta $00    ; $4F4A
                 pla    ; $4F4C
                 sta $01    ; $4F4D
-                bit $4DE4    ; $4F4F
+                bit DeleteKill?    ; $4F4F
                 bmi $4F57    ; $4F52
-                jsr $3A0A    ; $4F54
-                jsr $4C15    ; $4F57
+                jsr DelTempPoint    ; $4F54
+                jsr SetLastKill    ; $4F57
                 lda #$00    ; $4F5A
-                sta $4DE4    ; $4F5C
+                sta DeleteKill?    ; $4F5C
                 rts    ; $4F5F
                 lda $4F7D    ; $4F60
                 bmi $4F71    ; $4F63
@@ -7675,9 +9150,13 @@
                 jsr $4E9E    ; $4F77
                 jmp $4F49    ; $4F7A
                 brk    ; $4F7D
-                jsr $4C15    ; $4F7E
+;
+; === SetNewAppend ===
+                jsr SetLastKill    ; $4F7E
                 lda #$01    ; $4F81
                 rts    ; $4F83
+;
+; === ComTab ===
                 brk    ; $4F84
                 brk    ; $4F85
                 brk    ; $4F86
@@ -7696,15 +9175,15 @@
                 brk    ; $4F93
                 brk    ; $4F94
                 brk    ; $4F95
-                rol $25    ; $4F96
+                rol CV    ; $4F96
                 brk    ; $4F98
                 brk    ; $4F99
                 ror    ; $4F9A
-                asl $92BB,x    ; $4F9B
-                adc ($25)    ; $4F9E
-                cmp: $0022,x    ; $4FA0
+                asl FlushLibs,x    ; $4F9B
+                adc (CV)    ; $4F9E
+                cmp: WindowTop,x    ; $4FA0
                 brk    ; $4FA3
-                jmp $0023    ; $4FA4
+                jmp WindowBot    ; $4FA4
                 brk    ; $4FA7
                 beq $4FCD    ; $4FA8
                 brk    ; $4FAA
@@ -7768,7 +9247,7 @@
                 brk    ; $4FF8
                 brk    ; $4FF9
                 ply    ; $4FFA
-                asl $1A41,x    ; $4FFB
+                asl GotoTop,x    ; $4FFB
                 bcs $4F8D    ; $4FFE
                 phy    ; $5000
                 inc    ; $5001
@@ -7783,7 +9262,7 @@
                 rol $173A    ; $500E
                 rol $00,x    ; $5011
                 brk    ; $5013
-                lda $22,x    ; $5014
+                lda WindowTop,x    ; $5014
         dfb $BB        ; $5016  (data/65C02-bit)
                 stx: $0000    ; $5017
                 cpx #$3A    ; $501A
@@ -7802,13 +9281,13 @@
                 rts    ; $502E
                 rol $4C,x    ; $502F
                 and $92,x    ; $5031
-                sta $3F1F    ; $5033
+                sta MetaX    ; $5033
                 brk    ; $5036
                 brk    ; $5037
                 brk    ; $5038
                 brk    ; $5039
                 and $3C22,y    ; $503A
-                and $21CF,y    ; $503D
+                and DownPara,y    ; $503D
                 brk    ; $5040
                 brk    ; $5041
                 brk    ; $5042
@@ -7821,6 +9300,8 @@
         dfb $1B        ; $504B  (data/65C02-bit)
         dfb $C2        ; $504C  (data/65C02-bit)
         dfb $1B        ; $504D  (data/65C02-bit)
+;
+; === doc:ExitSafe ===
         dfb $CF        ; $504E  (data/65C02-bit)
                 inc $EDA0    ; $504F
                 sbc $E1    ; $5052
@@ -7854,7 +9335,7 @@
                 ldx $1B    ; $5080
                 inc $AB37,x    ; $5082
                 and $A6,x    ; $5085
-                bit $5E,x    ; $5087
+                bit BuffPoint,x    ; $5087
         dfb $17        ; $5089  (data/65C02-bit)
                 brk    ; $508A
                 brk    ; $508B
@@ -7881,7 +9362,7 @@
         dfb $7B        ; $50AF  (data/65C02-bit)
         dfb $D4        ; $50B0  (data/65C02-bit)
                 bit $9A,x    ; $50B1
-                sta $1B00    ; $50B3
+                sta ControlX    ; $50B3
                 sbc $EB4E    ; $50B6
                 inc    ; $50B9
                 cmp $1A,x    ; $50BA
@@ -7987,46 +9468,46 @@
                 asl $CE,x    ; $517D
                 asl $CE,x    ; $517F
                 asl $1D,x    ; $5181
-                asl $20,x    ; $5183
+                asl WindowLft,x    ; $5183
                 and ($7C)    ; $5185
                 beq $5194    ; $5187
-                jsr $3F8D    ; $5189
+                jsr ReadFunction    ; $5189
                 beq $519E    ; $518C
-                jsr $29B9    ; $518E
+                jsr Beep    ; $518E
                 lda #$01    ; $5191
                 rts    ; $5193
                 lda #$9B    ; $5194
                 sta $0200,x    ; $5196
-                jsr $5AE5    ; $5199
+                jsr SI:CompleteMe    ; $5199
                 bne $518E    ; $519C
                 jsr $5232    ; $519E
                 lda #$B0    ; $51A1
                 sta $5231    ; $51A3
                 inc $5231    ; $51A6
                 lda $5231    ; $51A9
-                jsr $8375    ; $51AC
+                jsr GetHelpFile    ; $51AC
                 bne $51BF    ; $51AF
                 jsr $5255    ; $51B1
                 bne $51A6    ; $51B4
                 jsr $529A    ; $51B6
-                jsr $73E5    ; $51B9
+                jsr DSK:CloseFile    ; $51B9
                 jmp $5191    ; $51BC
-                jsr $2AC4    ; $51BF
+                jsr OpenTypeout    ; $51BF
                 lda $5231    ; $51C2
                 cmp #$B1    ; $51C5
                 bne $521C    ; $51C7
-                jsr $5968    ; $51C9
+                jsr PrintMessage    ; $51C9
                 sta $E8D4    ; $51CC
                 sbc $A0    ; $51CF
                 inc $E9    ; $51D1
                 cpx $A0E5    ; $51D3
                 ldx #$00    ; $51D6
-                lda $8312,y    ; $51D8
+                lda HelpHelpFile,y    ; $51D8
                 beq $51E3    ; $51DB
-                jsr $2611    ; $51DD
+                jsr CharOut    ; $51DD
                 iny    ; $51E0
                 bne $51D8    ; $51E1
-                jsr $5968    ; $51E3
+                jsr PrintMessage    ; $51E3
                 ldx #$A0    ; $51E6
         dfb $E3        ; $51E8  (data/65C02-bit)
                 sbc ($EE,x)    ; $51E9
@@ -8061,11 +9542,11 @@
                 ldy #$00    ; $521C
                 lda $0280,y    ; $521E
                 beq $5229    ; $5221
-                jsr $2611    ; $5223
+                jsr CharOut    ; $5223
                 iny    ; $5226
                 bpl $521E    ; $5227
                 lda #$BF    ; $5229
-                jsr $2611    ; $522B
+                jsr CharOut    ; $522B
                 jmp $5216    ; $522E
                 brk    ; $5231
                 lda $00    ; $5232
@@ -8076,7 +9557,7 @@
                 lda ($00),y    ; $523E
                 php    ; $5240
                 ora #$80    ; $5241
-                jsr $36FD    ; $5243
+                jsr UpperCon    ; $5243
                 sta $0280,y    ; $5246
                 iny    ; $5249
                 plp    ; $524A
@@ -8086,17 +9567,17 @@
                 rts    ; $5252
                 brk    ; $5253
                 brk    ; $5254
-                jsr $72AB    ; $5255
+                jsr DSK:ReadByte    ; $5255
                 bne $5297    ; $5258
                 ora #$80    ; $525A
                 cmp #$9B    ; $525C
                 bne $5255    ; $525E
                 ldy #$00    ; $5260
                 sty $0300    ; $5262
-                jsr $72AB    ; $5265
+                jsr DSK:ReadByte    ; $5265
                 bne $5297    ; $5268
                 ora #$80    ; $526A
-                jsr $36FD    ; $526C
+                jsr UpperCon    ; $526C
                 ldy $0300    ; $526F
                 cmp $0280,y    ; $5272
                 bne $5255    ; $5275
@@ -8104,12 +9585,12 @@
                 sty $0300    ; $5278
                 lda $0280,y    ; $527B
                 bne $5265    ; $527E
-                jsr $72AB    ; $5280
+                jsr DSK:ReadByte    ; $5280
                 bne $5297    ; $5283
                 ora #$80    ; $5285
                 cmp #$9B    ; $5287
                 bne $5255    ; $5289
-                jsr $72AB    ; $528B
+                jsr DSK:ReadByte    ; $528B
                 bne $5297    ; $528E
                 ora #$80    ; $5290
                 cmp #$9B    ; $5292
@@ -8117,61 +9598,71 @@
                 rts    ; $5296
                 lda #$FF    ; $5297
                 rts    ; $5299
-                jsr $2AC4    ; $529A
+                jsr OpenTypeout    ; $529A
                 lda $5253    ; $529D
                 sta $00    ; $52A0
                 lda $5254    ; $52A2
                 sta $01    ; $52A5
-                jsr $598F    ; $52A7
-                jsr $5A12    ; $52AA
+                jsr DCIStringOut    ; $52A7
+                jsr DocRef    ; $52AA
                 lda #$1E    ; $52AD
-                sta $2A9F    ; $52AF
-                sta $24    ; $52B2
-                jsr $5991    ; $52B4
+                sta TypeoutCH    ; $52AF
+                sta CH    ; $52B2
+                jsr DCIStringOut1    ; $52B4
                 lda #$BA    ; $52B7
-                jsr $2611    ; $52B9
-                jsr $7DA3    ; $52BC
-                jsr $72AB    ; $52BF
+                jsr CharOut    ; $52B9
+                jsr PrintReturn    ; $52BC
+                jsr DSK:ReadByte    ; $52BF
                 bne $52D8    ; $52C2
                 ora #$80    ; $52C4
                 cmp #$8D    ; $52C6
                 bne $52DF    ; $52C8
-                jsr $2611    ; $52CA
-                jsr $72AB    ; $52CD
+                jsr CharOut    ; $52CA
+                jsr DSK:ReadByte    ; $52CD
                 bne $52D8    ; $52D0
                 ora #$80    ; $52D2
                 cmp #$9B    ; $52D4
                 bne $52C4    ; $52D6
-                jsr $7D97    ; $52D8
-                jsr $2B0F    ; $52DB
+                jsr PrintDone    ; $52D8
+                jsr CloseTypeout    ; $52DB
                 rts    ; $52DE
-                jsr $2611    ; $52DF
+                jsr CharOut    ; $52DF
                 jmp $52BF    ; $52E2
+;
+; === LastPercnt ===
                 brk    ; $52E5
+;
+; === ModeLineCV ===
                 trb $7F    ; $52E6
-                sty $1F    ; $52E8
-                ldy $24    ; $52EA
+;
+; === ModeLineChar ===
+                sty scrny    ; $52E8
+                ldy CH    ; $52EA
                 cpy #$50    ; $52EC
                 bcs $52F5    ; $52EE
                 sta $D400,y    ; $52F0
-                inc $24    ; $52F3
-                ldy $1F    ; $52F5
+                inc CH    ; $52F3
+                ldy scrny    ; $52F5
                 rts    ; $52F7
-                lda $52E6    ; $52F8
-                jsr $26EB    ; $52FB
+;
+; === DrawModeLine ===
+                lda ModeLineCV    ; $52F8
+                jsr vtab1    ; $52FB
                 ldy #$00    ; $52FE
                 lda $D400,y    ; $5300
-                and $52E7    ; $5303
+                and ModeLineInv    ; $5303
                 bmi $5311    ; $5306
                 cmp #$20    ; $5308
                 bcc $5311    ; $530A
                 lda $D400,y    ; $530C
                 and #$7F    ; $530F
-                jsr $2703    ; $5311
+                jsr StoreChar    ; $5311
                 iny    ; $5314
-                cpy $21    ; $5315
+                cpy WindowRgt    ; $5315
                 bcc $5300    ; $5317
-                jmp $26E9    ; $5319
+                jmp vtab    ; $5319
+;
+; === ModeLineMsg ===
                 pla    ; $531C
                 sta $00    ; $531D
                 pla    ; $531F
@@ -8182,28 +9673,34 @@
                 inc $01    ; $5328
                 lda ($00),y    ; $532A
                 beq $5334    ; $532C
-                jsr $52E8    ; $532E
+                jsr ModeLineChar    ; $532E
                 jmp $5324    ; $5331
                 lda $01    ; $5334
                 pha    ; $5336
                 lda $00    ; $5337
                 pha    ; $5339
                 rts    ; $533A
-                lda $52E7    ; $533B
+;
+; === InvModeLine ===
+                lda ModeLineInv    ; $533B
                 bpl $534B    ; $533E
                 lda #$7F    ; $5340
-                bit $2605    ; $5342
+                bit IIcMode?    ; $5342
                 bpl $534D    ; $5345
                 lda #$3F    ; $5347
                 bpl $534D    ; $5349
                 lda #$FF    ; $534B
-                sta $52E7    ; $534D
-                jsr $52F8    ; $5350
+                sta ModeLineInv    ; $534D
+                jsr DrawModeLine    ; $5350
                 lda #$01    ; $5353
                 rts    ; $5355
-                jsr $535D    ; $5356
-                jsr $52F8    ; $5359
+;
+; === InitModeLine ===
+                jsr ClearModeLine    ; $5356
+                jsr DrawModeLine    ; $5359
                 rts    ; $535C
+;
+; === ClearModeLine ===
                 lda #$A0    ; $535D
                 ldy #$00    ; $535F
                 sta $D400,y    ; $5361
@@ -8211,6 +9708,8 @@
                 cpy #$50    ; $5365
                 bcc $5361    ; $5367
                 rts    ; $5369
+;
+; === MajorNames ===
                 sbc ($54)    ; $536A
                 sbc $0154,x    ; $536C
                 eor $07,x    ; $536F
@@ -8222,43 +9721,45 @@
                 sbc ($54)    ; $537A
                 brk    ; $537C
                 brk    ; $537D
-                jsr $535D    ; $537E
+;
+; === MakeModeLine ===
+                jsr ClearModeLine    ; $537E
                 lda #$00    ; $5381
-                sta $24    ; $5383
-                jsr $531C    ; $5385
+                sta CH    ; $5383
+                jsr ModeLineMsg    ; $5385
                 cmp ($CD,x)    ; $5388
                 cmp ($C3,x)    ; $538A
         dfb $D3        ; $538C  (data/65C02-bit)
                 ldy #$A8    ; $538D
                 brk    ; $538F
                 ldy #$41    ; $5390
-                lda ($72),y    ; $5392
+                lda (BuffData),y    ; $5392
                 and #$01    ; $5394
                 beq $53A1    ; $5396
-                jsr $531C    ; $5398
+                jsr ModeLineMsg    ; $5398
         dfb $DB        ; $539B  (data/65C02-bit)
                 cmp ($CF)    ; $539C
                 cmp: $00A0,x    ; $539E
-                bit $8AA6    ; $53A1
+                bit MacroDef    ; $53A1
                 bpl $53B1    ; $53A4
                 lda #$24    ; $53A6
                 sta $00    ; $53A8
                 lda #$55    ; $53AA
                 sta $01    ; $53AC
-                jsr $5564    ; $53AE
+                jsr TempToMode    ; $53AE
                 ldy #$3F    ; $53B1
-                lda ($72),y    ; $53B3
+                lda (BuffData),y    ; $53B3
                 asl    ; $53B5
                 tax    ; $53B6
-                lda $536A,x    ; $53B7
+                lda MajorNames,x    ; $53B7
                 sta $00    ; $53BA
                 lda $536B,x    ; $53BC
                 sta $01    ; $53BF
-                jsr $5564    ; $53C1
-                jsr $5538    ; $53C4
-                jsr $531C    ; $53C7
+                jsr TempToMode    ; $53C1
+                jsr PrintMinors    ; $53C4
+                jsr ModeLineMsg    ; $53C7
                 lda #$00    ; $53CA
-                jsr $531C    ; $53CC
+                jsr ModeLineMsg    ; $53CC
                 ldy #$A0    ; $53CF
         dfb $C2        ; $53D1  (data/65C02-bit)
                 sbc $E6,x    ; $53D2
@@ -8266,29 +9767,29 @@
                 sbc ($BA)    ; $53D6
                 brk    ; $53D8
                 ldy #$52    ; $53D9
-                lda ($72),y    ; $53DB
+                lda (BuffData),y    ; $53DB
                 beq $53E5    ; $53DD
-                jsr $52E8    ; $53DF
+                jsr ModeLineChar    ; $53DF
                 iny    ; $53E2
                 bne $53DB    ; $53E3
-                jsr $531C    ; $53E5
+                jsr ModeLineMsg    ; $53E5
                 ldy #$A0    ; $53E8
                 ldy #$C6    ; $53EA
                 sbc #$EC    ; $53EC
                 sbc $BA    ; $53EE
                 brk    ; $53F0
                 ldy #$00    ; $53F1
-                lda ($72),y    ; $53F3
+                lda (BuffData),y    ; $53F3
                 beq $5429    ; $53F5
                 lda #$A8    ; $53F7
-                ldx $24    ; $53F9
+                ldx CH    ; $53F9
                 cpx #$43    ; $53FB
                 bcs $5429    ; $53FD
-                jsr $52E8    ; $53FF
+                jsr ModeLineChar    ; $53FF
                 dey    ; $5402
                 sty $5423    ; $5403
                 iny    ; $5406
-                lda ($72),y    ; $5407
+                lda (BuffData),y    ; $5407
                 beq $5415    ; $5409
                 cmp #$AF    ; $540B
                 bne $5412    ; $540D
@@ -8297,33 +9798,35 @@
                 bne $5407    ; $5413
                 ldy $5423    ; $5415
                 iny    ; $5418
-                lda ($72),y    ; $5419
+                lda (BuffData),y    ; $5419
                 beq $5424    ; $541B
-                jsr $52E8    ; $541D
+                jsr ModeLineChar    ; $541D
                 iny    ; $5420
                 bne $5419    ; $5421
                 brk    ; $5423
                 lda #$A9    ; $5424
-                jsr $52E8    ; $5426
+                jsr ModeLineChar    ; $5426
                 lda #$43    ; $5429
-                sta $24    ; $542B
-                jsr $531C    ; $542D
+                sta CH    ; $542B
+                jsr ModeLineMsg    ; $542D
                 ldy #$A0    ; $5430
                 ldy #$AD    ; $5432
                 lda $D4A0    ; $5434
         dfb $EF        ; $5437  (data/65C02-bit)
                 beq $53DA    ; $5438
                 lda: $00AD    ; $543A
-                jsr $5441    ; $543D
+                jsr ModeInfo    ; $543D
                 rts    ; $5440
-                lda $25    ; $5441
+;
+; === ModeInfo ===
+                lda CV    ; $5441
                 pha    ; $5443
-                lda $24    ; $5444
+                lda CH    ; $5444
                 pha    ; $5446
                 lda #$43    ; $5447
-                sta $24    ; $5449
+                sta CH    ; $5449
                 lda #$02    ; $544B
-                jsr $4C2B    ; $544D
+                jsr BuffFlagOn?    ; $544D
                 php    ; $5450
                 lda #$AA    ; $5451
                 plp    ; $5453
@@ -8331,76 +9834,76 @@
                 lda #$A0    ; $5456
                 pha    ; $5458
                 lda #$A0    ; $5459
-                jsr $52E8    ; $545B
+                jsr ModeLineChar    ; $545B
                 pla    ; $545E
-                jsr $52E8    ; $545F
+                jsr ModeLineChar    ; $545F
                 lda #$A0    ; $5462
-                jsr $52E8    ; $5464
-                lda $24    ; $5467
+                jsr ModeLineChar    ; $5464
+                lda CH    ; $5467
                 clc    ; $5469
                 adc #$03    ; $546A
-                sta $24    ; $546C
-                jsr $55CF    ; $546E
+                sta CH    ; $546C
+                jsr BuffPercent    ; $546E
                 tax    ; $5471
-                sta $52E5    ; $5472
+                sta LastPercnt    ; $5472
                 beq $54AC    ; $5475
                 cmp #$64    ; $5477
                 bcs $54B6    ; $5479
                 lda $2607    ; $547B
                 pha    ; $547E
-                lda $2606    ; $547F
+                lda CoutDef    ; $547F
                 pha    ; $5482
                 lda #$E8    ; $5483
-                sta $2606    ; $5485
+                sta CoutDef    ; $5485
                 lda #$52    ; $5488
                 sta $2607    ; $548A
-                jsr $7A55    ; $548D
+                jsr ZeroJustify    ; $548D
                 cpx #$0A    ; $5490
                 bcs $5499    ; $5492
-                jsr $7DA7    ; $5494
+                jsr PrintSpace    ; $5494
                 lda #$00    ; $5497
-                jsr $7A01    ; $5499
+                jsr PrintDec    ; $5499
                 lda #$A5    ; $549C
-                jsr $2611    ; $549E
+                jsr CharOut    ; $549E
                 pla    ; $54A1
-                sta $2606    ; $54A2
+                sta CoutDef    ; $54A2
                 pla    ; $54A5
                 sta $2607    ; $54A6
                 jmp $54BD    ; $54A9
-                jsr $531C    ; $54AC
+                jsr ModeLineMsg    ; $54AC
         dfb $D4        ; $54AF  (data/65C02-bit)
         dfb $EF        ; $54B0  (data/65C02-bit)
                 beq $54B3    ; $54B1
                 jmp $54BD    ; $54B3
-                jsr $531C    ; $54B6
+                jsr ModeLineMsg    ; $54B6
         dfb $C2        ; $54B9  (data/65C02-bit)
         dfb $EF        ; $54BA  (data/65C02-bit)
         dfb $F4        ; $54BB  (data/65C02-bit)
                 brk    ; $54BC
-                jsr $52F8    ; $54BD
+                jsr DrawModeLine    ; $54BD
                 lda #$3D    ; $54C0
-                sta $24    ; $54C2
+                sta CH    ; $54C2
                 lda #$15    ; $54C4
-                sta $25    ; $54C6
-                jsr $26E9    ; $54C8
+                sta CV    ; $54C6
+                jsr vtab    ; $54C8
                 lda $2607    ; $54CB
                 pha    ; $54CE
-                lda $2606    ; $54CF
+                lda CoutDef    ; $54CF
                 pha    ; $54D2
                 lda #$14    ; $54D3
-                sta $2606    ; $54D5
+                sta CoutDef    ; $54D5
                 lda #$26    ; $54D8
                 sta $2607    ; $54DA
-                jsr $6F00    ; $54DD
+                jsr DSK:ModeTime    ; $54DD
                 pla    ; $54E0
-                sta $2606    ; $54E1
+                sta CoutDef    ; $54E1
                 pla    ; $54E4
                 sta $2607    ; $54E5
                 pla    ; $54E8
-                sta $24    ; $54E9
+                sta CH    ; $54E9
                 pla    ; $54EB
-                sta $25    ; $54EC
-                jsr $26E9    ; $54EE
+                sta CV    ; $54EC
+                jsr vtab    ; $54EE
                 rts    ; $54F1
                 lsr $75    ; $54F2
                 ror $6164    ; $54F4
@@ -8417,16 +9920,16 @@
         dfb $73        ; $550E  (data/65C02-bit)
         dfb $63        ; $550F  (data/65C02-bit)
                 adc ($EC,x)    ; $5510
-                eor ($74,x)    ; $5512
+                eor (TheBuffer_X,x)    ; $5512
         dfb $6F        ; $5514  (data/65C02-bit)
                 sbc $6946    ; $5515
-                jmp ($49EC)    ; $5518
+                jmp (PBuffFile)    ; $5518
                 ror $6564    ; $551B
                 ror $43F4    ; $551E
-                adc ($70,x)    ; $5521
+                adc (PhysBuffBot,x)    ; $5521
         dfb $F3        ; $5523  (data/65C02-bit)
         dfb $44        ; $5524  (data/65C02-bit)
-                adc $66    ; $5525
+                adc BuffTop    ; $5525
                 ldy #$12    ; $5527
                 eor $16,x    ; $5529
                 eor $1A,x    ; $552B
@@ -8438,8 +9941,10 @@
                 brk    ; $5535
                 brk    ; $5536
                 brk    ; $5537
+;
+; === PrintMinors ===
                 ldy #$40    ; $5538
-                lda ($72),y    ; $553A
+                lda (BuffData),y    ; $553A
                 sta $5563    ; $553C
                 ldx #$FE    ; $553F
                 inx    ; $5541
@@ -8449,20 +9954,22 @@
                 lsr $5563    ; $5548
                 bcc $5541    ; $554B
                 lda #$A0    ; $554D
-                jsr $52E8    ; $554F
-                lda $5528,x    ; $5552
+                jsr ModeLineChar    ; $554F
+                lda MinorNames,x    ; $5552
                 sta $00    ; $5555
                 lda $5529,x    ; $5557
                 sta $01    ; $555A
-                jsr $5564    ; $555C
+                jsr TempToMode    ; $555C
                 jmp $5541    ; $555F
                 rts    ; $5562
                 brk    ; $5563
+;
+; === TempToMode ===
                 ldy #$00    ; $5564
                 lda ($00),y    ; $5566
                 pha    ; $5568
                 ora #$80    ; $5569
-                jsr $52E8    ; $556B
+                jsr ModeLineChar    ; $556B
                 iny    ; $556E
                 pla    ; $556F
                 bpl $5566    ; $5570
@@ -8471,6 +9978,8 @@
                 brk    ; $5574
                 brk    ; $5575
                 brk    ; $5576
+;
+; === SI:Divide ===
                 sta $5576    ; $5577
                 stx $5575    ; $557A
                 lda $00    ; $557D
@@ -8514,36 +10023,44 @@
                 brk    ; $55C8
                 brk    ; $55C9
                 brk    ; $55CA
+;
+; === P:Offset ===
                 brk    ; $55CB
                 brk    ; $55CC
+;
+; === P:Total ===
                 brk    ; $55CD
                 brk    ; $55CE
-                lda $60    ; $55CF
+;
+; === BuffPercent ===
+                lda TheBuffer    ; $55CF
                 sec    ; $55D1
-                sbc $6E    ; $55D2
-                sta $55CB    ; $55D4
+                sbc PhysBuffTop    ; $55D2
+                sta P:Offset    ; $55D4
                 lda $61    ; $55D7
                 sbc $6F    ; $55D9
                 sta $55CC    ; $55DB
-                ldx $0F3A    ; $55DE
-                jsr $49A4    ; $55E1
+                ldx SelectedBuff    ; $55DE
+                jsr MySize    ; $55E1
                 sta $55CE    ; $55E4
-                stx $55CD    ; $55E7
-                lda $55CD    ; $55EA
+                stx P:Total    ; $55E7
+;
+; === Percent ===
+                lda P:Total    ; $55EA
                 sta $55C9    ; $55ED
                 sta $5573    ; $55F0
                 lda $55CE    ; $55F3
                 sta $55CA    ; $55F6
                 sta $5574    ; $55F9
                 lsr    ; $55FC
-                ror $55CD    ; $55FD
+                ror P:Total    ; $55FD
                 sta $55C6    ; $5600
-                ldx $55CD    ; $5603
+                ldx P:Total    ; $5603
                 stx $55C5    ; $5606
                 lsr    ; $5609
-                ror $55CD    ; $560A
+                ror P:Total    ; $560A
                 sta $55C4    ; $560D
-                ldx $55CD    ; $5610
+                ldx P:Total    ; $5610
                 stx $55C3    ; $5613
                 lda $55C5    ; $5616
                 clc    ; $5619
@@ -8555,7 +10072,7 @@
                 ldx #$00    ; $5629
                 ldy #$00    ; $562B
                 sty $56FA    ; $562D
-                lda $55CB    ; $5630
+                lda P:Offset    ; $5630
                 ora $55CC    ; $5633
                 bne $563B    ; $5636
                 jmp $56F8    ; $5638
@@ -8563,7 +10080,7 @@
                 cmp $55C4,x    ; $563E
                 bcc $565A    ; $5641
                 bne $5655    ; $5643
-                lda $55CB    ; $5645
+                lda P:Offset    ; $5645
                 cmp $55C3,x    ; $5648
                 bcc $565A    ; $564B
                 bne $5655    ; $564D
@@ -8590,7 +10107,7 @@
                 cmp $01    ; $5678
                 bcc $56B0    ; $567A
                 bne $568F    ; $567C
-                lda $55CB    ; $567E
+                lda P:Offset    ; $567E
                 cmp $00    ; $5681
                 bcc $56B0    ; $5683
                 bne $568F    ; $5685
@@ -8604,7 +10121,7 @@
                 sta $56FA    ; $5697
                 lda $55C3,x    ; $569A
                 sec    ; $569D
-                sbc $55CB    ; $569E
+                sbc P:Offset    ; $569E
                 sta $5575    ; $56A1
                 lda $55C4,x    ; $56A4
                 sbc $55CC    ; $56A7
@@ -8612,7 +10129,7 @@
                 jmp $56C9    ; $56AD
                 lda $55BC,y    ; $56B0
                 sta $56F9    ; $56B3
-                lda $55CB    ; $56B6
+                lda P:Offset    ; $56B6
                 sec    ; $56B9
                 sbc $55C1,x    ; $56BA
                 sta $5575    ; $56BD
@@ -8640,35 +10157,41 @@
                 rts    ; $56F8
                 brk    ; $56F9
                 brk    ; $56FA
+;
+; === PreBlinkCount ===
         dfb $02        ; $56FB  (data/65C02-bit)
                 brk    ; $56FC
+;
+; === PreCharGet ===
                 sta $56FC    ; $56FD
-                lda $56FB    ; $5700
-                sta $28B9    ; $5703
-                lda $24    ; $5706
-                sta $28B7    ; $5708
-                lda $25    ; $570B
+                lda PreBlinkCount    ; $5700
+                sta BlinkTime    ; $5703
+                lda CH    ; $5706
+                sta Cursor2    ; $5708
+                lda CV    ; $570B
                 sta $28B8    ; $570D
-                jsr $28BB    ; $5710
+                jsr TimedBlink    ; $5710
                 beq $5723    ; $5713
-                jsr $579B    ; $5715
+                jsr ClrEchoArea    ; $5715
                 lda $56FC    ; $5718
-                jsr $5726    ; $571B
-                jsr $292E    ; $571E
+                jsr EchoOutput    ; $571B
+                jsr BlinkCursor    ; $571E
                 pha    ; $5721
                 pla    ; $5722
                 rts    ; $5723
+;
+; === EchoAreaCH ===
                 brk    ; $5724
                 asl $8D,x    ; $5725
                 adc $A557    ; $5727
                 and $48    ; $572A
-                lda $24    ; $572C
+                lda CH    ; $572C
                 pha    ; $572E
-                lda $5724    ; $572F
-                sta $24    ; $5732
+                lda EchoAreaCH    ; $572F
+                sta CH    ; $5732
                 lda $5725    ; $5734
-                sta $25    ; $5737
-                jsr $26E9    ; $5739
+                sta CV    ; $5737
+                jsr vtab    ; $5739
                 lda $576D    ; $573C
                 cmp #$00    ; $573F
                 beq $576E    ; $5741
@@ -8678,103 +10201,117 @@
                 beq $577B    ; $5749
                 cmp #$04    ; $574B
                 beq $5788    ; $574D
-                jsr $2611    ; $574F
-                lda $24    ; $5752
-                sta $5724    ; $5754
-                lda $25    ; $5757
+                jsr CharOut    ; $574F
+                lda CH    ; $5752
+                sta EchoAreaCH    ; $5754
+                lda CV    ; $5757
                 sta $5725    ; $5759
                 bne $5763    ; $575C
                 lda #$16    ; $575E
                 sta $5725    ; $5760
                 pla    ; $5763
-                sta $24    ; $5764
+                sta CH    ; $5764
                 pla    ; $5766
-                sta $25    ; $5767
-                jsr $26E9    ; $5769
+                sta CV    ; $5767
+                jsr vtab    ; $5769
                 rts    ; $576C
                 brk    ; $576D
                 lda #$CD    ; $576E
-                jsr $2611    ; $5770
+                jsr CharOut    ; $5770
                 lda #$AD    ; $5773
                 bne $574F    ; $5775
                 lda #$C3    ; $5777
                 bne $5770    ; $5779
                 lda #$C3    ; $577B
-                jsr $2611    ; $577D
+                jsr CharOut    ; $577D
                 lda #$AD    ; $5780
-                jsr $2611    ; $5782
+                jsr CharOut    ; $5782
                 jmp $576E    ; $5785
                 lda #$C3    ; $5788
-                jsr $2611    ; $578A
+                jsr CharOut    ; $578A
                 lda #$AD    ; $578D
-                jsr $2611    ; $578F
+                jsr CharOut    ; $578F
                 lda #$D8    ; $5792
-                jsr $2611    ; $5794
+                jsr CharOut    ; $5794
                 lda #$A0    ; $5797
                 bne $574F    ; $5799
-                lda $25    ; $579B
+;
+; === ClrEchoArea ===
+                lda CV    ; $579B
                 pha    ; $579D
-                lda $24    ; $579E
+                lda CH    ; $579E
                 pha    ; $57A0
-                lda $22    ; $57A1
+                lda WindowTop    ; $57A1
                 pha    ; $57A3
-                lda $23    ; $57A4
+                lda WindowBot    ; $57A4
                 pha    ; $57A6
                 lda #$16    ; $57A7
-                sta $22    ; $57A9
+                sta WindowTop    ; $57A9
                 lda #$18    ; $57AB
-                sta $23    ; $57AD
-                jsr $2871    ; $57AF
-                lda $24    ; $57B2
-                sta $5724    ; $57B4
-                lda $25    ; $57B7
+                sta WindowBot    ; $57AD
+                jsr ClearPage    ; $57AF
+                lda CH    ; $57B2
+                sta EchoAreaCH    ; $57B4
+                lda CV    ; $57B7
                 sta $5725    ; $57B9
                 pla    ; $57BC
-                sta $23    ; $57BD
+                sta WindowBot    ; $57BD
                 pla    ; $57BF
-                sta $22    ; $57C0
+                sta WindowTop    ; $57C0
                 pla    ; $57C2
-                sta $24    ; $57C3
+                sta CH    ; $57C3
                 pla    ; $57C5
-                sta $25    ; $57C6
-                jsr $26E9    ; $57C8
+                sta CV    ; $57C6
+                jsr vtab    ; $57C8
                 rts    ; $57CB
-                jsr $57D8    ; $57CC
-                jmp $2871    ; $57CF
+;
+; === NewEchoArea ===
+                jsr OpenEchoArea    ; $57CC
+                jmp ClearPage    ; $57CF
+;
+; === EchoAreaSave ===
                 brk    ; $57D2
                 brk    ; $57D3
                 brk    ; $57D4
                 brk    ; $57D5
                 brk    ; $57D6
                 brk    ; $57D7
+;
+; === OpenEchoArea ===
                 ldx #$00    ; $57D8
-                lda $20,x    ; $57DA
-                sta $57D2,x    ; $57DC
+                lda WindowLft,x    ; $57DA
+                sta EchoAreaSave,x    ; $57DC
                 inx    ; $57DF
                 cpx #$06    ; $57E0
                 bcc $57DA    ; $57E2
+;
+; === UseEchoArea ===
                 lda #$16    ; $57E4
-                sta $22    ; $57E6
+                sta WindowTop    ; $57E6
                 lda #$18    ; $57E8
-                sta $23    ; $57EA
-                lda $5724    ; $57EC
-                sta $24    ; $57EF
+                sta WindowBot    ; $57EA
+                lda EchoAreaCH    ; $57EC
+                sta CH    ; $57EF
                 lda $5725    ; $57F1
-                sta $25    ; $57F4
-                jsr $26E9    ; $57F6
+                sta CV    ; $57F4
+                jsr vtab    ; $57F6
                 rts    ; $57F9
-                lda $24    ; $57FA
-                sta $5724    ; $57FC
-                lda $25    ; $57FF
+;
+; === CloseEchoArea ===
+                lda CH    ; $57FA
+                sta EchoAreaCH    ; $57FC
+                lda CV    ; $57FF
                 sta $5725    ; $5801
                 ldx #$00    ; $5804
-                lda $57D2,x    ; $5806
-                sta $20,x    ; $5809
+                lda EchoAreaSave,x    ; $5806
+                sta WindowLft,x    ; $5809
                 inx    ; $580B
                 cpx #$06    ; $580C
                 bcc $5806    ; $580E
-                jsr $26E9    ; $5810
+                jsr vtab    ; $5810
                 rts    ; $5813
+;
+; === EchoAreaMsg ===
                 pla    ; $5814
                 sta $06    ; $5815
                 pla    ; $5817
@@ -8785,34 +10322,38 @@
                 inc $07    ; $5820
                 lda ($06),y    ; $5822
                 beq $582C    ; $5824
-                jsr $5726    ; $5826
+                jsr EchoOutput    ; $5826
                 jmp $581C    ; $5829
                 lda $07    ; $582C
                 pha    ; $582E
                 lda $06    ; $582F
                 pha    ; $5831
                 rts    ; $5832
+;
+; === BadCharMsg ===
                 tax    ; $5833
-                lda $25    ; $5834
+                lda CV    ; $5834
                 pha    ; $5836
-                lda $24    ; $5837
+                lda CH    ; $5837
                 pha    ; $5839
                 txa    ; $583A
                 pha    ; $583B
-                jsr $57CC    ; $583C
-                jsr $29B9    ; $583F
+                jsr NewEchoArea    ; $583C
+                jsr Beep    ; $583F
                 pla    ; $5842
-                jsr $586C    ; $5843
-                jsr $5858    ; $5846
-                jsr $57FA    ; $5849
+                jsr PrettyPrint    ; $5843
+                jsr PrUnDefined    ; $5846
+                jsr CloseEchoArea    ; $5849
                 pla    ; $584C
-                sta $24    ; $584D
+                sta CH    ; $584D
                 pla    ; $584F
-                sta $25    ; $5850
-                jsr $26E9    ; $5852
+                sta CV    ; $5850
+                jsr vtab    ; $5852
                 lda #$00    ; $5855
                 rts    ; $5857
-                jsr $5968    ; $5858
+;
+; === PrUnDefined ===
+                jsr PrintMessage    ; $5858
                 ldy #$E9    ; $585B
         dfb $F3        ; $585D  (data/65C02-bit)
                 ldy #$F5    ; $585E
@@ -8821,6 +10362,8 @@
                 inc $E4E5    ; $5865
                 ldx: $008D    ; $5868
                 rts    ; $586B
+;
+; === PrettyPrint ===
                 sta $58AA    ; $586C
                 jsr $58B0    ; $586F
                 lda $58AA    ; $5872
@@ -8832,18 +10375,18 @@
                 bcc $5897    ; $587F
                 cmp #$A0    ; $5881
                 beq $58AB    ; $5883
-                jsr $2611    ; $5885
+                jsr CharOut    ; $5885
                 rts    ; $5888
-                jsr $5951    ; $5889
+                jsr print_c_meta    ; $5889
                 lda $58AA    ; $588C
                 ora #$80    ; $588F
                 clc    ; $5891
                 adc #$40    ; $5892
                 jmp $5881    ; $5894
-                jsr $5944    ; $5897
+                jsr print_control    ; $5897
                 lda $58AA    ; $589A
                 jmp $588F    ; $589D
-                jsr $5954    ; $58A0
+                jsr print_meta    ; $58A0
                 lda $58AA    ; $58A3
                 ora #$80    ; $58A6
                 bmi $5881    ; $58A8
@@ -8857,7 +10400,7 @@
                 ora #$80    ; $58B8
                 jsr $58FD    ; $58BA
                 bne $58FA    ; $58BD
-                jsr $5968    ; $58BF
+                jsr PrintMessage    ; $58BF
                 cmp $F4E5    ; $58C2
                 sbc ($AD,x)    ; $58C5
                 brk    ; $58C7
@@ -8875,7 +10418,7 @@
                 sta $00    ; $58D9
                 lda $5911,x    ; $58DB
                 sta $01    ; $58DE
-                jsr $598F    ; $58E0
+                jsr DCIStringOut    ; $58E0
                 pla    ; $58E3
                 sta $00    ; $58E4
                 pla    ; $58E6
@@ -8883,7 +10426,7 @@
                 lda $58FC    ; $58E9
                 cmp #$04    ; $58EC
                 bcc $58FA    ; $58EE
-                jsr $5968    ; $58F0
+                jsr PrintMessage    ; $58F0
                 lda $F2C1    ; $58F3
                 sbc ($EF)    ; $58F6
         dfb $F7        ; $58F8  (data/65C02-bit)
@@ -8899,9 +10442,9 @@
                 rts    ; $5907
                 sta $9B89    ; $5908
         dfb $FF        ; $590B  (data/65C02-bit)
-                adc ($62,x)    ; $590C
+                adc (PageTop,x)    ; $590C
         dfb $63        ; $590E  (data/65C02-bit)
-                stz $20    ; $590F
+                stz WindowLft    ; $590F
                 eor $5926,y    ; $5911
                 and #$59    ; $5914
         dfb $2F        ; $5916  (data/65C02-bit)
@@ -8934,18 +10477,24 @@
         dfb $EF        ; $594C  (data/65C02-bit)
                 cpx: $00AD    ; $594D
                 rts    ; $5950
-                jsr $5944    ; $5951
-                jsr $5968    ; $5954
+;
+; === print_c_meta ===
+                jsr print_control    ; $5951
+;
+; === print_meta ===
+                jsr PrintMessage    ; $5954
                 cmp $F4E5    ; $5957
                 sbc ($AD,x)    ; $595A
                 brk    ; $595C
                 rts    ; $595D
-                jsr $5968    ; $595E
+                jsr PrintMessage    ; $595E
         dfb $D3        ; $5961  (data/65C02-bit)
                 beq $5945    ; $5962
         dfb $E3        ; $5964  (data/65C02-bit)
                 sbc $00    ; $5965
                 rts    ; $5967
+;
+; === PrintMessage ===
                 pla    ; $5968
                 sta $06    ; $5969
                 pla    ; $596B
@@ -8956,29 +10505,41 @@
                 inc $07    ; $5974
                 lda ($06),y    ; $5976
                 beq $5980    ; $5978
-                jsr $2611    ; $597A
+                jsr CharOut    ; $597A
                 jmp $5970    ; $597D
                 lda $07    ; $5980
                 pha    ; $5982
                 lda $06    ; $5983
                 pha    ; $5985
                 rts    ; $5986
+;
+; === CompList ===
         dfb $37        ; $5987  (data/65C02-bit)
         dfb $9B        ; $5988  (data/65C02-bit)
+;
+; === CompOffset ===
                 brk    ; $5989
                 brk    ; $598A
+;
+; === CompCount ===
                 brk    ; $598B
-                jsr $5A12    ; $598C
-                lda $24    ; $598F
+;
+; === PrintCompDoc ===
+                jsr DocRef    ; $598C
+;
+; === DCIStringOut   (also PrintComp) ===
+                lda CH    ; $598F
+;
+; === DCIStringOut1 ===
                 sta $5A10    ; $5991
                 ldy #$FF    ; $5994
                 iny    ; $5996
                 sty $5A0E    ; $5997
-                lda $24    ; $599A
-                cmp $20    ; $599C
+                lda CH    ; $599A
+                cmp WindowLft    ; $599C
                 bne $59A5    ; $599E
                 lda $5A10    ; $59A0
-                sta $24    ; $59A3
+                sta CH    ; $59A3
                 sta $5A0F    ; $59A5
                 lda ($00),y    ; $59A8
                 bpl $59FD    ; $59AA
@@ -8986,27 +10547,27 @@
                 beq $59E3    ; $59AE
                 cmp #$8D    ; $59B0
                 beq $59E3    ; $59B2
-                jsr $2DE0    ; $59B4
+                jsr GetXCharLen    ; $59B4
                 txa    ; $59B7
                 clc    ; $59B8
                 adc $5A0F    ; $59B9
                 sta $5A0F    ; $59BC
-                cmp $21    ; $59BF
+                cmp WindowRgt    ; $59BF
                 bcs $59C6    ; $59C1
                 iny    ; $59C3
                 bne $59A8    ; $59C4
                 tya    ; $59C6
                 pha    ; $59C7
-                jsr $7DA3    ; $59C8
-                lda $21    ; $59CB
+                jsr PrintReturn    ; $59C8
+                lda WindowRgt    ; $59CB
                 pha    ; $59CD
                 lda $5A10    ; $59CE
-                sta $21    ; $59D1
-                jsr $2862    ; $59D3
+                sta WindowRgt    ; $59D1
+                jsr ClearEOL    ; $59D3
                 pla    ; $59D6
-                sta $21    ; $59D7
+                sta WindowRgt    ; $59D7
                 lda $5A10    ; $59D9
-                sta $24    ; $59DC
+                sta CH    ; $59DC
                 sta $5A0F    ; $59DE
                 pla    ; $59E1
                 tay    ; $59E2
@@ -9015,7 +10576,7 @@
                 lda ($00),y    ; $59E9
                 php    ; $59EB
                 ora #$80    ; $59EC
-                jsr $2611    ; $59EE
+                jsr CharOut    ; $59EE
                 plp    ; $59F1
                 bpl $5A0D    ; $59F2
                 cpy $5A11    ; $59F4
@@ -9023,11 +10584,11 @@
                 iny    ; $59F9
                 jmp $59E9    ; $59FA
                 ora #$80    ; $59FD
-                jsr $2DE0    ; $59FF
+                jsr GetXCharLen    ; $59FF
                 txa    ; $5A02
                 clc    ; $5A03
                 adc $5A0F    ; $5A04
-                cmp $21    ; $5A07
+                cmp WindowRgt    ; $5A07
                 bcc $59E3    ; $5A09
                 bcs $59C6    ; $5A0B
                 rts    ; $5A0D
@@ -9035,7 +10596,9 @@
                 brk    ; $5A0F
                 brk    ; $5A10
                 brk    ; $5A11
-                jsr $5A24    ; $5A12
+;
+; === DocRef ===
+                jsr DCIStringLen    ; $5A12
                 iny    ; $5A15
                 iny    ; $5A16
                 iny    ; $5A17
@@ -9047,6 +10610,8 @@
                 pla    ; $5A20
                 sta $01    ; $5A21
                 rts    ; $5A23
+;
+; === DCIStringLen ===
                 ldy #$00    ; $5A24
                 lda ($00),y    ; $5A26
                 php    ; $5A28
@@ -9054,7 +10619,9 @@
                 plp    ; $5A2A
                 bmi $5A26    ; $5A2B
                 rts    ; $5A2D
-                jsr $5A24    ; $5A2E
+;
+; === FunctionRef ===
+                jsr DCIStringLen    ; $5A2E
                 lda ($00),y    ; $5A31
                 pha    ; $5A33
                 iny    ; $5A34
@@ -9063,11 +10630,13 @@
                 pla    ; $5A39
                 sta $00    ; $5A3A
                 rts    ; $5A3C
-                ldx $598B    ; $5A3D
+;
+; === PopCompPoint ===
+                ldx CompCount    ; $5A3D
                 beq $5A53    ; $5A40
                 dex    ; $5A42
-                stx $598B    ; $5A43
-                lda $A900,x    ; $5A46
+                stx CompCount    ; $5A43
+                lda rm_DataBuffer,x    ; $5A46
                 sta $00    ; $5A49
                 lda $AA00,x    ; $5A4B
                 sta $01    ; $5A4E
@@ -9075,15 +10644,19 @@
                 rts    ; $5A52
                 lda #$FF    ; $5A53
                 rts    ; $5A55
-                ldx $598B    ; $5A56
+;
+; === PushCompPoint ===
+                ldx CompCount    ; $5A56
                 lda $00    ; $5A59
-                sta $A900,x    ; $5A5B
+                sta rm_DataBuffer,x    ; $5A5B
                 lda $01    ; $5A5E
                 sta $AA00,x    ; $5A60
                 inx    ; $5A63
-                stx $598B    ; $5A64
+                stx CompCount    ; $5A64
                 rts    ; $5A67
-                jsr $5A24    ; $5A68
+;
+; === SkipEnt ===
+                jsr DCIStringLen    ; $5A68
                 tya    ; $5A6B
                 clc    ; $5A6C
                 adc #$04    ; $5A6D
@@ -9092,17 +10665,19 @@
                 bcc $5A77    ; $5A73
                 inc $01    ; $5A75
                 rts    ; $5A77
+;
+; === CompareEnt ===
                 ldy #$00    ; $5A78
                 ldx $598A    ; $5A7A
                 lda ($00),y    ; $5A7D
                 sta $E3    ; $5A7F
                 ora #$80    ; $5A81
-                jsr $36FD    ; $5A83
+                jsr UpperCon    ; $5A83
                 sta $E2    ; $5A86
                 lda $0200,x    ; $5A88
                 cmp #$9B    ; $5A8B
                 beq $5AA3    ; $5A8D
-                jsr $36FD    ; $5A8F
+                jsr UpperCon    ; $5A8F
                 cmp $E2    ; $5A92
                 bne $5AAD    ; $5A94
                 iny    ; $5A96
@@ -9112,21 +10687,21 @@
                 lda $0200,x    ; $5A9C
                 cmp #$9B    ; $5A9F
                 bne $5AAD    ; $5AA1
-                cpy $5AD3    ; $5AA3
+                cpy HighMatch    ; $5AA3
                 bcc $5AAB    ; $5AA6
-                sty $5AD3    ; $5AA8
+                sty HighMatch    ; $5AA8
                 lda #$00    ; $5AAB
                 rts    ; $5AAD
                 ldy #$00    ; $5AAE
                 lda ($00),y    ; $5AB0
                 sta $E3    ; $5AB2
                 ora #$80    ; $5AB4
-                jsr $36FD    ; $5AB6
+                jsr UpperCon    ; $5AB6
                 sta $E2    ; $5AB9
                 lda ($02),y    ; $5ABB
                 sta $E4    ; $5ABD
                 ora #$80    ; $5ABF
-                jsr $36FD    ; $5AC1
+                jsr UpperCon    ; $5AC1
                 cmp $E2    ; $5AC4
                 bne $5AD1    ; $5AC6
                 lda $E3    ; $5AC8
@@ -9136,30 +10711,38 @@
                 bne $5AB0    ; $5ACF
                 rts    ; $5AD1
                 brk    ; $5AD2
+;
+; === HighMatch ===
                 brk    ; $5AD3
+;
+; === GetCompLink ===
                 ldy #$00    ; $5AD4
                 lda ($00),y    ; $5AD6
                 beq $5AE4    ; $5AD8
                 cmp #$FF    ; $5ADA
                 beq $5AE4    ; $5ADC
-                jsr $5A68    ; $5ADE
-                jmp $5AD4    ; $5AE1
+                jsr SkipEnt    ; $5ADE
+                jmp GetCompLink    ; $5AE1
                 rts    ; $5AE4
+;
+; === SI:CompleteMe ===
                 lda #$9B    ; $5AE5
                 bne $5AEB    ; $5AE7
+;
+; === SI:CompleteSp ===
                 lda #$A0    ; $5AE9
                 sta $5AD2    ; $5AEB
-                lda $5987    ; $5AEE
+                lda CompList    ; $5AEE
                 sta $00    ; $5AF1
                 lda $5988    ; $5AF3
                 sta $01    ; $5AF6
                 lda #$00    ; $5AF8
-                sta $598B    ; $5AFA
+                sta CompCount    ; $5AFA
                 sta $5BC6    ; $5AFD
-                sta $5AD3    ; $5B00
-                ldy $5989    ; $5B03
+                sta HighMatch    ; $5B00
+                ldy CompOffset    ; $5B03
                 sty $598A    ; $5B06
-                sta $5989    ; $5B09
+                sta CompOffset    ; $5B09
                 ldy #$00    ; $5B0C
                 lda ($00),y    ; $5B0E
                 beq $5B38    ; $5B10
@@ -9174,23 +10757,23 @@
                 pla    ; $5B1F
                 sta $00    ; $5B20
                 jmp $5B0C    ; $5B22
-                jsr $5A78    ; $5B25
+                jsr CompareEnt    ; $5B25
                 bne $5B32    ; $5B28
-                cpy $5AD3    ; $5B2A
+                cpy HighMatch    ; $5B2A
                 bcc $5B32    ; $5B2D
-                jsr $5A56    ; $5B2F
-                jsr $5A68    ; $5B32
+                jsr PushCompPoint    ; $5B2F
+                jsr SkipEnt    ; $5B32
                 jmp $5B0C    ; $5B35
-                lda $598B    ; $5B38
+                lda CompCount    ; $5B38
                 beq $5B44    ; $5B3B
                 cmp #$01    ; $5B3D
                 beq $5B4A    ; $5B3F
                 jmp $5B65    ; $5B41
-                ldx $3F6D    ; $5B44
+                ldx CharIndex    ; $5B44
                 lda #$FF    ; $5B47
                 rts    ; $5B49
-                jsr $5A3D    ; $5B4A
-                jsr $5A56    ; $5B4D
+                jsr PopCompPoint    ; $5B4A
+                jsr PushCompPoint    ; $5B4D
                 ldy #$00    ; $5B50
                 ldx $598A    ; $5B52
                 lda ($00),y    ; $5B55
@@ -9208,14 +10791,14 @@
                 beq $5B44    ; $5B6A
                 ldy #$FF    ; $5B6C
                 sty $5BC5    ; $5B6E
-                lda $598B    ; $5B71
+                lda CompCount    ; $5B71
                 sta $5BC7    ; $5B74
-                jsr $5A3D    ; $5B77
+                jsr PopCompPoint    ; $5B77
                 lda $00    ; $5B7A
                 sta $02    ; $5B7C
                 lda $01    ; $5B7E
                 sta $03    ; $5B80
-                jsr $5A3D    ; $5B82
+                jsr PopCompPoint    ; $5B82
                 bne $5B95    ; $5B85
                 jsr $5AAE    ; $5B87
                 cpy $5BC5    ; $5B8A
@@ -9223,7 +10806,7 @@
                 sty $5BC5    ; $5B8F
                 jmp $5B7A    ; $5B92
                 lda $5BC7    ; $5B95
-                sta $598B    ; $5B98
+                sta CompCount    ; $5B98
                 ldx $598A    ; $5B9B
                 ldy #$00    ; $5B9E
                 lda ($02),y    ; $5BA0
@@ -9247,6 +10830,8 @@
                 brk    ; $5BC5
                 brk    ; $5BC6
                 brk    ; $5BC7
+;
+; === SearchDefault ===
                 brk    ; $5BC8
                 brk    ; $5BC9
                 brk    ; $5BCA
@@ -9288,6 +10873,8 @@
                 brk    ; $5BEE
                 brk    ; $5BEF
                 brk    ; $5BF0
+;
+; === SearchString ===
                 brk    ; $5BF1
                 brk    ; $5BF2
                 brk    ; $5BF3
@@ -9328,6 +10915,8 @@
                 brk    ; $5C16
                 brk    ; $5C17
                 brk    ; $5C18
+;
+; === ISearchStack ===
                 brk    ; $5C19
                 brk    ; $5C1A
                 brk    ; $5C1B
@@ -9568,31 +11157,37 @@
                 brk    ; $5D06
                 brk    ; $5D07
                 brk    ; $5D08
+;
+; === IStackPntr ===
                 brk    ; $5D09
+;
+; === ISearchDir ===
                 brk    ; $5D0A
                 brk    ; $5D0B
                 brk    ; $5D0C
                 brk    ; $5D0D
                 brk    ; $5D0E
+;
+; === SMoveMax ===
         dfb $F4        ; $5D0F  (data/65C02-bit)
                 ora ($AE,x)    ; $5D10
                 ora #$5D    ; $5D12
                 beq $5D61    ; $5D14
-                dec $5D09    ; $5D16
+                dec IStackPntr    ; $5D16
                 dex    ; $5D19
                 txa    ; $5D1A
                 asl    ; $5D1B
                 asl    ; $5D1C
                 clc    ; $5D1D
-                adc $5D09    ; $5D1E
-                adc $5D09    ; $5D21
+                adc IStackPntr    ; $5D1E
+                adc IStackPntr    ; $5D21
                 tax    ; $5D24
-                lda $5C19,x    ; $5D25
-                sta $60    ; $5D28
+                lda ISearchStack,x    ; $5D25
+                sta TheBuffer    ; $5D28
                 lda $5C1A,x    ; $5D2A
                 sta $61    ; $5D2D
                 lda $5C1B,x    ; $5D2F
-                sta $62    ; $5D32
+                sta PageTop    ; $5D32
                 lda $5C1C,x    ; $5D34
                 sta $63    ; $5D37
                 lda $5C1D,x    ; $5D39
@@ -9604,38 +11199,40 @@
                 asl    ; $5D44
                 asl    ; $5D45
                 asl    ; $5D46
-                sta $5D0A    ; $5D47
+                sta ISearchDir    ; $5D47
                 lda $5C1E,x    ; $5D4A
                 sta $5BF0    ; $5D4D
-                lda $5D0A    ; $5D50
+                lda ISearchDir    ; $5D50
                 bpl $5D59    ; $5D53
                 lda #$FF    ; $5D55
                 bne $5D5B    ; $5D57
                 lda #$00    ; $5D59
-                sta $5D0A    ; $5D5B
+                sta ISearchDir    ; $5D5B
                 lda #$00    ; $5D5E
                 rts    ; $5D60
                 lda #$FF    ; $5D61
                 rts    ; $5D63
-                ldx $5D09    ; $5D64
+;
+; === IPushSearch ===
+                ldx IStackPntr    ; $5D64
                 cpx #$28    ; $5D67
                 bcs $5DAD    ; $5D69
                 txa    ; $5D6B
                 asl    ; $5D6C
                 asl    ; $5D6D
                 clc    ; $5D6E
-                adc $5D09    ; $5D6F
-                adc $5D09    ; $5D72
+                adc IStackPntr    ; $5D6F
+                adc IStackPntr    ; $5D72
                 tax    ; $5D75
-                lda $60    ; $5D76
-                sta $5C19,x    ; $5D78
+                lda TheBuffer    ; $5D76
+                sta ISearchStack,x    ; $5D78
                 lda $61    ; $5D7B
                 sta $5C1A,x    ; $5D7D
-                lda $62    ; $5D80
+                lda PageTop    ; $5D80
                 sta $5C1B,x    ; $5D82
                 lda $63    ; $5D85
                 sta $5C1C,x    ; $5D87
-                lda $5D0A    ; $5D8A
+                lda ISearchDir    ; $5D8A
                 lsr    ; $5D8D
                 lsr    ; $5D8E
                 lsr    ; $5D8F
@@ -9649,11 +11246,13 @@
                 sta $5C1D,x    ; $5D9E
                 lda $5BF0    ; $5DA1
                 sta $5C1E,x    ; $5DA4
-                inc $5D09    ; $5DA7
+                inc IStackPntr    ; $5DA7
                 lda #$00    ; $5DAA
                 rts    ; $5DAC
                 lda #$FF    ; $5DAD
                 rts    ; $5DAF
+;
+; === ISearchChars ===
         dfb $87        ; $5DB0  (data/65C02-bit)
         dfb $FF        ; $5DB1  (data/65C02-bit)
         dfb $93        ; $5DB2  (data/65C02-bit)
@@ -9662,7 +11261,7 @@
                 sta ($BA),y    ; $5DB7
                 adc ($49,x)    ; $5DB9
                 rts    ; $5DBB
-                inc $60    ; $5DBC
+                inc TheBuffer    ; $5DBC
         dfb $E2        ; $5DBE  (data/65C02-bit)
                 rts    ; $5DBF
                 lsr $5263    ; $5DC0
@@ -9672,7 +11271,9 @@
         dfb $43        ; $5DC6  (data/65C02-bit)
         dfb $63        ; $5DC7  (data/65C02-bit)
                 brk    ; $5DC8
-                lda $60    ; $5DC9
+;
+; === SearchForward ===
+                lda TheBuffer    ; $5DC9
                 sta $00    ; $5DCB
                 lda $61    ; $5DCD
                 sta $01    ; $5DCF
@@ -9695,17 +11296,17 @@
                 cmp $6B    ; $5DF0
                 bcc $5DFF    ; $5DF2
                 bne $5DFC    ; $5DF4
-                cpx $6A    ; $5DF6
+                cpx GapTop    ; $5DF6
                 bcc $5DFF    ; $5DF8
                 beq $5DFF    ; $5DFA
                 lda #$FF    ; $5DFC
                 rts    ; $5DFE
                 ldy #$00    ; $5DFF
                 jsr $D000    ; $5E01
-                jsr $5E8E    ; $5E04
+                jsr SearchCase    ; $5E04
                 sta $08    ; $5E07
-                lda $5BF1,y    ; $5E09
-                jsr $5E8E    ; $5E0C
+                lda SearchString,y    ; $5E09
+                jsr SearchCase    ; $5E0C
                 cmp $08    ; $5E0F
                 bne $5E26    ; $5E11
                 iny    ; $5E13
@@ -9724,7 +11325,9 @@
                 bne $5E2F    ; $5E2B
                 inc $01    ; $5E2D
                 bne $5DE5    ; $5E2F
-                lda $60    ; $5E31
+;
+; === SearchBackwrd ===
+                lda TheBuffer    ; $5E31
                 sta $00    ; $5E33
                 lda $61    ; $5E35
                 sta $01    ; $5E37
@@ -9733,7 +11336,7 @@
                 inc $01    ; $5E3D
                 jsr $61CE    ; $5E3F
                 lda $00    ; $5E42
-                cmp $66    ; $5E44
+                cmp BuffTop    ; $5E44
                 bne $5E51    ; $5E46
                 lda $01    ; $5E48
                 cmp $67    ; $5E4A
@@ -9753,15 +11356,15 @@
                 cmp $6B    ; $5E64
                 bcc $5E70    ; $5E66
                 bne $5E3F    ; $5E68
-                cpx $6A    ; $5E6A
+                cpx GapTop    ; $5E6A
                 beq $5E70    ; $5E6C
                 bcs $5E3F    ; $5E6E
                 ldy #$00    ; $5E70
                 jsr $D000    ; $5E72
-                jsr $5E8E    ; $5E75
+                jsr SearchCase    ; $5E75
                 sta $08    ; $5E78
-                lda $5BF1,y    ; $5E7A
-                jsr $5E8E    ; $5E7D
+                lda SearchString,y    ; $5E7A
+                jsr SearchCase    ; $5E7D
                 cmp $08    ; $5E80
                 bne $5E3F    ; $5E82
                 iny    ; $5E84
@@ -9769,62 +11372,66 @@
                 bcc $5E72    ; $5E88
                 lda #$00    ; $5E8A
                 rts    ; $5E8C
+;
+; === CaseSearch ===
                 brk    ; $5E8D
-                bit $5E8D    ; $5E8E
+;
+; === SearchCase ===
+                bit CaseSearch    ; $5E8E
                 bmi $5E98    ; $5E91
                 cmp #$E0    ; $5E93
-                jsr $36FD    ; $5E95
+                jsr UpperCon    ; $5E95
                 rts    ; $5E98
                 php    ; $5E99
                 pha    ; $5E9A
                 lda #$00    ; $5E9B
-                sta $5D09    ; $5E9D
+                sta IStackPntr    ; $5E9D
                 pla    ; $5EA0
                 plp    ; $5EA1
                 bne $5EBE    ; $5EA2
                 cmp #$9B    ; $5EA4
                 bne $5EB1    ; $5EA6
                 jsr $5EC1    ; $5EA8
-                jsr $2824    ; $5EAB
+                jsr PopTYI    ; $5EAB
                 jmp $5EBE    ; $5EAE
                 cmp #$87    ; $5EB1
                 bne $5EC1    ; $5EB3
                 jsr $5EE5    ; $5EB5
-                jsr $29B9    ; $5EB8
-                jsr $579B    ; $5EBB
+                jsr Beep    ; $5EB8
+                jsr ClrEchoArea    ; $5EBB
                 lda #$FF    ; $5EBE
                 rts    ; $5EC0
                 ldy #$00    ; $5EC1
                 cpy $5BF0    ; $5EC3
                 beq $5EDF    ; $5EC6
-                lda $5BF1,y    ; $5EC8
-                sta $5BC8,y    ; $5ECB
+                lda SearchString,y    ; $5EC8
+                sta SearchDefault,y    ; $5ECB
                 iny    ; $5ECE
                 cpy $5BF0    ; $5ECF
                 bne $5EC8    ; $5ED2
                 lda #$00    ; $5ED4
-                sta $5BC8,y    ; $5ED6
-                jsr $579B    ; $5ED9
+                sta SearchDefault,y    ; $5ED6
+                jsr ClrEchoArea    ; $5ED9
                 jsr $5F04    ; $5EDC
-                jsr $27FF    ; $5EDF
+                jsr UnTYI    ; $5EDF
                 ldy #$00    ; $5EE2
                 rts    ; $5EE4
                 ldx #$00    ; $5EE5
                 lda $5D0B    ; $5EE7
-                sta $60    ; $5EEA
+                sta TheBuffer    ; $5EEA
                 lda $5D0C    ; $5EEC
                 sta $61    ; $5EEF
                 lda $5D0D    ; $5EF1
-                sta $62    ; $5EF4
+                sta PageTop    ; $5EF4
                 lda $5D0E    ; $5EF6
                 sta $63    ; $5EF9
-                jsr $300C    ; $5EFB
-                jsr $2D88    ; $5EFE
+                jsr DisplayPage    ; $5EFB
+                jsr FindPoint    ; $5EFE
                 lda #$FF    ; $5F01
                 rts    ; $5F03
-                lda $5D0A    ; $5F04
+                lda ISearchDir    ; $5F04
                 bmi $5F19    ; $5F07
-                lda $60    ; $5F09
+                lda TheBuffer    ; $5F09
                 sec    ; $5F0B
                 sbc $5D0B    ; $5F0C
                 sta $00    ; $5F0F
@@ -9833,7 +11440,7 @@
                 jmp $5F26    ; $5F16
                 lda $5D0B    ; $5F19
                 sec    ; $5F1C
-                sbc $60    ; $5F1D
+                sbc TheBuffer    ; $5F1D
                 sta $00    ; $5F1F
                 lda $5D0C    ; $5F21
                 sbc $61    ; $5F24
@@ -9841,22 +11448,22 @@
                 bcc $5F5E    ; $5F29
                 bne $5F34    ; $5F2B
                 lda $00    ; $5F2D
-                cmp $5D0F    ; $5F2F
+                cmp SMoveMax    ; $5F2F
                 bcc $5F5E    ; $5F32
                 lda $61    ; $5F34
                 pha    ; $5F36
-                lda $60    ; $5F37
+                lda TheBuffer    ; $5F37
                 pha    ; $5F39
                 lda $5D0B    ; $5F3A
-                sta $60    ; $5F3D
+                sta TheBuffer    ; $5F3D
                 lda $5D0C    ; $5F3F
                 sta $61    ; $5F42
-                jsr $4CFB    ; $5F44
+                jsr PushMark    ; $5F44
                 pla    ; $5F47
-                sta $60    ; $5F48
+                sta TheBuffer    ; $5F48
                 pla    ; $5F4A
                 sta $61    ; $5F4B
-                jsr $5814    ; $5F4D
+                jsr EchoAreaMsg    ; $5F4D
                 bne $5F41    ; $5F50
                 sbc #$EE    ; $5F52
         dfb $F4        ; $5F54  (data/65C02-bit)
@@ -9871,36 +11478,36 @@
                 lda #$00    ; $5F65
                 sta $5DC8    ; $5F67
                 beq $5F76    ; $5F6A
-                jsr $29B9    ; $5F6C
+                jsr Beep    ; $5F6C
                 lda #$00    ; $5F6F
-                sta $8AA5    ; $5F71
+                sta MacroExec    ; $5F71
                 lda #$FF    ; $5F74
                 rts    ; $5F76
-                jsr $57D8    ; $5F77
+                jsr OpenEchoArea    ; $5F77
                 lda #$16    ; $5F7A
                 sta $5725    ; $5F7C
-                sta $25    ; $5F7F
-                lda $20    ; $5F81
-                sta $5724    ; $5F83
-                sta $24    ; $5F86
-                jsr $26E9    ; $5F88
+                sta CV    ; $5F7F
+                lda WindowLft    ; $5F81
+                sta EchoAreaCH    ; $5F83
+                sta CH    ; $5F86
+                jsr vtab    ; $5F88
                 lda $5DC8    ; $5F8B
                 bpl $5F9C    ; $5F8E
-                jsr $5968    ; $5F90
+                jsr PrintMessage    ; $5F90
                 dec $E1    ; $5F93
                 sbc #$EC    ; $5F95
                 sbc #$EE    ; $5F97
         dfb $E7        ; $5F99  (data/65C02-bit)
                 ldy #$00    ; $5F9A
-                lda $5D0A    ; $5F9C
+                lda ISearchDir    ; $5F9C
                 bpl $5FAD    ; $5F9F
-                jsr $5968    ; $5FA1
+                jsr PrintMessage    ; $5FA1
                 cmp ($E5)    ; $5FA4
                 inc $E5,x    ; $5FA6
                 sbc ($F3)    ; $5FA8
                 sbc $A0    ; $5FAA
                 brk    ; $5FAC
-                jsr $5968    ; $5FAD
+                jsr PrintMessage    ; $5FAD
                 cmp #$AD    ; $5FB0
         dfb $D3        ; $5FB2  (data/65C02-bit)
                 sbc $E1    ; $5FB3
@@ -9911,17 +11518,19 @@
                 ldy #$00    ; $5FBA
                 cpy $5BF0    ; $5FBC
                 beq $5FCA    ; $5FBF
-                lda $5BF1,y    ; $5FC1
-                jsr $2611    ; $5FC4
+                lda SearchString,y    ; $5FC1
+                jsr CharOut    ; $5FC4
                 iny    ; $5FC7
                 bne $5FBC    ; $5FC8
-                jsr $2874    ; $5FCA
-                jsr $57FA    ; $5FCD
+                jsr ClearEOP    ; $5FCA
+                jsr CloseEchoArea    ; $5FCD
                 rts    ; $5FD0
-                jsr $617C    ; $5FD1
-                jsr $5D64    ; $5FD4
+;
+; === ISearch ===
+                jsr SearchInit    ; $5FD1
+                jsr IPushSearch    ; $5FD4
                 jsr $5F77    ; $5FD7
-                jsr $6085    ; $5FDA
+                jsr SearchKeyin    ; $5FDA
                 jsr $61AC    ; $5FDD
                 beq $5FEB    ; $5FE0
                 cmp #$A0    ; $5FE2
@@ -9931,7 +11540,7 @@
                 txa    ; $5FEB
                 asl    ; $5FEC
                 tax    ; $5FED
-                lda $5DB8,x    ; $5FEE
+                lda ISearchVects,x    ; $5FEE
                 sta $00    ; $5FF1
                 lda $5DB9,x    ; $5FF3
                 sta $01    ; $5FF6
@@ -9941,8 +11550,8 @@
                 ldx $5BF0    ; $6001
                 cpx #$28    ; $6004
                 bcs $6042    ; $6006
-                sta $5BF1,x    ; $6008
-                jsr $5D64    ; $600B
+                sta SearchString,x    ; $6008
+                jsr IPushSearch    ; $600B
                 inc $5BF0    ; $600E
                 jsr $5F77    ; $6011
                 bit $5DC8    ; $6014
@@ -9953,116 +11562,118 @@
                 jsr $5F5F    ; $6021
                 bne $603F    ; $6024
                 lda $00    ; $6026
-                sta $60    ; $6028
+                sta TheBuffer    ; $6028
                 lda $01    ; $602A
                 sta $61    ; $602C
-                jsr $2D88    ; $602E
+                jsr FindPoint    ; $602E
                 beq $603F    ; $6031
-                dec $300B    ; $6033
-                jsr $31F7    ; $6036
-                inc $300B    ; $6039
-                jsr $2D88    ; $603C
+                dec EnableKDisp    ; $6033
+                jsr CenterPage    ; $6036
+                inc EnableKDisp    ; $6039
+                jsr FindPoint    ; $603C
                 jmp $5FD7    ; $603F
                 lda #$FF    ; $6042
                 sta $5DC8    ; $6044
                 bmi $5FD7    ; $6047
                 lda $63    ; $6049
                 pha    ; $604B
-                lda $62    ; $604C
+                lda PageTop    ; $604C
                 pha    ; $604E
-                jsr $5D11    ; $604F
+                jsr IPopSearch    ; $604F
                 pla    ; $6052
                 sta $00    ; $6053
                 pla    ; $6055
                 sta $01    ; $6056
-                lda $5D09    ; $6058
+                lda IStackPntr    ; $6058
                 beq $6076    ; $605B
                 lda $00    ; $605D
-                cmp $62    ; $605F
+                cmp PageTop    ; $605F
                 bne $6069    ; $6061
                 lda $01    ; $6063
                 cmp $63    ; $6065
                 beq $6072    ; $6067
-                dec $300B    ; $6069
-                jsr $300C    ; $606C
-                inc $300B    ; $606F
-                jsr $2D88    ; $6072
+                dec EnableKDisp    ; $6069
+                jsr DisplayPage    ; $606C
+                inc EnableKDisp    ; $606F
+                jsr FindPoint    ; $6072
                 rts    ; $6075
                 pla    ; $6076
                 pla    ; $6077
-                jsr $579B    ; $6078
+                jsr ClrEchoArea    ; $6078
                 lda #$9B    ; $607B
                 ldy #$00    ; $607D
                 sty $5BF0    ; $607F
                 jmp $5E99    ; $6082
-                lda $5724    ; $6085
-                sta $29D6    ; $6088
+;
+; === SearchKeyin ===
+                lda EchoAreaCH    ; $6085
+                sta ParenPos    ; $6088
                 lda $5725    ; $608B
                 sta $29D7    ; $608E
-                lda $25    ; $6091
+                lda CV    ; $6091
                 pha    ; $6093
-                lda $24    ; $6094
+                lda CH    ; $6094
                 pha    ; $6096
-                lda $29D6    ; $6097
-                sta $24    ; $609A
+                lda ParenPos    ; $6097
+                sta CH    ; $609A
                 lda $29D7    ; $609C
-                sta $25    ; $609F
-                jsr $26E9    ; $60A1
+                sta CV    ; $609F
+                jsr vtab    ; $60A1
                 lda #$DF    ; $60A4
-                ldy $24    ; $60A6
-                jsr $2703    ; $60A8
+                ldy CH    ; $60A6
+                jsr StoreChar    ; $60A8
                 pla    ; $60AB
-                sta $24    ; $60AC
+                sta CH    ; $60AC
                 pla    ; $60AE
-                sta $25    ; $60AF
-                jsr $26E9    ; $60B1
+                sta CV    ; $60AF
+                jsr vtab    ; $60B1
                 lda #$FF    ; $60B4
-                sta $29D5    ; $60B6
-                jsr $292E    ; $60B9
+                sta ParenFlag    ; $60B6
+                jsr BlinkCursor    ; $60B9
                 pha    ; $60BC
-                lda $25    ; $60BD
+                lda CV    ; $60BD
                 pha    ; $60BF
-                lda $24    ; $60C0
+                lda CH    ; $60C0
                 pha    ; $60C2
-                lda $5724    ; $60C3
-                sta $24    ; $60C6
+                lda EchoAreaCH    ; $60C3
+                sta CH    ; $60C6
                 lda $5725    ; $60C8
-                sta $25    ; $60CB
-                jsr $26E9    ; $60CD
+                sta CV    ; $60CB
+                jsr vtab    ; $60CD
                 lda #$A0    ; $60D0
-                ldy $24    ; $60D2
-                jsr $2703    ; $60D4
+                ldy CH    ; $60D2
+                jsr StoreChar    ; $60D4
                 pla    ; $60D7
-                sta $24    ; $60D8
+                sta CH    ; $60D8
                 pla    ; $60DA
-                sta $25    ; $60DB
-                jsr $26E9    ; $60DD
+                sta CV    ; $60DB
+                jsr vtab    ; $60DD
                 pla    ; $60E0
                 rts    ; $60E1
                 lda #$FF    ; $60E2
                 bne $60E8    ; $60E4
                 lda #$00    ; $60E6
                 pha    ; $60E8
-                jsr $5D64    ; $60E9
+                jsr IPushSearch    ; $60E9
                 pla    ; $60EC
-                cmp $5D0A    ; $60ED
-                sta $5D0A    ; $60F0
+                cmp ISearchDir    ; $60ED
+                sta ISearchDir    ; $60F0
                 php    ; $60F3
                 ldx $5BF0    ; $60F4
                 bne $6118    ; $60F7
                 plp    ; $60F9
                 php    ; $60FA
                 beq $610A    ; $60FB
-                lda $5D0A    ; $60FD
+                lda ISearchDir    ; $60FD
                 pha    ; $6100
-                jsr $5D11    ; $6101
+                jsr IPopSearch    ; $6101
                 pla    ; $6104
-                sta $5D0A    ; $6105
+                sta ISearchDir    ; $6105
                 plp    ; $6108
                 rts    ; $6109
-                lda $5BC8,x    ; $610A
+                lda SearchDefault,x    ; $610A
                 beq $6115    ; $610D
-                sta $5BF1,x    ; $610F
+                sta SearchString,x    ; $610F
                 inx    ; $6112
                 bne $610A    ; $6113
                 stx $5BF0    ; $6115
@@ -10075,62 +11686,64 @@
                 jsr $5F5F    ; $6126
                 bne $6109    ; $6129
                 lda $00    ; $612B
-                sta $60    ; $612D
+                sta TheBuffer    ; $612D
                 lda $01    ; $612F
                 sta $61    ; $6131
-                jsr $2D88    ; $6133
+                jsr FindPoint    ; $6133
                 beq $6109    ; $6136
-                jsr $31F7    ; $6138
-                jmp $2D88    ; $613B
+                jsr CenterPage    ; $6138
+                jmp FindPoint    ; $613B
                 pla    ; $613E
                 lda #$FF    ; $613F
                 jmp $5F5F    ; $6141
                 lda $5BF0    ; $6144
                 beq $6164    ; $6147
-                lda $5D0A    ; $6149
+                lda ISearchDir    ; $6149
                 bmi $6165    ; $614C
-                inc $60    ; $614E
+                inc TheBuffer    ; $614E
                 bne $6154    ; $6150
                 inc $61    ; $6152
                 jsr $61A1    ; $6154
                 jsr $5F5F    ; $6157
                 beq $612B    ; $615A
-                lda $60    ; $615C
+                lda TheBuffer    ; $615C
                 bne $6162    ; $615E
                 dec $61    ; $6160
-                dec $60    ; $6162
+                dec TheBuffer    ; $6162
                 rts    ; $6164
-                lda $60    ; $6165
+                lda TheBuffer    ; $6165
                 bne $616B    ; $6167
                 dec $61    ; $6169
-                dec $60    ; $616B
+                dec TheBuffer    ; $616B
                 jsr $61A1    ; $616D
                 jsr $5F5F    ; $6170
                 beq $612B    ; $6173
-                inc $60    ; $6175
+                inc TheBuffer    ; $6175
                 bne $617B    ; $6177
                 inc $61    ; $6179
                 rts    ; $617B
-                jsr $4CBE    ; $617C
-                lda $60    ; $617F
+;
+; === SearchInit ===
+                jsr KillGap    ; $617C
+                lda TheBuffer    ; $617F
                 sta $5D0B    ; $6181
                 lda $61    ; $6184
                 sta $5D0C    ; $6186
-                lda $62    ; $6189
+                lda PageTop    ; $6189
                 sta $5D0D    ; $618B
                 lda $63    ; $618E
                 sta $5D0E    ; $6190
                 lda #$00    ; $6193
-                sta $5D09    ; $6195
+                sta IStackPntr    ; $6195
                 sta $5BF0    ; $6198
                 sta $5DC8    ; $619B
-                jmp $579B    ; $619E
-                lda $5D0A    ; $61A1
+                jmp ClrEchoArea    ; $619E
+                lda ISearchDir    ; $61A1
                 beq $61A9    ; $61A4
-                jmp $5E31    ; $61A6
-                jmp $5DC9    ; $61A9
+                jmp SearchBackwrd    ; $61A6
+                jmp SearchForward    ; $61A9
                 ldx #$00    ; $61AC
-                cmp $5DB0,x    ; $61AE
+                cmp ISearchChars,x    ; $61AE
                 beq $61B9    ; $61B1
                 inx    ; $61B3
                 cpx #$08    ; $61B4
@@ -10139,38 +11752,38 @@
                 rts    ; $61B9
                 lda $5DC8    ; $61BA
                 beq $61C5    ; $61BD
-                jsr $29B9    ; $61BF
+                jsr Beep    ; $61BF
                 jmp $61F0    ; $61C2
                 pla    ; $61C5
                 pla    ; $61C6
                 lda #$87    ; $61C7
                 ldy #$00    ; $61C9
                 jmp $5E99    ; $61CB
-                lda $C000    ; $61CE
+                lda HardKey    ; $61CE
                 bpl $61EF    ; $61D1
                 cmp #$87    ; $61D3
                 php    ; $61D5
-                jsr $2843    ; $61D6
+                jsr GatherTYI    ; $61D6
                 plp    ; $61D9
                 bne $61EF    ; $61DA
                 pla    ; $61DC
                 pla    ; $61DD
-                jsr $5D11    ; $61DE
-                jsr $29B9    ; $61E1
-                lda $60    ; $61E4
+                jsr IPopSearch    ; $61DE
+                jsr Beep    ; $61E1
+                lda TheBuffer    ; $61E4
                 sta $00    ; $61E6
                 lda $61    ; $61E8
                 sta $01    ; $61EA
                 lda $5DC8    ; $61EC
                 rts    ; $61EF
-                jsr $5D11    ; $61F0
+                jsr IPopSearch    ; $61F0
                 bne $61FA    ; $61F3
                 bit $5DC8    ; $61F5
                 bmi $61F0    ; $61F8
-                dec $300B    ; $61FA
-                jsr $300C    ; $61FD
-                inc $300B    ; $6200
-                jsr $2D88    ; $6203
+                dec EnableKDisp    ; $61FA
+                jsr DisplayPage    ; $61FD
+                inc EnableKDisp    ; $6200
+                jsr FindPoint    ; $6203
                 jsr $5F77    ; $6206
                 rts    ; $6209
                 pla    ; $620A
@@ -10180,20 +11793,26 @@
                 lda #$9B    ; $6211
                 ldy #$00    ; $6213
                 jmp $5E99    ; $6215
-                lda $5D0A    ; $6218
-                jmp $6226    ; $621B
+                lda ISearchDir    ; $6218
+                jmp StrSearch    ; $621B
                 brk    ; $621E
                 brk    ; $621F
+;
+; === StringSearch ===
                 lda #$00    ; $6220
-                beq $6226    ; $6222
+                beq StrSearch    ; $6222
+;
+; === RStrSearch ===
                 lda #$FF    ; $6224
-                sta $5D0A    ; $6226
-                jsr $617C    ; $6229
+;
+; === StrSearch ===
+                sta ISearchDir    ; $6226
+                jsr SearchInit    ; $6229
                 lda #$00    ; $622C
                 sta $621E    ; $622E
                 sta $621F    ; $6231
                 jsr $635B    ; $6234
-                jsr $6085    ; $6237
+                jsr SearchKeyin    ; $6237
                 jsr $625B    ; $623A
                 bne $6245    ; $623D
                 jsr $6269    ; $623F
@@ -10201,10 +11820,10 @@
                 ldx $5BF0    ; $6245
                 cpx #$28    ; $6248
                 bcs $6255    ; $624A
-                sta $5BF1,x    ; $624C
+                sta SearchString,x    ; $624C
                 inc $5BF0    ; $624F
                 jmp $6234    ; $6252
-                jsr $29B9    ; $6255
+                jsr Beep    ; $6255
                 jmp $6234    ; $6258
                 ldx #$00    ; $625B
                 cmp $627B,x    ; $625D
@@ -10242,30 +11861,30 @@
                 pla    ; $6291
                 lda #$FF    ; $6292
                 sta $5DC8    ; $6294
-                jsr $5D64    ; $6297
+                jsr IPushSearch    ; $6297
                 lda $621F    ; $629A
                 beq $62AA    ; $629D
-                lda $66    ; $629F
-                sta $60    ; $62A1
+                lda BuffTop    ; $629F
+                sta TheBuffer    ; $62A1
                 lda $67    ; $62A3
                 sta $61    ; $62A5
                 jmp $62BF    ; $62A7
                 lda $621E    ; $62AA
                 beq $62BF    ; $62AD
-                lda $6A    ; $62AF
-                sta $60    ; $62B1
+                lda GapTop    ; $62AF
+                sta TheBuffer    ; $62B1
                 lda $6B    ; $62B3
                 sta $61    ; $62B5
-                lda $60    ; $62B7
+                lda TheBuffer    ; $62B7
                 bne $62BD    ; $62B9
                 dec $61    ; $62BB
-                dec $60    ; $62BD
+                dec TheBuffer    ; $62BD
                 lda #$9B    ; $62BF
-                jsr $5726    ; $62C1
+                jsr EchoOutput    ; $62C1
                 jsr $61A1    ; $62C4
                 bne $62D8    ; $62C7
                 lda $00    ; $62C9
-                sta $60    ; $62CB
+                sta TheBuffer    ; $62CB
                 lda $01    ; $62CD
                 sta $61    ; $62CF
                 lda #$9B    ; $62D1
@@ -10275,56 +11894,56 @@
                 ldy #$00    ; $62DA
                 jmp $5E99    ; $62DC
                 lda #$FF    ; $62DF
-                sta $5D0A    ; $62E1
+                sta ISearchDir    ; $62E1
                 sta $621E    ; $62E4
                 lda #$00    ; $62E7
                 sta $621F    ; $62E9
                 rts    ; $62EC
                 lda #$00    ; $62ED
-                sta $5D0A    ; $62EF
+                sta ISearchDir    ; $62EF
                 sta $621E    ; $62F2
                 lda #$FF    ; $62F5
                 sta $621F    ; $62F7
                 rts    ; $62FA
                 lda #$FF    ; $62FB
-                sta $5D0A    ; $62FD
+                sta ISearchDir    ; $62FD
                 lda #$00    ; $6300
                 sta $621F    ; $6302
                 rts    ; $6305
                 ldx $5BF0    ; $6306
                 bne $631C    ; $6309
                 ldx #$00    ; $630B
-                lda $5BC8,x    ; $630D
+                lda SearchDefault,x    ; $630D
                 beq $6318    ; $6310
-                sta $5BF1,x    ; $6312
+                sta SearchString,x    ; $6312
                 inx    ; $6315
                 bne $630D    ; $6316
                 stx $5BF0    ; $6318
                 rts    ; $631B
                 cpx #$28    ; $631C
                 bcs $6327    ; $631E
-                sta $5BF1,x    ; $6320
+                sta SearchString,x    ; $6320
                 inc $5BF0    ; $6323
                 rts    ; $6326
-                jsr $29B9    ; $6327
+                jsr Beep    ; $6327
                 rts    ; $632A
-                jsr $579B    ; $632B
-                jsr $29B9    ; $632E
+                jsr ClrEchoArea    ; $632B
+                jsr Beep    ; $632E
                 pla    ; $6331
                 pla    ; $6332
                 lda #$01    ; $6333
                 rts    ; $6335
                 dec $5BF0    ; $6336
                 bpl $6342    ; $6339
-                jsr $579B    ; $633B
+                jsr ClrEchoArea    ; $633B
                 pla    ; $633E
                 pla    ; $633F
                 lda #$01    ; $6340
                 rts    ; $6342
-                jsr $6085    ; $6343
+                jsr SearchKeyin    ; $6343
                 cmp #$87    ; $6346
                 bne $6354    ; $6348
-                jsr $29B9    ; $634A
+                jsr Beep    ; $634A
                 rts    ; $634D
                 lda #$8D    ; $634E
                 bne $6354    ; $6350
@@ -10334,63 +11953,65 @@
                 pla    ; $6356
                 txa    ; $6357
                 jmp $6001    ; $6358
-                lda $25    ; $635B
+                lda CV    ; $635B
                 pha    ; $635D
-                lda $24    ; $635E
+                lda CH    ; $635E
                 pha    ; $6360
-                jsr $57D8    ; $6361
+                jsr OpenEchoArea    ; $6361
                 lda #$16    ; $6364
                 sta $5725    ; $6366
-                sta $25    ; $6369
-                lda $20    ; $636B
-                sta $5724    ; $636D
-                sta $24    ; $6370
-                jsr $26E9    ; $6372
+                sta CV    ; $6369
+                lda WindowLft    ; $636B
+                sta EchoAreaCH    ; $636D
+                sta CH    ; $6370
+                jsr vtab    ; $6372
                 lda $621F    ; $6375
                 beq $6384    ; $6378
-                jsr $5968    ; $637A
+                jsr PrintMessage    ; $637A
         dfb $C2        ; $637D  (data/65C02-bit)
                 dex    ; $637E
                 ldy #$00    ; $637F
                 jmp $6390    ; $6381
                 lda $621E    ; $6384
                 beq $6390    ; $6387
-                jsr $5968    ; $6389
+                jsr PrintMessage    ; $6389
                 cmp $CA    ; $638C
                 ldy #$00    ; $638E
-                bit $5D0A    ; $6390
+                bit ISearchDir    ; $6390
                 bpl $63A1    ; $6393
-                jsr $5968    ; $6395
+                jsr PrintMessage    ; $6395
                 cmp ($E5)    ; $6398
                 inc $E5,x    ; $639A
                 sbc ($F3)    ; $639C
                 sbc $A0    ; $639E
                 brk    ; $63A0
-                jsr $5968    ; $63A1
+                jsr PrintMessage    ; $63A1
         dfb $D3        ; $63A4  (data/65C02-bit)
                 sbc $E1    ; $63A5
                 sbc ($E3)    ; $63A7
                 inx    ; $63A9
                 tsx    ; $63AA
                 brk    ; $63AB
-                lda $5BF1,y    ; $63AC
+                lda SearchString,y    ; $63AC
                 cpy $5BF0    ; $63AF
                 beq $63BA    ; $63B2
-                jsr $2611    ; $63B4
+                jsr CharOut    ; $63B4
                 iny    ; $63B7
                 bne $63AC    ; $63B8
-                jsr $2874    ; $63BA
-                jsr $57FA    ; $63BD
+                jsr ClearEOP    ; $63BA
+                jsr CloseEchoArea    ; $63BD
                 pla    ; $63C0
-                sta $24    ; $63C1
+                sta CH    ; $63C1
                 pla    ; $63C3
-                sta $25    ; $63C4
-                jsr $26E9    ; $63C6
+                sta CV    ; $63C4
+                jsr vtab    ; $63C6
                 rts    ; $63C9
-                jsr $7C32    ; $63CA
+;
+; === LabelSearch ===
+                jsr GetStrArg    ; $63CA
                 beq $63F3    ; $63CD
-                jsr $57CC    ; $63CF
-                jsr $5968    ; $63D2
+                jsr NewEchoArea    ; $63CF
+                jsr PrintMessage    ; $63D2
                 cpy $E2E1    ; $63D5
                 sbc $EC    ; $63D8
                 ldy #$D3    ; $63DA
@@ -10399,12 +12020,12 @@
                 inx    ; $63E0
                 tsx    ; $63E1
                 brk    ; $63E2
-                jsr $3B23    ; $63E3
+                jsr ReadArgLine    ; $63E3
                 php    ; $63E6
-                jsr $57FA    ; $63E7
+                jsr CloseEchoArea    ; $63E7
                 plp    ; $63EA
                 beq $63F3    ; $63EB
-                jsr $29B9    ; $63ED
+                jsr Beep    ; $63ED
                 lda #$01    ; $63F0
                 rts    ; $63F2
                 ldy #$01    ; $63F3
@@ -10412,55 +12033,55 @@
                 lda $0200,x    ; $63F7
                 cmp #$8D    ; $63FA
                 beq $6407    ; $63FC
-                sta $5BF1,y    ; $63FE
+                sta SearchString,y    ; $63FE
                 inx    ; $6401
                 iny    ; $6402
                 cpy #$28    ; $6403
                 bcc $63F7    ; $6405
                 lda #$8D    ; $6407
-                sta $5BF1    ; $6409
+                sta SearchString    ; $6409
                 sty $5BF0    ; $640C
-                jsr $4CBE    ; $640F
-                lda $60    ; $6412
+                jsr KillGap    ; $640F
+                lda TheBuffer    ; $6412
                 sta $5D0B    ; $6414
                 lda $61    ; $6417
                 sta $5D0C    ; $6419
-                lda $62    ; $641C
+                lda PageTop    ; $641C
                 sta $5D0D    ; $641E
                 lda $63    ; $6421
                 sta $5D0E    ; $6423
-                lda $66    ; $6426
-                sta $60    ; $6428
+                lda BuffTop    ; $6426
+                sta TheBuffer    ; $6428
                 lda $67    ; $642A
                 sta $61    ; $642C
                 lda #$00    ; $642E
-                sta $5D0A    ; $6430
+                sta ISearchDir    ; $6430
                 jsr $61A1    ; $6433
                 beq $6448    ; $6436
-                jsr $29B9    ; $6438
+                jsr Beep    ; $6438
                 lda $5D0B    ; $643B
-                sta $60    ; $643E
+                sta TheBuffer    ; $643E
                 lda $5D0C    ; $6440
                 sta $61    ; $6443
                 jmp $63F0    ; $6445
                 lda $00    ; $6448
-                sta $60    ; $644A
+                sta TheBuffer    ; $644A
                 lda $01    ; $644C
                 sta $61    ; $644E
                 lda #$A0    ; $6450
-                jsr $5726    ; $6452
+                jsr EchoOutput    ; $6452
                 ldx #$FF    ; $6455
                 lda $61    ; $6457
                 cmp $5D0C    ; $6459
                 bcc $6468    ; $645C
                 bne $6467    ; $645E
-                lda $60    ; $6460
+                lda TheBuffer    ; $6460
                 cmp $5D0B    ; $6462
                 bcc $6468    ; $6465
                 inx    ; $6467
-                stx $5D0A    ; $6468
+                stx ISearchDir    ; $6468
                 jsr $5F04    ; $646B
-                jsr $4C52    ; $646E
+                jsr SetGap    ; $646E
                 lda #$01    ; $6471
                 rts    ; $6473
                 ldy $F7A0    ; $6474
@@ -10478,32 +12099,32 @@
                 ldy #$F6    ; $648A
                 sbc #$E1    ; $648C
                 tsx    ; $648E
-                jsr $A900    ; $648F
+                jsr rm_DataBuffer    ; $648F
         dfb $37        ; $6492  (data/65C02-bit)
-                sta $5987    ; $6493
+                sta CompList    ; $6493
                 lda #$9B    ; $6496
                 sta $5988    ; $6498
-                jsr $66E1    ; $649B
+                jsr GetAproArg    ; $649B
                 beq $64A6    ; $649E
-                jsr $29B9    ; $64A0
+                jsr Beep    ; $64A0
                 lda #$01    ; $64A3
                 rts    ; $64A5
                 lda #$9B    ; $64A6
                 sta $0200,x    ; $64A8
-                jsr $663D    ; $64AB
-                jsr $2AC4    ; $64AE
+                jsr SI:Apropos    ; $64AB
+                jsr OpenTypeout    ; $64AE
                 lda #$00    ; $64B1
                 jsr $6686    ; $64B3
                 jmp $64CD    ; $64B6
-                jsr $7C32    ; $64B9
+                jsr GetStrArg    ; $64B9
                 bne $64C4    ; $64BC
-                jsr $7DA3    ; $64BE
+                jsr PrintReturn    ; $64BE
                 jmp $64A6    ; $64C1
-                jsr $7D97    ; $64C4
-                jsr $2B0F    ; $64C7
+                jsr PrintDone    ; $64C4
+                jsr CloseTypeout    ; $64C7
                 lda #$06    ; $64CA
                 rts    ; $64CC
-                jsr $5A3D    ; $64CD
+                jsr PopCompPoint    ; $64CD
                 bne $64B9    ; $64D0
                 lda $01    ; $64D2
                 pha    ; $64D4
@@ -10515,20 +12136,20 @@
                 lda #$64    ; $64DF
                 sta $01    ; $64E1
                 lda #$1E    ; $64E3
-                jsr $5991    ; $64E5
+                jsr DCIStringOut1    ; $64E5
                 pla    ; $64E8
                 sta $00    ; $64E9
                 pla    ; $64EB
                 sta $01    ; $64EC
-                jsr $5A56    ; $64EE
-                jsr $5A2E    ; $64F1
+                jsr PushCompPoint    ; $64EE
+                jsr FunctionRef    ; $64F1
                 ldx #$00    ; $64F4
                 stx $6490    ; $64F6
                 lda $6490    ; $64F9
                 bne $6504    ; $64FC
-                jsr $6704    ; $64FE
+                jsr GetKeyFun    ; $64FE
                 jmp $6507    ; $6501
-                jsr $6708    ; $6504
+                jsr GetKeyFun1    ; $6504
                 bne $6528    ; $6507
                 inc $6490    ; $6509
                 pha    ; $650C
@@ -10538,29 +12159,29 @@
                 cmp #$04    ; $6514
                 bcs $6527    ; $6516
                 lda #$AC    ; $6518
-                jsr $2611    ; $651A
-                jsr $7DA7    ; $651D
+                jsr CharOut    ; $651A
+                jsr PrintSpace    ; $651D
                 pla    ; $6520
-                jsr $586C    ; $6521
+                jsr PrettyPrint    ; $6521
                 jmp $64F9    ; $6524
                 pla    ; $6527
                 jsr $6567    ; $6528
-                jsr $5A3D    ; $652B
+                jsr PopCompPoint    ; $652B
                 lda $6490    ; $652E
                 beq $654B    ; $6531
                 cmp #$04    ; $6533
                 bcs $6540    ; $6535
-                jsr $5968    ; $6537
+                jsr PrintMessage    ; $6537
                 ldx: $008D    ; $653A
                 jmp $64CD    ; $653D
-                jsr $5968    ; $6540
+                jsr PrintMessage    ; $6540
                 ldx $AEAE    ; $6543
                 sta $4C00    ; $6546
                 cmp $A564    ; $6549
                 ora ($48,x)    ; $654C
                 lda $00    ; $654E
                 pha    ; $6550
-                jsr $5968    ; $6551
+                jsr PrintMessage    ; $6551
                 cmp $D8AD    ; $6554
                 ldy #$00    ; $6557
                 pla    ; $6559
@@ -10568,57 +12189,59 @@
                 pla    ; $655C
                 sta $01    ; $655D
                 lda #$1E    ; $655F
-                jsr $5991    ; $6561
+                jsr DCIStringOut1    ; $6561
                 jmp $6537    ; $6564
                 ldx #$00    ; $6567
                 txa    ; $6569
                 asl    ; $656A
                 tay    ; $656B
                 lda $00    ; $656C
-                cmp $7DDE,y    ; $656E
+                cmp C_XVectors,y    ; $656E
                 bne $657A    ; $6571
                 lda $01    ; $6573
                 cmp $7DDF,y    ; $6575
                 beq $6581    ; $6578
                 inx    ; $657A
-                cpx $7E2A    ; $657B
+                cpx C_XCharCount    ; $657B
                 bcc $6569    ; $657E
                 rts    ; $6580
-                lda $7DB8,x    ; $6581
+                lda C_XCharacters,x    ; $6581
                 pha    ; $6584
                 lda $6490    ; $6585
                 beq $6590    ; $6588
-                jsr $5968    ; $658A
+                jsr PrintMessage    ; $658A
                 ldy: $00A0    ; $658D
                 lda #$98    ; $6590
-                jsr $586C    ; $6592
-                jsr $7DA7    ; $6595
+                jsr PrettyPrint    ; $6592
+                jsr PrintSpace    ; $6595
                 pla    ; $6598
-                jsr $586C    ; $6599
+                jsr PrettyPrint    ; $6599
                 inc $6490    ; $659C
                 rts    ; $659F
-                jsr $7DA3    ; $65A0
-                jsr $598F    ; $65A3
+                jsr PrintReturn    ; $65A0
+                jsr DCIStringOut    ; $65A3
                 lda #$1E    ; $65A6
-                sta $24    ; $65A8
-                sta $2A9F    ; $65AA
-                jmp $598C    ; $65AD
+                sta CH    ; $65A8
+                sta TypeoutCH    ; $65AA
+                jmp PrintCompDoc    ; $65AD
+;
+; === ListVars ===
                 lda #$5D    ; $65B0
-                sta $5987    ; $65B2
+                sta CompList    ; $65B2
                 lda #$97    ; $65B5
                 sta $5988    ; $65B7
-                jsr $66E1    ; $65BA
+                jsr GetAproArg    ; $65BA
                 beq $65C5    ; $65BD
-                jsr $29B9    ; $65BF
+                jsr Beep    ; $65BF
                 lda #$01    ; $65C2
                 rts    ; $65C4
                 lda #$9B    ; $65C5
                 sta $0200,x    ; $65C7
-                jsr $663D    ; $65CA
-                jsr $2AC4    ; $65CD
+                jsr SI:Apropos    ; $65CA
+                jsr OpenTypeout    ; $65CD
                 lda #$FF    ; $65D0
                 jsr $6686    ; $65D2
-                jsr $5A3D    ; $65D5
+                jsr PopCompPoint    ; $65D5
                 bne $65FF    ; $65D8
                 lda $01    ; $65DA
                 pha    ; $65DC
@@ -10630,18 +12253,20 @@
                 lda #$BE    ; $65E7
                 sta $01    ; $65E9
                 lda #$1E    ; $65EB
-                jsr $5991    ; $65ED
+                jsr DCIStringOut1    ; $65ED
                 pla    ; $65F0
                 sta $00    ; $65F1
                 pla    ; $65F3
                 sta $01    ; $65F4
-                jsr $13EF    ; $65F6
-                jsr $7DA3    ; $65F9
+                jsr PrintVar    ; $65F6
+                jsr PrintReturn    ; $65F9
                 jmp $65D5    ; $65FC
-                jsr $7D97    ; $65FF
-                jsr $2B0F    ; $6602
+                jsr PrintDone    ; $65FF
+                jsr CloseTypeout    ; $6602
                 lda #$01    ; $6605
                 rts    ; $6607
+;
+; === CheckString ===
                 ldy #$FF    ; $6608
                 sty $02    ; $660A
                 inc $02    ; $660C
@@ -10650,30 +12275,32 @@
                 lda $0200,x    ; $6612
                 cmp #$9B    ; $6615
                 beq $663C    ; $6617
-                jsr $36FD    ; $6619
+                jsr UpperCon    ; $6619
                 sta $03    ; $661C
                 lda ($00),y    ; $661E
                 bpl $662D    ; $6620
-                jsr $36FD    ; $6622
+                jsr UpperCon    ; $6622
                 cmp $03    ; $6625
                 bne $660C    ; $6627
                 iny    ; $6629
                 inx    ; $662A
                 bne $6612    ; $662B
                 ora #$80    ; $662D
-                jsr $36FD    ; $662F
+                jsr UpperCon    ; $662F
                 cmp $03    ; $6632
                 bne $663C    ; $6634
                 inx    ; $6636
                 lda $0200,x    ; $6637
                 cmp #$9B    ; $663A
                 rts    ; $663C
-                lda $5987    ; $663D
+;
+; === SI:Apropos ===
+                lda CompList    ; $663D
                 sta $00    ; $6640
                 lda $5988    ; $6642
                 sta $01    ; $6645
                 lda #$00    ; $6647
-                sta $598B    ; $6649
+                sta CompCount    ; $6649
                 ldy #$00    ; $664C
                 lda ($00),y    ; $664E
                 beq $6665    ; $6650
@@ -10689,21 +12316,21 @@
                 sta $00    ; $6660
                 jmp $664C    ; $6662
                 rts    ; $6665
-                jsr $6608    ; $6666
+                jsr CheckString    ; $6666
                 bne $6674    ; $6669
-                jsr $5A56    ; $666B
-                jsr $5A68    ; $666E
+                jsr PushCompPoint    ; $666B
+                jsr SkipEnt    ; $666E
                 jmp $664C    ; $6671
-                jsr $5A56    ; $6674
-                jsr $5A12    ; $6677
-                jsr $6608    ; $667A
+                jsr PushCompPoint    ; $6674
+                jsr DocRef    ; $6677
+                jsr CheckString    ; $667A
                 php    ; $667D
-                jsr $5A3D    ; $667E
+                jsr PopCompPoint    ; $667E
                 plp    ; $6681
                 beq $666B    ; $6682
                 bne $666E    ; $6684
                 php    ; $6686
-                jsr $5968    ; $6687
+                jsr PrintMessage    ; $6687
                 iny    ; $668A
                 sbc $F2    ; $668B
                 sbc $A0    ; $668D
@@ -10715,18 +12342,18 @@
                 brk    ; $6697
                 plp    ; $6698
                 bmi $66AA    ; $6699
-                jsr $5968    ; $669B
+                jsr PrintMessage    ; $669B
                 inc $F5    ; $669E
                 inc $F4E3    ; $66A0
                 sbc #$EF    ; $66A3
                 inc $4C00    ; $66A5
-                ldx $66,y    ; $66A8
-                jsr $5968    ; $66AA
+                ldx BuffTop,y    ; $66A8
+                jsr PrintMessage    ; $66AA
                 inc $E1,x    ; $66AD
                 sbc ($E9)    ; $66AF
                 sbc ($E2,x)    ; $66B1
                 cpx: $00E5    ; $66B3
-                jsr $5968    ; $66B6
+                jsr PrintMessage    ; $66B6
         dfb $F3        ; $66B9  (data/65C02-bit)
                 ldy #$F7    ; $66BA
                 inx    ; $66BC
@@ -10741,17 +12368,19 @@
                 lda $0200,y    ; $66CB
                 cmp #$9B    ; $66CE
                 beq $66D8    ; $66D0
-                jsr $2611    ; $66D2
+                jsr CharOut    ; $66D2
                 iny    ; $66D5
                 bne $66CB    ; $66D6
-                jsr $5968    ; $66D8
+                jsr PrintMessage    ; $66D8
                 ldx #$BA    ; $66DB
                 sta: $008D    ; $66DD
                 rts    ; $66E0
-                jsr $7C32    ; $66E1
+;
+; === GetAproArg ===
+                jsr GetStrArg    ; $66E1
                 beq $6703    ; $66E4
-                jsr $57CC    ; $66E6
-                jsr $5968    ; $66E9
+                jsr NewEchoArea    ; $66E6
+                jsr PrintMessage    ; $66E9
         dfb $D3        ; $66EC  (data/65C02-bit)
                 sbc $E2,x    ; $66ED
         dfb $F3        ; $66EF  (data/65C02-bit)
@@ -10759,18 +12388,22 @@
                 sbc ($E9)    ; $66F1
                 inc $BAE7    ; $66F3
                 brk    ; $66F6
-                jsr $3B23    ; $66F7
+                jsr ReadArgLine    ; $66F7
                 php    ; $66FA
                 txa    ; $66FB
                 pha    ; $66FC
-                jsr $57FA    ; $66FD
+                jsr CloseEchoArea    ; $66FD
                 pla    ; $6700
                 tax    ; $6701
                 plp    ; $6702
                 rts    ; $6703
+;
+; === GetKeyFun ===
                 ldx #$00    ; $6704
                 stx $B0    ; $6706
-                lda $7839    ; $6708
+;
+; === GetKeyFun1 ===
+                lda DispatchTab    ; $6708
                 sta $02    ; $670B
                 lda $783A    ; $670D
                 sta $03    ; $6710
@@ -10810,44 +12443,52 @@
                 stx $B0    ; $6749
                 ldx #$00    ; $674B
                 rts    ; $674D
+;
+; === AutoFileExt ===
                 brk    ; $674E
                 brk    ; $674F
                 brk    ; $6750
                 brk    ; $6751
                 brk    ; $6752
                 brk    ; $6753
+;
+; === ShowExtension ===
                 brk    ; $6754
                 brk    ; $6755
+;
+; === VisitFile ===
                 lda #$00    ; $6756
+;
+; === SI:VisFile ===
                 bne $6778    ; $6758
-                jsr $681F    ; $675A
+                jsr MaybeSave    ; $675A
                 bne $678E    ; $675D
-                dec $6754    ; $675F
+                dec ShowExtension    ; $675F
                 lda #$D7    ; $6762
                 sta $00    ; $6764
                 lda #$67    ; $6766
                 sta $01    ; $6768
                 lda #$00    ; $676A
-                jsr $69D0    ; $676C
+                jsr ReadFilename    ; $676C
                 bne $678E    ; $676F
-                jsr $68C0    ; $6771
+                jsr Default    ; $6771
                 cmp #$8D    ; $6774
                 beq $677B    ; $6776
-                jsr $6C38    ; $6778
-                jsr $729D    ; $677B
+                jsr FixPath    ; $6778
+                jsr DSK:OpenFile    ; $677B
                 bne $67E3    ; $677E
                 lda #$01    ; $6780
-                jsr $4C20    ; $6782
+                jsr ClrBuffFlag    ; $6782
                 jsr $6875    ; $6785
-                jsr $4C45    ; $6788
+                jsr ClrModified    ; $6788
                 jmp $6796    ; $678B
-                jsr $29B9    ; $678E
+                jsr Beep    ; $678E
                 lda #$87    ; $6791
-                jsr $2611    ; $6793
+                jsr CharOut    ; $6793
                 bit $6755    ; $6796
                 bpl $67CE    ; $6799
-                jsr $57CC    ; $679B
-                jsr $5968    ; $679E
+                jsr NewEchoArea    ; $679B
+                jsr PrintMessage    ; $679E
                 ldy #$D4    ; $67A1
                 inx    ; $67A3
                 sbc $A0    ; $67A4
@@ -10867,12 +12508,12 @@
                 cpx $E5    ; $67BE
                 cpx $A1    ; $67C0
                 brk    ; $67C2
-                jsr $57FA    ; $67C3
+                jsr CloseEchoArea    ; $67C3
                 lda #$01    ; $67C6
-                jsr $4C17    ; $67C8
-                jsr $29B9    ; $67CB
-                jsr $300C    ; $67CE
-                jsr $537E    ; $67D1
+                jsr SetBuffFlag    ; $67C8
+                jsr Beep    ; $67CB
+                jsr DisplayPage    ; $67CE
+                jsr MakeModeLine    ; $67D1
                 lda #$01    ; $67D4
                 rts    ; $67D6
                 dec $E9,x    ; $67D7
@@ -10882,46 +12523,48 @@
                 sbc #$EC    ; $67DE
                 sbc $84    ; $67E0
                 dec    ; $67E2
-                jsr $68E4    ; $67E3
-                jsr $57CC    ; $67E6
-                jsr $5968    ; $67E9
+                jsr SetFileDef    ; $67E3
+                jsr NewEchoArea    ; $67E6
+                jsr PrintMessage    ; $67E9
                 tay    ; $67EC
                 dec $F7E5    ; $67ED
                 ldy #$C6    ; $67F0
                 sbc #$EC    ; $67F2
                 sbc $A9    ; $67F4
                 brk    ; $67F6
-                jsr $57FA    ; $67F7
-                jsr $537E    ; $67FA
-                lda $66    ; $67FD
-                sta $60    ; $67FF
-                sta $6A    ; $6801
+                jsr CloseEchoArea    ; $67F7
+                jsr MakeModeLine    ; $67FA
+                lda BuffTop    ; $67FD
+                sta TheBuffer    ; $67FF
+                sta GapTop    ; $6801
                 lda $67    ; $6803
                 sta $61    ; $6805
                 sta $6B    ; $6807
-                lda $68    ; $6809
+                lda BuffBot    ; $6809
                 sec    ; $680B
                 sbc #$01    ; $680C
-                sta $6C    ; $680E
+                sta GapBot    ; $680E
                 lda $69    ; $6810
                 sbc #$00    ; $6812
                 sta $6D    ; $6814
-                jsr $57FA    ; $6816
-                jsr $4C45    ; $6819
+                jsr CloseEchoArea    ; $6816
+                jsr ClrModified    ; $6819
                 lda #$06    ; $681C
                 rts    ; $681E
-                bit $4B83    ; $681F
+;
+; === MaybeSave ===
+                bit Modified?    ; $681F
                 bmi $6825    ; $6822
                 rts    ; $6824
-                jsr $57CC    ; $6825
-                jsr $5968    ; $6828
+                jsr NewEchoArea    ; $6825
+                jsr PrintMessage    ; $6828
         dfb $C2        ; $682B  (data/65C02-bit)
                 sbc $E6,x    ; $682C
                 inc $E5    ; $682E
                 sbc ($A0)    ; $6830
                 brk    ; $6832
-                jsr $6AC6    ; $6833
-                jsr $5968    ; $6836
+                jsr PrBuffName    ; $6833
+                jsr PrintMessage    ; $6836
                 ldy #$E8    ; $6839
                 sbc ($F3,x)    ; $683B
                 ldy #$E2    ; $683D
@@ -10941,10 +12584,10 @@
         dfb $F3        ; $6859  (data/65C02-bit)
         dfb $F4        ; $685A  (data/65C02-bit)
                 brk    ; $685B
-                jsr $7D20    ; $685C
+                jsr GetYOrNp    ; $685C
                 php    ; $685F
                 pha    ; $6860
-                jsr $57FA    ; $6861
+                jsr CloseEchoArea    ; $6861
                 pla    ; $6864
                 plp    ; $6865
                 beq $6872    ; $6866
@@ -10954,24 +12597,24 @@
                 rts    ; $686E
                 lda #$FF    ; $686F
                 rts    ; $6871
-                jmp $6922    ; $6872
-                jsr $57CC    ; $6875
-                jsr $5968    ; $6878
+                jmp IN:SaveFile    ; $6872
+                jsr NewEchoArea    ; $6875
+                jsr PrintMessage    ; $6878
                 cmp ($E5)    ; $687B
                 sbc ($E4,x)    ; $687D
                 sbc #$EE    ; $687F
         dfb $E7        ; $6881  (data/65C02-bit)
                 ldy #$00    ; $6882
-                jsr $7025    ; $6884
-                jsr $5968    ; $6887
+                jsr PrintPath    ; $6884
+                jsr PrintMessage    ; $6887
         dfb $BB        ; $688A  (data/65C02-bit)
                 ldy #$A8    ; $688B
                 brk    ; $688D
-                sty $7A54    ; $688E
+                sty PD:Justify    ; $688E
                 lda $7127    ; $6891
-                ldx $7126    ; $6894
-                jsr $7A01    ; $6897
-                jsr $5968    ; $689A
+                ldx GblLength    ; $6894
+                jsr PrintDec    ; $6897
+                jsr PrintMessage    ; $689A
                 ldy #$E3    ; $689D
                 inx    ; $689F
                 sbc ($F2,x)    ; $68A0
@@ -10980,20 +12623,22 @@
                 sbc $F2    ; $68A5
         dfb $F3        ; $68A7  (data/65C02-bit)
                 lda #$00    ; $68A8
-                jsr $57FA    ; $68AA
-                jsr $68E4    ; $68AD
-                jsr $49F6    ; $68B0
+                jsr CloseEchoArea    ; $68AA
+                jsr SetFileDef    ; $68AD
+                jsr ZapBuff    ; $68B0
                 jsr $6B27    ; $68B3
                 sta $6755    ; $68B6
-                jsr $4C52    ; $68B9
-                jsr $823F    ; $68BC
+                jsr SetGap    ; $68B9
+                jsr ParseMode    ; $68BC
                 rts    ; $68BF
+;
+; === Default ===
                 lda $0200    ; $68C0
                 cmp #$8D    ; $68C3
                 bne $68DB    ; $68C5
                 ldy #$00    ; $68C7
                 ldx #$00    ; $68C9
-                lda ($72),y    ; $68CB
+                lda (BuffData),y    ; $68CB
                 beq $68D6    ; $68CD
                 sta $0200,x    ; $68CF
                 iny    ; $68D2
@@ -11004,14 +12649,16 @@
                 rts    ; $68DB
                 lda #$8D    ; $68DC
                 sta $0200,x    ; $68DE
-                jmp $74BE    ; $68E1
-                lda $674E    ; $68E4
+                jmp DSK:ListFiles    ; $68E1
+;
+; === SetFileDef ===
+                lda AutoFileExt    ; $68E4
                 pha    ; $68E7
                 lda #$00    ; $68E8
-                sta $674E    ; $68EA
-                jsr $6C38    ; $68ED
+                sta AutoFileExt    ; $68EA
+                jsr FixPath    ; $68ED
                 pla    ; $68F0
-                sta $674E    ; $68F1
+                sta AutoFileExt    ; $68F1
                 ldx #$00    ; $68F4
                 lda $0200,x    ; $68F6
                 beq $6904    ; $68F9
@@ -11025,21 +12672,23 @@
                 tax    ; $6909
                 ldy #$00    ; $690A
                 lda $0200,x    ; $690C
-                sta ($72),y    ; $690F
+                sta (BuffData),y    ; $690F
                 beq $6919    ; $6911
                 iny    ; $6913
                 inx    ; $6914
                 cpx #$3F    ; $6915
                 bcc $690C    ; $6917
                 lda #$00    ; $6919
-                sta ($72),y    ; $691B
+                sta (BuffData),y    ; $691B
                 rts    ; $691D
                 lda #$FF    ; $691E
                 bmi $6924    ; $6920
+;
+; === IN:SaveFile ===
                 lda #$00    ; $6922
                 php    ; $6924
                 ldy #$41    ; $6925
-                lda ($72),y    ; $6927
+                lda (BuffData),y    ; $6927
                 and #$01    ; $6929
                 beq $6931    ; $692B
                 plp    ; $692D
@@ -11047,10 +12696,10 @@
                 plp    ; $6931
                 bmi $6951    ; $6932
                 ldy #$00    ; $6934
-                lda ($72),y    ; $6936
+                lda (BuffData),y    ; $6936
                 beq $6951    ; $6938
                 ldx #$00    ; $693A
-                lda ($72),y    ; $693C
+                lda (BuffData),y    ; $693C
                 beq $6949    ; $693E
                 sta $0200,x    ; $6940
                 iny    ; $6943
@@ -11065,13 +12714,13 @@
                 lda #$69    ; $6955
                 sta $01    ; $6957
                 lda #$FF    ; $6959
-                jsr $69D0    ; $695B
+                jsr ReadFilename    ; $695B
                 bne $6986    ; $695E
-                jsr $734A    ; $6960
+                jsr DSK:SaveFile    ; $6960
                 bne $698C    ; $6963
-                jsr $68E4    ; $6965
-                jsr $57CC    ; $6968
-                jsr $5968    ; $696B
+                jsr SetFileDef    ; $6965
+                jsr NewEchoArea    ; $6968
+                jsr PrintMessage    ; $696B
         dfb $D7        ; $696E  (data/65C02-bit)
                 sbc ($E9)    ; $696F
         dfb $F4        ; $6971  (data/65C02-bit)
@@ -11079,17 +12728,17 @@
                 sbc $EE    ; $6973
                 tsx    ; $6975
                 brk    ; $6976
-                jsr $6ACC    ; $6977
-                jsr $4C45    ; $697A
-                jsr $537E    ; $697D
-                jsr $57FA    ; $6980
+                jsr PrFileName    ; $6977
+                jsr ClrModified    ; $697A
+                jsr MakeModeLine    ; $697D
+                jsr CloseEchoArea    ; $6980
                 lda #$00    ; $6983
                 rts    ; $6985
-                jsr $57FA    ; $6986
+                jsr CloseEchoArea    ; $6986
                 lda #$FF    ; $6989
                 rts    ; $698B
-                jsr $57CC    ; $698C
-                jsr $5968    ; $698F
+                jsr NewEchoArea    ; $698C
+                jsr PrintMessage    ; $698F
                 dec $E1    ; $6992
                 sbc #$EC    ; $6994
                 sbc $E4    ; $6996
@@ -11104,8 +12753,8 @@
         dfb $EF        ; $69A7  (data/65C02-bit)
                 inc $A0    ; $69A8
                 brk    ; $69AA
-                jsr $6ACC    ; $69AB
-                jsr $29B9    ; $69AE
+                jsr PrFileName    ; $69AB
+                jsr Beep    ; $69AE
                 jmp $6986    ; $69B1
         dfb $D3        ; $69B4  (data/65C02-bit)
                 sbc ($F6,x)    ; $69B5
@@ -11119,36 +12768,40 @@
                 inc $E6A0    ; $69C3
                 sbc #$EC    ; $69C6
                 sbc $3A    ; $69C8
+;
+; === WriteFile ===
                 jsr $691E    ; $69CA
                 lda #$01    ; $69CD
                 rts    ; $69CF
+;
+; === ReadFilename ===
                 sta $6A7C    ; $69D0
                 lda $00    ; $69D3
                 sta $6A7A    ; $69D5
                 lda $01    ; $69D8
                 sta $6A7B    ; $69DA
-                jsr $7C32    ; $69DD
+                jsr GetStrArg    ; $69DD
                 bne $69E8    ; $69E0
                 lda #$00    ; $69E2
-                sta $6754    ; $69E4
+                sta ShowExtension    ; $69E4
                 rts    ; $69E7
-                jsr $57CC    ; $69E8
-                bit $6754    ; $69EB
+                jsr NewEchoArea    ; $69E8
+                bit ShowExtension    ; $69EB
                 bpl $6A13    ; $69EE
-                inc $6754    ; $69F0
-                jsr $7A7F    ; $69F3
+                inc ShowExtension    ; $69F0
+                jsr AnyArgument?    ; $69F3
                 beq $6A13    ; $69F6
-                ldy $674E    ; $69F8
+                ldy AutoFileExt    ; $69F8
                 beq $6A13    ; $69FB
-                jsr $5968    ; $69FD
+                jsr PrintMessage    ; $69FD
         dfb $DB        ; $6A00  (data/65C02-bit)
                 brk    ; $6A01
-                lda $674E,y    ; $6A02
+                lda AutoFileExt,y    ; $6A02
                 beq $6A0D    ; $6A05
-                jsr $2611    ; $6A07
+                jsr CharOut    ; $6A07
                 iny    ; $6A0A
                 bne $6A02    ; $6A0B
-                jsr $5968    ; $6A0D
+                jsr PrintMessage    ; $6A0D
                 cmp: $00A0,x    ; $6A10
                 lda $6A7A    ; $6A13
                 sta $00    ; $6A16
@@ -11160,34 +12813,34 @@
                 ora #$80    ; $6A22
                 cmp #$82    ; $6A24
                 bne $6A2E    ; $6A26
-                jsr $6AC6    ; $6A28
+                jsr PrBuffName    ; $6A28
                 jmp $6A48    ; $6A2B
                 cmp #$84    ; $6A2E
                 bne $6A45    ; $6A30
                 ldy #$00    ; $6A32
-                lda ($72),y    ; $6A34
+                lda (BuffData),y    ; $6A34
                 beq $6A48    ; $6A36
-                jsr $7DA7    ; $6A38
+                jsr PrintSpace    ; $6A38
                 lda #$A8    ; $6A3B
-                jsr $2611    ; $6A3D
-                jsr $6ACC    ; $6A40
+                jsr CharOut    ; $6A3D
+                jsr PrFileName    ; $6A40
                 lda #$A9    ; $6A43
-                jsr $2611    ; $6A45
+                jsr CharOut    ; $6A45
                 inc $00    ; $6A48
                 bne $6A4E    ; $6A4A
                 inc $01    ; $6A4C
                 plp    ; $6A4E
                 bmi $6A1D    ; $6A4F
                 lda #$DC    ; $6A51
-                sta $3B20    ; $6A53
+                sta ReadLineHelp    ; $6A53
                 lda #$68    ; $6A56
                 sta $3B21    ; $6A58
-                dec $3D87    ; $6A5B
-                jsr $3B2D    ; $6A5E
+                dec FileRead    ; $6A5B
+                jsr ReadLine    ; $6A5E
                 php    ; $6A61
                 txa    ; $6A62
                 pha    ; $6A63
-                jsr $57FA    ; $6A64
+                jsr CloseEchoArea    ; $6A64
                 pla    ; $6A67
                 tax    ; $6A68
                 plp    ; $6A69
@@ -11202,13 +12855,15 @@
                 brk    ; $6A7A
                 brk    ; $6A7B
                 brk    ; $6A7C
-                bit $4B83    ; $6A7D
+;
+; === SaveFile ===
+                bit Modified?    ; $6A7D
                 bpl $6A88    ; $6A80
-                jsr $6922    ; $6A82
+                jsr IN:SaveFile    ; $6A82
                 lda #$01    ; $6A85
                 rts    ; $6A87
-                jsr $57CC    ; $6A88
-                jsr $5968    ; $6A8B
+                jsr NewEchoArea    ; $6A88
+                jsr PrintMessage    ; $6A8B
                 dec $A0EF    ; $6A8E
         dfb $E3        ; $6A91  (data/65C02-bit)
                 inx    ; $6A92
@@ -11218,13 +12873,13 @@
                 ldy #$EE    ; $6A98
                 sbc $E5    ; $6A9A
                 cpx $00    ; $6A9C
-                jsr $7A7F    ; $6A9E
+                jsr AnyArgument?    ; $6A9E
                 php    ; $6AA1
                 bne $6AAA    ; $6AA2
-                jsr $5968    ; $6AA4
+                jsr PrintMessage    ; $6AA4
                 sbc $E4    ; $6AA7
                 brk    ; $6AA9
-                jsr $5968    ; $6AAA
+                jsr PrintMessage    ; $6AAA
                 ldy #$F4    ; $6AAD
         dfb $EF        ; $6AAF  (data/65C02-bit)
                 ldy #$E2    ; $6AB0
@@ -11241,26 +12896,32 @@
                 beq $6A82    ; $6AC1
                 lda #$01    ; $6AC3
                 rts    ; $6AC5
-                ldx $0F3A    ; $6AC6
-                jmp $49DC    ; $6AC9
-                ldx $0F3A    ; $6ACC
-                jmp $49EC    ; $6ACF
+;
+; === PrBuffName ===
+                ldx SelectedBuff    ; $6AC6
+                jmp PBuffName    ; $6AC9
+;
+; === PrFileName ===
+                ldx SelectedBuff    ; $6ACC
+                jmp PBuffFile    ; $6ACF
+;
+; === InsertFile ===
                 lda #$F6    ; $6AD2
                 sta $00    ; $6AD4
                 lda #$6A    ; $6AD6
                 sta $01    ; $6AD8
                 lda #$FF    ; $6ADA
-                jsr $69D0    ; $6ADC
+                jsr ReadFilename    ; $6ADC
                 bne $6AEE    ; $6ADF
-                jsr $729D    ; $6AE1
+                jsr DSK:OpenFile    ; $6AE1
                 bne $6B02    ; $6AE4
                 jsr $6B27    ; $6AE6
                 bne $6B02    ; $6AE9
                 lda #$06    ; $6AEB
                 rts    ; $6AED
                 lda #$87    ; $6AEE
-                jsr $5726    ; $6AF0
-                jmp $6BB8    ; $6AF3
+                jsr EchoOutput    ; $6AF0
+                jmp BeepFindPoint    ; $6AF3
                 cmp #$EE    ; $6AF6
         dfb $F3        ; $6AF8  (data/65C02-bit)
                 sbc $F2    ; $6AF9
@@ -11268,8 +12929,8 @@
                 ldy #$C6    ; $6AFC
                 sbc #$EC    ; $6AFE
                 sbc $3A    ; $6B00
-                jsr $57CC    ; $6B02
-                jsr $5968    ; $6B05
+                jsr NewEchoArea    ; $6B02
+                jsr PrintMessage    ; $6B05
                 cmp $F2    ; $6B08
                 sbc ($EF)    ; $6B0A
                 sbc ($A0)    ; $6B0C
@@ -11281,57 +12942,63 @@
                 sbc #$EC    ; $6B17
                 sbc $A1    ; $6B19
                 ldy #$00    ; $6B1B
-                jsr $29B9    ; $6B1D
-                jsr $57FA    ; $6B20
+                jsr Beep    ; $6B1D
+                jsr CloseEchoArea    ; $6B20
                 jmp $6AEE    ; $6B23
+;
+; === EORValue ===
                 bra $6ACD    ; $6B26
                 adc ($48,x)    ; $6B28
-                lda $60    ; $6B2A
+                lda TheBuffer    ; $6B2A
                 pha    ; $6B2C
-                jsr $72FE    ; $6B2D
-                jsr $72AB    ; $6B30
+                jsr PrepRead    ; $6B2D
+                jsr DSK:ReadByte    ; $6B30
                 bne $6B41    ; $6B33
-                eor $6B26    ; $6B35
-                jsr $4B84    ; $6B38
+                eor EORValue    ; $6B35
+                jsr BuffInsert    ; $6B38
                 beq $6B30    ; $6B3B
                 lda #$FF    ; $6B3D
                 bmi $6B43    ; $6B3F
                 lda #$00    ; $6B41
                 tax    ; $6B43
                 pla    ; $6B44
-                sta $60    ; $6B45
+                sta TheBuffer    ; $6B45
                 pla    ; $6B47
                 sta $61    ; $6B48
                 txa    ; $6B4A
                 pha    ; $6B4B
-                jsr $4C52    ; $6B4C
-                jsr $73E5    ; $6B4F
+                jsr SetGap    ; $6B4C
+                jsr DSK:CloseFile    ; $6B4F
                 pla    ; $6B52
                 rts    ; $6B53
+;
+; === FileLister ===
                 lda #$00    ; $6B54
                 beq $6B5A    ; $6B56
+;
+; === DirLister ===
                 lda #$FF    ; $6B58
                 sta $6B92    ; $6B5A
-                jsr $7C32    ; $6B5D
+                jsr GetStrArg    ; $6B5D
                 beq $6B7C    ; $6B60
-                jsr $7A7F    ; $6B62
+                jsr AnyArgument?    ; $6B62
                 bne $6B79    ; $6B65
                 lda #$93    ; $6B67
                 sta $00    ; $6B69
                 lda #$6B    ; $6B6B
                 sta $01    ; $6B6D
                 lda #$00    ; $6B6F
-                jsr $69D0    ; $6B71
+                jsr ReadFilename    ; $6B71
                 beq $6B7C    ; $6B74
-                jmp $6BB8    ; $6B76
-                jsr $6B9D    ; $6B79
+                jmp BeepFindPoint    ; $6B76
+                jsr SelfPath    ; $6B79
                 lda #$8D    ; $6B7C
                 sta $0200,x    ; $6B7E
                 bit $6B92    ; $6B81
                 bmi $6B8C    ; $6B84
-                jsr $74BE    ; $6B86
+                jsr DSK:ListFiles    ; $6B86
                 jmp $6B8F    ; $6B89
-                jsr $74BA    ; $6B8C
+                jsr DSK:ListDir    ; $6B8C
                 lda #$00    ; $6B8F
                 rts    ; $6B91
                 brk    ; $6B92
@@ -11342,41 +13009,49 @@
         dfb $EF        ; $6B99  (data/65C02-bit)
                 sbc ($F9)    ; $6B9A
                 dec    ; $6B9C
+;
+; === SelfPath ===
                 ldx #$00    ; $6B9D
                 ldy #$00    ; $6B9F
-                lda ($72),y    ; $6BA1
+                lda (BuffData),y    ; $6BA1
                 sta $0200,x    ; $6BA3
-                beq $6BAC    ; $6BA6
+                beq BackPath    ; $6BA6
                 iny    ; $6BA8
                 inx    ; $6BA9
                 bne $6BA1    ; $6BAA
+;
+; === BackPath ===
                 dex    ; $6BAC
                 bmi $6BB6    ; $6BAD
                 lda $0200,x    ; $6BAF
                 cmp #$AF    ; $6BB2
-                bne $6BAC    ; $6BB4
+                bne BackPath    ; $6BB4
                 inx    ; $6BB6
                 rts    ; $6BB7
-                jsr $29B9    ; $6BB8
+;
+; === BeepFindPoint ===
+                jsr Beep    ; $6BB8
                 lda #$01    ; $6BBB
                 rts    ; $6BBD
-                dec $6754    ; $6BBE
+;
+; === FindFile ===
+                dec ShowExtension    ; $6BBE
                 lda #$D3    ; $6BC1
                 sta $00    ; $6BC3
                 lda #$6B    ; $6BC5
                 sta $01    ; $6BC7
                 lda #$FF    ; $6BC9
-                jsr $69D0    ; $6BCB
+                jsr ReadFilename    ; $6BCB
                 beq $6BDD    ; $6BCE
-                jmp $6BB8    ; $6BD0
+                jmp BeepFindPoint    ; $6BD0
                 dec $E9    ; $6BD3
                 inc $A0E4    ; $6BD5
                 dec $E9    ; $6BD8
                 cpx $3AE5    ; $6BDA
-                jsr $6C38    ; $6BDD
-                jsr $4829    ; $6BE0
+                jsr FixPath    ; $6BDD
+                jsr FindBuffFile    ; $6BE0
                 bne $6BE8    ; $6BE3
-                jmp $45EB    ; $6BE5
+                jmp SI:OpenBuff    ; $6BE5
                 ldx #$00    ; $6BE8
                 dex    ; $6BEA
                 stx $6C25    ; $6BEB
@@ -11400,8 +13075,8 @@
                 bne $6C07    ; $6C11
                 lda #$00    ; $6C13
                 sta $01FF,y    ; $6C15
-                jsr $43F0    ; $6C18
-                jsr $4624    ; $6C1B
+                jsr Deselect    ; $6C18
+                jsr CreateBuffer    ; $6C1B
                 cmp #$06    ; $6C1E
                 beq $6C26    ; $6C20
                 jmp $6BD0    ; $6C22
@@ -11413,16 +13088,18 @@
                 cmp #$8D    ; $6C2F
                 bne $6C28    ; $6C31
                 lda #$FF    ; $6C33
-                jmp $6758    ; $6C35
+                jmp SI:VisFile    ; $6C35
+;
+; === FixPath ===
                 ldx #$00    ; $6C38
                 lda $0200    ; $6C3A
                 cmp #$AF    ; $6C3D
                 beq $6C4F    ; $6C3F
-                lda $0342,x    ; $6C41
+                lda PrefixName,x    ; $6C41
                 ora #$80    ; $6C44
                 sta $0280,x    ; $6C46
                 inx    ; $6C49
-                cpx $0341    ; $6C4A
+                cpx ThePrefix    ; $6C4A
                 bcc $6C41    ; $6C4D
                 ldy #$00    ; $6C4F
                 lda $0200,y    ; $6C51
@@ -11438,11 +13115,11 @@
                 dex    ; $6C67
                 bpl $6C61    ; $6C68
                 ldy #$00    ; $6C6A
-                lda $674E    ; $6C6C
+                lda AutoFileExt    ; $6C6C
                 beq $6CB4    ; $6C6F
-                jsr $7A7F    ; $6C71
+                jsr AnyArgument?    ; $6C71
                 beq $6CB4    ; $6C74
-                lda $674E,y    ; $6C76
+                lda AutoFileExt,y    ; $6C76
                 beq $6C7E    ; $6C79
                 iny    ; $6C7B
                 bne $6C76    ; $6C7C
@@ -11450,10 +13127,10 @@
                 ldx $6CB5    ; $6C7F
                 dex    ; $6C82
                 lda $0200,x    ; $6C83
-                jsr $36FD    ; $6C86
+                jsr UpperCon    ; $6C86
                 sta $6CB6    ; $6C89
-                lda $674E,y    ; $6C8C
-                jsr $36FD    ; $6C8F
+                lda AutoFileExt,y    ; $6C8C
+                jsr UpperCon    ; $6C8F
                 cmp $6CB6    ; $6C92
                 bne $6C9E    ; $6C95
                 dex    ; $6C97
@@ -11462,7 +13139,7 @@
                 jmp $6CB4    ; $6C9B
                 ldy #$00    ; $6C9E
                 ldx $6CB5    ; $6CA0
-                lda $674E,y    ; $6CA3
+                lda AutoFileExt,y    ; $6CA3
                 sta $0200,x    ; $6CA6
                 beq $6CAF    ; $6CA9
                 iny    ; $6CAB
@@ -11473,11 +13150,13 @@
                 rts    ; $6CB4
                 brk    ; $6CB5
                 brk    ; $6CB6
-                jsr $7C32    ; $6CB7
+;
+; === SetPrefix ===
+                jsr GetStrArg    ; $6CB7
                 beq $6CE6    ; $6CBA
                 jsr $6CE9    ; $6CBC
-                jsr $57D8    ; $6CBF
-                jsr $5968    ; $6CC2
+                jsr OpenEchoArea    ; $6CBF
+                jsr PrintMessage    ; $6CC2
                 sta $E5CE    ; $6CC5
         dfb $F7        ; $6CC8  (data/65C02-bit)
                 ldy #$F0    ; $6CC9
@@ -11486,21 +13165,21 @@
                 sed    ; $6CCF
                 tsx    ; $6CD0
                 brk    ; $6CD1
-                dec $3D87    ; $6CD2
-                jsr $3B23    ; $6CD5
+                dec FileRead    ; $6CD2
+                jsr ReadArgLine    ; $6CD5
                 php    ; $6CD8
                 txa    ; $6CD9
                 pha    ; $6CDA
-                jsr $57FA    ; $6CDB
+                jsr CloseEchoArea    ; $6CDB
                 pla    ; $6CDE
                 tax    ; $6CDF
                 plp    ; $6CE0
                 bne $6CE9    ; $6CE1
                 txa    ; $6CE3
                 beq $6CE9    ; $6CE4
-                jsr $6DDB    ; $6CE6
-                jsr $57CC    ; $6CE9
-                jsr $5968    ; $6CEC
+                jsr DSK:SetPrefix    ; $6CE6
+                jsr NewEchoArea    ; $6CE9
+                jsr PrintMessage    ; $6CEC
         dfb $C3        ; $6CEF  (data/65C02-bit)
                 sbc $F2,x    ; $6CF0
                 sbc ($E5)    ; $6CF2
@@ -11511,24 +13190,26 @@
                 tsx    ; $6CFD
                 ldy #$00    ; $6CFE
                 ldx #$00    ; $6D00
-                lda $0342,x    ; $6D02
+                lda PrefixName,x    ; $6D02
                 ora #$80    ; $6D05
-                jsr $2611    ; $6D07
+                jsr CharOut    ; $6D07
                 inx    ; $6D0A
-                cpx $0341    ; $6D0B
+                cpx ThePrefix    ; $6D0B
                 bcc $6D02    ; $6D0E
-                jsr $57FA    ; $6D10
+                jsr CloseEchoArea    ; $6D10
                 lda #$01    ; $6D13
                 rts    ; $6D15
+;
+; === DeleteFile ===
                 lda #$30    ; $6D16
                 sta $00    ; $6D18
                 lda #$6D    ; $6D1A
                 sta $01    ; $6D1C
                 lda #$FF    ; $6D1E
-                jsr $69D0    ; $6D20
+                jsr ReadFilename    ; $6D20
                 beq $6D28    ; $6D23
-                jmp $6BB8    ; $6D25
-                jsr $76CA    ; $6D28
+                jmp BeepFindPoint    ; $6D25
+                jsr DSK:Delete    ; $6D28
                 bne $6D25    ; $6D2B
                 lda #$01    ; $6D2D
                 rts    ; $6D2F
@@ -11537,13 +13218,15 @@
                 sbc $A0    ; $6D35
                 inc $E9    ; $6D37
                 cpx $3AE5    ; $6D39
-                lda $77BF    ; $6D3C
+;
+; === InitFiler ===
+                lda ClockPatch    ; $6D3C
                 bne $6D4C    ; $6D3F
-                lda $BF06    ; $6D41
-                sta $77BF    ; $6D44
+                lda ReadClock    ; $6D41
+                sta ClockPatch    ; $6D44
                 lda #$60    ; $6D47
-                sta $BF06    ; $6D49
-                jsr $6D84    ; $6D4C
+                sta ReadClock    ; $6D49
+                jsr GetPrefix    ; $6D4C
                 rts    ; $6D4F
                 brk    ; $6D50
                 brk    ; $6D51
@@ -11553,14 +13236,20 @@
                 lda #$03    ; $6D58
                 sta $6D73    ; $6D5A
                 pla    ; $6D5D
-                stx $6D71    ; $6D5E
+                stx MLIParams    ; $6D5E
+;
+; === OpCallMLI ===
                 sta $6D6A    ; $6D61
+;
+; === CallMLI ===
                 jsr $72E6    ; $6D64
-                jsr $BF00    ; $6D67
+                jsr MLI    ; $6D67
                 brk    ; $6D6A
                 adc ($6D),y    ; $6D6B
                 jsr $72F4    ; $6D6D
                 rts    ; $6D70
+;
+; === MLIParams ===
                 brk    ; $6D71
                 brk    ; $6D72
                 brk    ; $6D73
@@ -11579,6 +13268,8 @@
                 brk    ; $6D80
                 brk    ; $6D81
                 brk    ; $6D82
+;
+; === DefFileType ===
                 tsb $A2    ; $6D83
                 ora ($A9,x)    ; $6D85
                 eor ($8D,x)    ; $6D87
@@ -11588,45 +13279,53 @@
                 lda #$C7    ; $6D90
                 jsr $6D5E    ; $6D92
                 rts    ; $6D95
-                jsr $6DD1    ; $6D96
+;
+; === DSK:Quit ===
+                jsr DSK:ChkExit    ; $6D96
                 jsr $77B3    ; $6D99
                 beq $6D9F    ; $6D9C
                 rts    ; $6D9E
-                jsr $7C32    ; $6D9F
+                jsr GetStrArg    ; $6D9F
                 bne $6DC4    ; $6DA2
                 lda #$8D    ; $6DA4
                 sta $0200,x    ; $6DA6
-                jsr $70AA    ; $6DA9
+                jsr MakePath    ; $6DA9
                 ldy #$00    ; $6DAC
-                lda $0302,y    ; $6DAE
+                lda PathStr,y    ; $6DAE
                 ora #$80    ; $6DB1
-                sta $76E4,y    ; $6DB3
+                sta Compiler,y    ; $6DB3
                 iny    ; $6DB6
-                cpy $0301    ; $6DB7
+                cpy ThePathname    ; $6DB7
                 bcc $6DAE    ; $6DBA
                 lda #$00    ; $6DBC
-                sta $76E4,y    ; $6DBE
+                sta Compiler,y    ; $6DBE
                 jmp $772D    ; $6DC1
-                lda $77BF    ; $6DC4
-                sta $BF06    ; $6DC7
+                lda ClockPatch    ; $6DC4
+                sta ReadClock    ; $6DC7
                 ldx #$04    ; $6DCA
                 lda #$65    ; $6DCC
                 jmp $6D5E    ; $6DCE
-                jsr $77F2    ; $6DD1
+;
+; === DSK:ChkExit ===
+                jsr SafetyCheck    ; $6DD1
                 beq $6DDA    ; $6DD4
                 pla    ; $6DD6
                 pla    ; $6DD7
                 lda #$01    ; $6DD8
                 rts    ; $6DDA
-                jsr $70DC    ; $6DDB
+;
+; === DSK:SetPrefix ===
+                jsr OpenPath    ; $6DDB
                 bne $6DEF    ; $6DDE
-                jsr $73E5    ; $6DE0
+                jsr DSK:CloseFile    ; $6DE0
                 ldx #$01    ; $6DE3
                 lda #$C6    ; $6DE5
                 jsr $6D52    ; $6DE7
-                jsr $6D84    ; $6DEA
+                jsr GetPrefix    ; $6DEA
                 lda #$00    ; $6DED
                 rts    ; $6DEF
+;
+; === SlotDrive ===
         dfb $02        ; $6DF0  (data/65C02-bit)
                 ora ($0A,x)    ; $6DF1
                 php    ; $6DF3
@@ -11635,7 +13334,7 @@
                 lsr    ; $6DF6
                 lsr    ; $6DF7
                 lsr    ; $6DF8
-                sta $6DF0    ; $6DF9
+                sta SlotDrive    ; $6DF9
                 lda #$00    ; $6DFC
                 plp    ; $6DFE
                 rol    ; $6DFF
@@ -11647,11 +13346,15 @@
                 brk    ; $6E08
                 brk    ; $6E09
                 brk    ; $6E0A
+;
+; === Time ===
                 brk    ; $6E0B
                 brk    ; $6E0C
                 brk    ; $6E0D
                 brk    ; $6E0E
-                lda $BF90    ; $6E0F
+;
+; === GetSysDate ===
+                lda SysTheDate    ; $6E0F
                 sta $6E06    ; $6E12
                 lda $BF91    ; $6E15
                 sta $6E07    ; $6E18
@@ -11674,18 +13377,24 @@
                 lsr    ; $6E3E
                 sta $6E09    ; $6E3F
                 rts    ; $6E42
-                lda $BF92    ; $6E43
-                sta $6E0B    ; $6E46
+;
+; === GetSystemTime ===
+                lda SysTheTime    ; $6E43
+                sta Time    ; $6E46
                 lda $BF93    ; $6E49
                 sta $6E0C    ; $6E4C
+;
+; === GetRealTime ===
                 lda $6E0C    ; $6E4F
                 and #$1F    ; $6E52
                 sta $6E0E    ; $6E54
                 tax    ; $6E57
-                lda $6E0B    ; $6E58
+                lda Time    ; $6E58
                 and #$3F    ; $6E5B
                 sta $6E0D    ; $6E5D
                 rts    ; $6E60
+;
+; === Months ===
                 adc $7C6E,y    ; $6E61
                 ror $6E7F    ; $6E64
         dfb $82        ; $6E67  (data/65C02-bit)
@@ -11701,7 +13410,7 @@
                 lsr $65    ; $6E7C
         dfb $E2        ; $6E7E  (data/65C02-bit)
                 eor $F261    ; $6E7F
-                eor ($70,x)    ; $6E82
+                eor (PhysBuffBot,x)    ; $6E82
                 sbc ($4D)    ; $6E84
                 adc ($F9,x)    ; $6E86
                 lsr    ; $6E88
@@ -11718,11 +13427,13 @@
                 lsr $F66F    ; $6E97
         dfb $44        ; $6E9A  (data/65C02-bit)
                 adc $E3    ; $6E9B
+;
+; === PrintDate ===
                 jsr $6E28    ; $6E9D
                 lda $6E06    ; $6EA0
                 ora $6E07    ; $6EA3
                 bne $6EB6    ; $6EA6
-                jsr $5968    ; $6EA8
+                jsr PrintMessage    ; $6EA8
         dfb $DB        ; $6EAB  (data/65C02-bit)
                 inc $A0EF    ; $6EAC
                 cpx $E1    ; $6EAF
@@ -11731,20 +13442,20 @@
                 brk    ; $6EB4
                 rts    ; $6EB5
                 ldx $6E0A    ; $6EB6
-                jsr $7A55    ; $6EB9
+                jsr ZeroJustify    ; $6EB9
                 cpx #$0A    ; $6EBC
                 bcs $6EC7    ; $6EBE
                 lda #$B0    ; $6EC0
-                jsr $2611    ; $6EC2
+                jsr CharOut    ; $6EC2
                 lda #$00    ; $6EC5
-                jsr $7A01    ; $6EC7
+                jsr PrintDec    ; $6EC7
                 jsr $6EFA    ; $6ECA
                 lda $6E09    ; $6ECD
                 sec    ; $6ED0
                 sbc #$01    ; $6ED1
                 asl    ; $6ED3
                 tax    ; $6ED4
-                lda $6E61,x    ; $6ED5
+                lda Months,x    ; $6ED5
                 sta $00    ; $6ED8
                 lda $6E62,x    ; $6EDA
                 sta $01    ; $6EDD
@@ -11752,36 +13463,40 @@
                 ldx #$03    ; $6EE1
                 lda ($00),y    ; $6EE3
                 ora #$80    ; $6EE5
-                jsr $2611    ; $6EE7
+                jsr CharOut    ; $6EE7
                 iny    ; $6EEA
                 dex    ; $6EEB
                 bne $6EE3    ; $6EEC
                 jsr $6EFA    ; $6EEE
                 ldx $6E08    ; $6EF1
                 lda #$00    ; $6EF4
-                jsr $7A01    ; $6EF6
+                jsr PrintDec    ; $6EF6
                 rts    ; $6EF9
                 lda #$AD    ; $6EFA
-                jmp $2611    ; $6EFC
+                jmp CharOut    ; $6EFC
                 rts    ; $6EFF
-                lda $77BF    ; $6F00
+;
+; === DSK:ModeTime ===
+                lda ClockPatch    ; $6F00
                 cmp #$60    ; $6F03
                 beq $6EFF    ; $6F05
-                jsr $77C0    ; $6F07
-                lda $BF90    ; $6F0A
+                jsr GetTheTime    ; $6F07
+                lda SysTheDate    ; $6F0A
                 sta $6E06    ; $6F0D
                 lda $BF91    ; $6F10
                 sta $6E07    ; $6F13
-                jsr $6E9D    ; $6F16
+                jsr PrintDate    ; $6F16
                 ldx #$01    ; $6F19
                 jsr $7637    ; $6F1B
-                lda $BF92    ; $6F1E
-                sta $6E0B    ; $6F21
+                lda SysTheTime    ; $6F1E
+                sta Time    ; $6F21
                 lda $BF93    ; $6F24
                 sta $6E0C    ; $6F27
-                jsr $7A55    ; $6F2A
+;
+; === PrintTime ===
+                jsr ZeroJustify    ; $6F2A
                 sta $6F7E    ; $6F2D
-                jsr $6E4F    ; $6F30
+                jsr GetRealTime    ; $6F30
                 ldx $6E0E    ; $6F33
                 beq $6F45    ; $6F36
                 cpx #$0C    ; $6F38
@@ -11794,83 +13509,95 @@
                 ldx #$0C    ; $6F45
                 cpx #$0A    ; $6F47
                 bcs $6F4E    ; $6F49
-                jsr $7DA7    ; $6F4B
+                jsr PrintSpace    ; $6F4B
                 lda #$00    ; $6F4E
-                jsr $7A01    ; $6F50
+                jsr PrintDec    ; $6F50
                 lda #$BA    ; $6F53
-                jsr $2611    ; $6F55
+                jsr CharOut    ; $6F55
                 ldx $6E0D    ; $6F58
                 cpx #$0A    ; $6F5B
                 bcs $6F64    ; $6F5D
                 lda #$B0    ; $6F5F
-                jsr $2611    ; $6F61
+                jsr CharOut    ; $6F61
                 lda #$00    ; $6F64
-                jsr $7A01    ; $6F66
-                jsr $7DA7    ; $6F69
+                jsr PrintDec    ; $6F66
+                jsr PrintSpace    ; $6F69
                 lda #$E1    ; $6F6C
                 bit $6F7E    ; $6F6E
                 bpl $6F75    ; $6F71
                 lda #$F0    ; $6F73
-                jsr $2611    ; $6F75
+                jsr CharOut    ; $6F75
                 lda #$ED    ; $6F78
-                jsr $2611    ; $6F7A
+                jsr CharOut    ; $6F7A
                 rts    ; $6F7D
                 brk    ; $6F7E
-                jsr $77C0    ; $6F7F
-                jsr $6FAC    ; $6F82
-                lda $BF90    ; $6F85
+;
+; === BuffDateTime ===
+                jsr GetTheTime    ; $6F7F
+                jsr BuffPutOn    ; $6F82
+                lda SysTheDate    ; $6F85
                 sta $6E06    ; $6F88
                 lda $BF91    ; $6F8B
                 sta $6E07    ; $6F8E
-                jsr $6E9D    ; $6F91
+                jsr PrintDate    ; $6F91
                 ldx #$01    ; $6F94
                 jsr $7637    ; $6F96
-                lda $BF92    ; $6F99
-                sta $6E0B    ; $6F9C
+                lda SysTheTime    ; $6F99
+                sta Time    ; $6F9C
                 lda $BF93    ; $6F9F
                 sta $6E0C    ; $6FA2
-                jsr $6F2A    ; $6FA5
-                jsr $6FD5    ; $6FA8
+                jsr PrintTime    ; $6FA5
+                jsr BuffPutOff    ; $6FA8
                 rts    ; $6FAB
-                lda $2606    ; $6FAC
+;
+; === BuffPutOn ===
+                lda CoutDef    ; $6FAC
                 sta $6FE7    ; $6FAF
                 lda $2607    ; $6FB2
                 sta $6FE8    ; $6FB5
                 lda #$C3    ; $6FB8
-                sta $2606    ; $6FBA
+                sta CoutDef    ; $6FBA
                 lda #$6F    ; $6FBD
                 sta $2607    ; $6FBF
                 rts    ; $6FC2
+;
+; === BuffPutter ===
                 stx $6FD4    ; $6FC3
                 sty $6FD3    ; $6FC6
-                jsr $4B84    ; $6FC9
+                jsr BuffInsert    ; $6FC9
                 ldy $6FD3    ; $6FCC
                 ldx $6FD4    ; $6FCF
                 rts    ; $6FD2
                 brk    ; $6FD3
                 brk    ; $6FD4
+;
+; === BuffPutOff ===
                 lda $6FE7    ; $6FD5
-                sta $2606    ; $6FD8
+                sta CoutDef    ; $6FD8
                 lda $6FE8    ; $6FDB
                 sta $2607    ; $6FDE
-                jsr $300C    ; $6FE1
+                jsr DisplayPage    ; $6FE1
                 lda #$01    ; $6FE4
                 rts    ; $6FE6
                 brk    ; $6FE7
                 brk    ; $6FE8
+;
+; === PushFilePath ===
                 ldx #$00    ; $6FE9
+;
+; === PushFilePath1 ===
                 stx $7024    ; $6FEB
                 lda $2607    ; $6FEE
                 pha    ; $6FF1
-                lda $2606    ; $6FF2
+                lda CoutDef    ; $6FF2
                 pha    ; $6FF5
                 lda #$14    ; $6FF6
-                sta $2606    ; $6FF8
+                sta CoutDef    ; $6FF8
                 lda #$70    ; $6FFB
                 sta $2607    ; $6FFD
-                jsr $7025    ; $7000
+                jsr PrintPath    ; $7000
                 pla    ; $7003
-                sta $2606    ; $7004
+                sta CoutDef    ; $7004
                 pla    ; $7007
                 sta $2607    ; $7008
                 lda #$00    ; $700B
@@ -11884,18 +13611,24 @@
                 inc $7024    ; $7020
                 rts    ; $7023
                 brk    ; $7024
+;
+; === PrintPath ===
                 ldx #$00    ; $7025
-                cpx $0301    ; $7027
+                cpx ThePathname    ; $7027
                 bcs $7037    ; $702A
-                lda $0302,x    ; $702C
+                lda PathStr,x    ; $702C
                 ora #$80    ; $702F
-                jsr $2611    ; $7031
+                jsr CharOut    ; $7031
                 inx    ; $7034
                 bne $7027    ; $7035
                 rts    ; $7037
+;
+; === RBlock ===
                 sta $6D72    ; $7038
+;
+; === RBlock1 ===
                 lda #$03    ; $703B
-                sta $6D71    ; $703D
+                sta MLIParams    ; $703D
                 stx $6D75    ; $7040
                 sty $6D76    ; $7043
                 lda #$00    ; $7046
@@ -11903,8 +13636,10 @@
                 lda #$A5    ; $704B
                 sta $6D74    ; $704D
                 lda #$80    ; $7050
-                jsr $6D61    ; $7052
+                jsr OpCallMLI    ; $7052
                 rts    ; $7055
+;
+; === VolInfo ===
                 brk    ; $7056
                 brk    ; $7057
                 brk    ; $7058
@@ -11987,31 +13722,37 @@
                 brk    ; $70A7
                 brk    ; $70A8
                 brk    ; $70A9
+;
+; === MakePath ===
                 ldx #$00    ; $70AA
                 ldy #$00    ; $70AC
                 lda $0200    ; $70AE
                 cmp #$AF    ; $70B1
                 beq $70C6    ; $70B3
-                lda $0341    ; $70B5
+                lda ThePrefix    ; $70B5
                 beq $70C6    ; $70B8
-                lda $0342,y    ; $70BA
-                sta $0302,y    ; $70BD
+                lda PrefixName,y    ; $70BA
+                sta PathStr,y    ; $70BD
                 iny    ; $70C0
-                cpy $0341    ; $70C1
+                cpy ThePrefix    ; $70C1
                 bcc $70BA    ; $70C4
                 lda $0200,x    ; $70C6
                 and #$7F    ; $70C9
-                sta $0302,y    ; $70CB
+                sta PathStr,y    ; $70CB
                 cmp #$0D    ; $70CE
                 beq $70D8    ; $70D0
                 inx    ; $70D2
                 iny    ; $70D3
                 cpy #$3F    ; $70D4
                 bcc $70C6    ; $70D6
-                sty $0301    ; $70D8
+                sty ThePathname    ; $70D8
                 rts    ; $70DB
-                jsr $73E5    ; $70DC
-                jsr $70AA    ; $70DF
+;
+; === OpenPath ===
+                jsr DSK:CloseFile    ; $70DC
+                jsr MakePath    ; $70DF
+;
+; === OpenPath1 ===
                 ldx #$0A    ; $70E2
                 lda #$C4    ; $70E4
                 jsr $6D52    ; $70E6
@@ -12024,7 +13765,7 @@
                 lda #$A5    ; $70F8
                 sta $6D75    ; $70FA
                 lda #$00    ; $70FD
-                sta $7126    ; $70FF
+                sta GblLength    ; $70FF
                 sta $7127    ; $7102
                 sta $7128    ; $7105
                 lda #$C8    ; $7108
@@ -12035,18 +13776,22 @@
                 bcc $711B    ; $7116
                 ldx #$FF    ; $7118
                 rts    ; $711A
-                jsr $BF00    ; $711B
-                cmp ($24),y    ; $711E
+                jsr MLI    ; $711B
+                cmp (CH),y    ; $711E
                 adc ($A2),y    ; $7120
                 brk    ; $7122
                 rts    ; $7123
         dfb $02        ; $7124  (data/65C02-bit)
                 brk    ; $7125
+;
+; === GblLength ===
                 brk    ; $7126
                 brk    ; $7127
                 brk    ; $7128
                 brk    ; $7129
-                ldy $0301    ; $712A
+;
+; === CompFile ===
+                ldy ThePathname    ; $712A
                 cpy $7129    ; $712D
                 beq $715D    ; $7130
                 lda $727E    ; $7132
@@ -12056,11 +13801,11 @@
                 ldx #$00    ; $713A
                 lda $707F,x    ; $713C
                 ora #$80    ; $713F
-                jsr $36FD    ; $7141
+                jsr UpperCon    ; $7141
                 sta $715E    ; $7144
-                lda $0301,y    ; $7147
+                lda ThePathname,y    ; $7147
                 ora #$80    ; $714A
-                jsr $36FD    ; $714C
+                jsr UpperCon    ; $714C
                 cmp $715E    ; $714F
                 bne $715D    ; $7152
                 cpy $7129    ; $7154
@@ -12070,46 +13815,48 @@
                 bne $713C    ; $715B
                 rts    ; $715D
                 brk    ; $715E
+;
+; === GetDirInfo ===
                 lda #$00    ; $715F
                 sta $727E    ; $7161
-                jsr $70DC    ; $7164
+                jsr OpenPath    ; $7164
                 php    ; $7167
-                ldy $0301    ; $7168
+                ldy ThePathname    ; $7168
                 sty $7129    ; $716B
                 plp    ; $716E
                 bne $717B    ; $716F
-                jsr $73E5    ; $7171
+                jsr DSK:CloseFile    ; $7171
                 lda $6D51    ; $7174
                 cmp #$0F    ; $7177
                 beq $71A8    ; $7179
-                ldy $0301    ; $717B
+                ldy ThePathname    ; $717B
                 iny    ; $717E
                 dey    ; $717F
                 bmi $71A6    ; $7180
-                lda $0301,y    ; $7182
+                lda ThePathname,y    ; $7182
                 cmp #$2F    ; $7185
                 bne $717F    ; $7187
-                sty $0301    ; $7189
+                sty ThePathname    ; $7189
                 cpy #$01    ; $718C
                 bne $7197    ; $718E
-                jsr $7280    ; $7190
+                jsr GetOnline    ; $7190
                 dec $727E    ; $7193
                 rts    ; $7196
-                jsr $70E2    ; $7197
+                jsr OpenPath1    ; $7197
                 bne $71A6    ; $719A
-                jsr $73E5    ; $719C
+                jsr DSK:CloseFile    ; $719C
                 lda $6D51    ; $719F
                 cmp #$0F    ; $71A2
                 beq $71A8    ; $71A4
                 sec    ; $71A6
                 rts    ; $71A7
-                lda $BF30    ; $71A8
+                lda LastUnit    ; $71A8
                 and #$F0    ; $71AB
                 sta $6D72    ; $71AD
                 ldy #$04    ; $71B0
                 ldx #$00    ; $71B2
-                lda $A500,y    ; $71B4
-                sta $7056,x    ; $71B7
+                lda rm_FileBuffer,y    ; $71B4
+                sta VolInfo,x    ; $71B7
                 iny    ; $71BA
                 inx    ; $71BB
                 cpx #$27    ; $71BC
@@ -12125,6 +13872,8 @@
                 sta $70A9    ; $71D7
                 clc    ; $71DA
                 rts    ; $71DB
+;
+; === NextFile ===
                 bit $727E    ; $71DC
                 bpl $7215    ; $71DF
                 lda $727F    ; $71E1
@@ -12136,22 +13885,22 @@
                 asl    ; $71ED
                 asl    ; $71EE
                 tay    ; $71EF
-                lda $A500,y    ; $71F0
+                lda rm_FileBuffer,y    ; $71F0
                 and #$0F    ; $71F3
                 sta $EF    ; $71F5
                 beq $71E1    ; $71F7
-                lda $A500,y    ; $71F9
-                jsr $6DF2    ; $71FC
+                lda rm_FileBuffer,y    ; $71F9
+                jsr MakeSD    ; $71FC
                 ldx #$00    ; $71FF
                 iny    ; $7201
-                lda $A500,y    ; $7202
+                lda rm_FileBuffer,y    ; $7202
                 sta $707F,x    ; $7205
                 inx    ; $7208
                 cpx $EF    ; $7209
                 bcc $7201    ; $720B
                 txa    ; $720D
                 ora #$D0    ; $720E
-                sta $707E    ; $7210
+                sta FileInfo    ; $7210
                 clc    ; $7213
                 rts    ; $7214
                 lda $70A8    ; $7215
@@ -12164,7 +13913,7 @@
                 bcc $723F    ; $7225
                 ldx $A502    ; $7227
                 ldy $A503    ; $722A
-                jsr $703B    ; $722D
+                jsr RBlock1    ; $722D
                 bcs $721E    ; $7230
                 lda #$00    ; $7232
                 sta $70A7    ; $7234
@@ -12180,7 +13929,7 @@
                 sta $01    ; $724C
                 ldy #$00    ; $724E
                 lda ($00),y    ; $7250
-                sta $707E,y    ; $7252
+                sta FileInfo,y    ; $7252
                 iny    ; $7255
                 cpy #$27    ; $7256
                 bcc $7250    ; $7258
@@ -12191,7 +13940,7 @@
                 sta $70A5    ; $7262
                 bcc $726A    ; $7265
                 inc $70A6    ; $7267
-                lda $707E    ; $726A
+                lda FileInfo    ; $726A
                 and #$F0    ; $726D
                 beq $721F    ; $726F
                 lda $70A8    ; $7271
@@ -12202,7 +13951,9 @@
                 rts    ; $727D
                 brk    ; $727E
                 brk    ; $727F
-                jsr $73E5    ; $7280
+;
+; === GetOnline ===
+                jsr DSK:CloseFile    ; $7280
                 lda #$00    ; $7283
                 sta $6D72    ; $7285
                 sta $727F    ; $7288
@@ -12214,20 +13965,24 @@
                 lda #$C5    ; $7297
                 jsr $6D5E    ; $7299
                 rts    ; $729C
-                jsr $70DC    ; $729D
+;
+; === DSK:OpenFile ===
+                jsr OpenPath    ; $729D
                 bne $72AA    ; $72A0
                 lda $6D50    ; $72A2
                 sta $6D72    ; $72A5
                 lda #$00    ; $72A8
                 rts    ; $72AA
-                jsr $2843    ; $72AB
+;
+; === DSK:ReadByte ===
+                jsr GatherTYI    ; $72AB
                 lda $6D77    ; $72AE
                 bne $72B6    ; $72B1
                 dec $6D78    ; $72B3
                 dec $6D77    ; $72B6
                 lda $6D78    ; $72B9
                 bpl $72D6    ; $72BC
-                jsr $6D64    ; $72BE
+                jsr CallMLI    ; $72BE
                 bcs $72E3    ; $72C1
                 lda #$00    ; $72C3
                 sta $B0    ; $72C5
@@ -12261,12 +14016,14 @@
                 pla    ; $72FB
                 plp    ; $72FC
                 rts    ; $72FD
+;
+; === PrepRead ===
                 lda #$A9    ; $72FE
                 sta $6D74    ; $7300
                 lda #$02    ; $7303
                 sta $6D76    ; $7305
                 lda #$04    ; $7308
-                sta $6D71    ; $730A
+                sta MLIParams    ; $730A
                 lda #$CA    ; $730D
                 sta $6D6A    ; $730F
                 lda #$00    ; $7312
@@ -12275,13 +14032,17 @@
                 sta $6D77    ; $731A
                 sta $6D78    ; $731D
                 rts    ; $7320
-                jsr $72FE    ; $7321
+;
+; === PrepWrite ===
+                jsr PrepRead    ; $7321
                 sta $6D76    ; $7324
                 inc $6D6A    ; $7327
                 rts    ; $732A
+;
+; === DSK:WriteByte ===
                 sty $7349    ; $732B
                 ldy $6D75    ; $732E
-                sta $A900,y    ; $7331
+                sta rm_DataBuffer,y    ; $7331
                 inc $6D75    ; $7334
                 bne $7341    ; $7337
                 inc $6D76    ; $7339
@@ -12293,13 +14054,15 @@
                 plp    ; $7347
                 rts    ; $7348
                 brk    ; $7349
-                jsr $729D    ; $734A
+;
+; === DSK:SaveFile ===
+                jsr DSK:OpenFile    ; $734A
                 beq $7355    ; $734D
-                jsr $76A6    ; $734F
-                bcc $734A    ; $7352
+                jsr DSK:Create    ; $734F
+                bcc DSK:SaveFile    ; $7352
                 rts    ; $7354
-                jsr $7321    ; $7355
-                lda $66    ; $7358
+                jsr PrepWrite    ; $7355
+                lda BuffTop    ; $7358
                 sta $00    ; $735A
                 lda $67    ; $735C
                 sta $01    ; $735E
@@ -12308,51 +14071,53 @@
                 bcc $737F    ; $7364
                 bne $7373    ; $7366
                 lda $00    ; $7368
-                cmp $6A    ; $736A
+                cmp GapTop    ; $736A
                 bcc $737F    ; $736C
                 bne $7373    ; $736E
-                jsr $2EF3    ; $7370
+                jsr SetTempBot    ; $7370
                 lda $01    ; $7373
                 cmp $69    ; $7375
                 bcc $737F    ; $7377
                 lda $00    ; $7379
-                cmp $68    ; $737B
+                cmp BuffBot    ; $737B
                 bcs $739D    ; $737D
-                jsr $2843    ; $737F
+                jsr GatherTYI    ; $737F
                 ldy #$00    ; $7382
                 jsr $D000    ; $7384
-                eor $6B26    ; $7387
-                jsr $732B    ; $738A
+                eor EORValue    ; $7387
+                jsr DSK:WriteByte    ; $738A
                 bne $7397    ; $738D
                 inc $00    ; $738F
                 bne $7395    ; $7391
                 inc $01    ; $7393
                 bne $7360    ; $7395
-                jsr $73E5    ; $7397
+                jsr DSK:CloseFile    ; $7397
                 lda #$FF    ; $739A
                 rts    ; $739C
-                jsr $73B4    ; $739D
-                jsr $4C52    ; $73A0
+                jsr DSK:CloseHere    ; $739D
+                jsr SetGap    ; $73A0
                 lda #$00    ; $73A3
                 rts    ; $73A5
-                jsr $6D64    ; $73A6
+                jsr CallMLI    ; $73A6
                 bcs $73B3    ; $73A9
                 lda #$00    ; $73AB
                 sta $6D76    ; $73AD
                 sta $6D75    ; $73B0
                 rts    ; $73B3
+;
+; === DSK:CloseHere ===
                 jsr $73A6    ; $73B4
                 ldx #$02    ; $73B7
                 lda #$CF    ; $73B9
                 jsr $6D5E    ; $73BB
                 lda #$D0    ; $73BE
-                jsr $6D61    ; $73C0
+                jsr OpCallMLI    ; $73C0
                 ldx #$0A    ; $73C3
                 lda #$C4    ; $73C5
                 jsr $6D52    ; $73C7
-                jsr $77C0    ; $73CA
+                jsr GetTheTime    ; $73CA
                 ldx #$00    ; $73CD
-                lda $BF90,x    ; $73CF
+                lda SysTheDate,x    ; $73CF
                 sta $6D79,x    ; $73D2
                 inx    ; $73D5
                 cpx #$04    ; $73D6
@@ -12360,45 +14125,49 @@
                 ldx #$07    ; $73DA
                 lda #$C3    ; $73DC
                 jsr $6D5E    ; $73DE
-                jsr $73E5    ; $73E1
+                jsr DSK:CloseFile    ; $73E1
                 rts    ; $73E4
+;
+; === DSK:CloseFile ===
                 lda #$00    ; $73E5
                 sta $6D72    ; $73E7
                 ldx #$01    ; $73EA
                 lda #$CC    ; $73EC
                 jsr $6D5E    ; $73EE
                 rts    ; $73F1
-                jsr $6B9D    ; $73F2
+;
+; === DSK:DiskSpace ===
+                jsr SelfPath    ; $73F2
                 lda #$8D    ; $73F5
                 sta $0200,x    ; $73F7
-                jsr $70DC    ; $73FA
+                jsr OpenPath    ; $73FA
                 bcc $7400    ; $73FD
                 rts    ; $73FF
-                jsr $73E5    ; $7400
-                lda $BF30    ; $7403
+                jsr DSK:CloseFile    ; $7400
+                lda LastUnit    ; $7403
                 ldx #$02    ; $7406
                 ldy #$00    ; $7408
-                sty $7A54    ; $740A
-                jsr $7038    ; $740D
+                sty PD:Justify    ; $740A
+                jsr RBlock    ; $740D
                 ldy #$04    ; $7410
-                lda $A500,y    ; $7412
+                lda rm_FileBuffer,y    ; $7412
                 and #$0F    ; $7415
                 tax    ; $7417
                 inx    ; $7418
-                stx $0301    ; $7419
+                stx ThePathname    ; $7419
                 ldy #$00    ; $741C
-                lda $0302,y    ; $741E
+                lda PathStr,y    ; $741E
                 ora #$80    ; $7421
-                jsr $2611    ; $7423
+                jsr CharOut    ; $7423
                 iny    ; $7426
                 dex    ; $7427
                 bne $741E    ; $7428
-                jsr $5968    ; $742A
+                jsr PrintMessage    ; $742A
                 ldy #$E8    ; $742D
                 sbc ($F3,x)    ; $742F
                 ldy #$00    ; $7431
                 ldy #$29    ; $7433
-                lda $A500,y    ; $7435
+                lda rm_FileBuffer,y    ; $7435
                 sta $7499    ; $7438
                 tax    ; $743B
                 lda $A501,y    ; $743C
@@ -12413,15 +14182,15 @@
                 tax    ; $7452
                 lda $749A    ; $7453
                 sbc $6D7A    ; $7456
-                jsr $749B    ; $7459
-                jsr $5968    ; $745C
+                jsr PrintPages    ; $7459
+                jsr PrintMessage    ; $745C
                 inc $F2    ; $745F
                 sbc $E5    ; $7461
                 ldy: $00A0    ; $7463
                 lda $6D7A    ; $7466
                 ldx $6D79    ; $7469
-                jsr $749B    ; $746C
-                jsr $5968    ; $746F
+                jsr PrintPages    ; $746C
+                jsr PrintMessage    ; $746F
                 sbc #$EE    ; $7472
                 ldy #$F5    ; $7474
         dfb $F3        ; $7476  (data/65C02-bit)
@@ -12439,37 +14208,43 @@
                 brk    ; $7489
                 lda $749A    ; $748A
                 ldx $7499    ; $748D
-                jsr $7A01    ; $7490
+                jsr PrintDec    ; $7490
                 lda #$AE    ; $7493
-                jsr $2611    ; $7495
+                jsr CharOut    ; $7495
                 rts    ; $7498
                 brk    ; $7499
                 brk    ; $749A
+;
+; === PrintPages ===
                 stx $0100    ; $749B
                 sta $0101    ; $749E
-                jsr $7A01    ; $74A1
-                jsr $5968    ; $74A4
+                jsr PrintDec    ; $74A1
+                jsr PrintMessage    ; $74A4
                 ldy #$F0    ; $74A7
                 sbc ($E7,x)    ; $74A9
                 sbc $00    ; $74AB
                 ldx $0100    ; $74AD
                 lda $0101    ; $74B0
-                jsr $7DAC    ; $74B3
-                jsr $7DA7    ; $74B6
+                jsr Plurilize    ; $74B3
+                jsr PrintSpace    ; $74B6
                 rts    ; $74B9
+;
+; === DSK:ListDir ===
                 lda #$00    ; $74BA
                 beq $74C0    ; $74BC
+;
+; === DSK:ListFiles ===
                 lda #$FF    ; $74BE
                 sta $753F    ; $74C0
-                jsr $2B93    ; $74C3
-                jsr $715F    ; $74C6
+                jsr PrepTO    ; $74C3
+                jsr GetDirInfo    ; $74C6
                 bcs $74FB    ; $74C9
                 jsr $7501    ; $74CB
                 lda #$00    ; $74CE
                 sta $B0    ; $74D0
-                jsr $71DC    ; $74D2
+                jsr NextFile    ; $74D2
                 bcs $74FB    ; $74D5
-                jsr $712A    ; $74D7
+                jsr CompFile    ; $74D7
                 bne $74D2    ; $74DA
                 jsr $7540    ; $74DC
                 bit $753F    ; $74DF
@@ -12479,27 +14254,27 @@
                 sta $B0    ; $74E8
                 beq $74F5    ; $74EA
                 lda #$28    ; $74EC
-                sta $24    ; $74EE
-                sta $2A9F    ; $74F0
+                sta CH    ; $74EE
+                sta TypeoutCH    ; $74F0
                 bne $74D2    ; $74F3
-                jsr $7DA3    ; $74F5
+                jsr PrintReturn    ; $74F5
                 jmp $74D2    ; $74F8
-                jsr $7DA3    ; $74FB
-                jmp $2BB7    ; $74FE
+                jsr PrintReturn    ; $74FB
+                jmp UnPrepTO    ; $74FE
                 bit $727E    ; $7501
                 bmi $753D    ; $7504
-                jsr $7A55    ; $7506
+                jsr ZeroJustify    ; $7506
                 lda $7078    ; $7509
                 ldx $7077    ; $750C
-                jsr $7A01    ; $750F
-                jsr $5968    ; $7512
+                jsr PrintDec    ; $750F
+                jsr PrintMessage    ; $7512
                 ldy #$E6    ; $7515
                 sbc #$EC    ; $7517
                 sbc $00    ; $7519
                 lda $7078    ; $751B
                 ldx $7077    ; $751E
-                jsr $7DAC    ; $7521
-                jsr $5968    ; $7524
+                jsr Plurilize    ; $7521
+                jsr PrintMessage    ; $7524
                 ldy #$F0    ; $7527
                 sbc ($E5)    ; $7529
         dfb $F3        ; $752B  (data/65C02-bit)
@@ -12507,79 +14282,81 @@
         dfb $F4        ; $752E  (data/65C02-bit)
                 ldy #$EF    ; $752F
                 inc: $00A0    ; $7531
-                jsr $7025    ; $7534
-                jsr $5968    ; $7537
+                jsr PrintPath    ; $7534
+                jsr PrintMessage    ; $7537
                 sta: $008D    ; $753A
                 rts    ; $753D
+;
+; === HexListing ===
         dfb $FF        ; $753E  (data/65C02-bit)
                 brk    ; $753F
                 ldy #$00    ; $7540
-                lda $707E    ; $7542
+                lda FileInfo    ; $7542
                 and #$0F    ; $7545
                 tax    ; $7547
                 lda $707F,y    ; $7548
                 dex    ; $754B
                 bmi $7556    ; $754C
                 ora #$80    ; $754E
-                jsr $2611    ; $7550
+                jsr CharOut    ; $7550
                 iny    ; $7553
                 bne $7548    ; $7554
                 bit $753F    ; $7556
                 bpl $756E    ; $7559
                 bit $727E    ; $755B
                 bmi $756E    ; $755E
-                lda $707E    ; $7560
+                lda FileInfo    ; $7560
                 and #$F0    ; $7563
                 cmp #$D0    ; $7565
                 bcc $756E    ; $7567
                 lda #$AF    ; $7569
-                jsr $2611    ; $756B
+                jsr CharOut    ; $756B
                 lda #$A0    ; $756E
                 cpy #$11    ; $7570
                 bcs $757A    ; $7572
-                jsr $2611    ; $7574
+                jsr CharOut    ; $7574
                 iny    ; $7577
                 bne $7570    ; $7578
                 bit $727E    ; $757A
                 bpl $7594    ; $757D
                 lda #$00    ; $757F
-                ldx $6DF0    ; $7581
-                jsr $7A01    ; $7584
+                ldx SlotDrive    ; $7581
+                jsr PrintDec    ; $7584
                 lda #$AC    ; $7587
-                jsr $2611    ; $7589
+                jsr CharOut    ; $7589
                 lda #$00    ; $758C
                 ldx $6DF1    ; $758E
-                jmp $7A01    ; $7591
+                jmp PrintDec    ; $7591
                 bit $753F    ; $7594
                 bpl $759A    ; $7597
                 rts    ; $7599
                 lda $708E    ; $759A
-                jsr $7679    ; $759D
+                jsr PrintType    ; $759D
                 lda #$A0    ; $75A0
-                sta $7A54    ; $75A2
+                sta PD:Justify    ; $75A2
                 ldx $7091    ; $75A5
                 lda $7092    ; $75A8
-                jsr $7A01    ; $75AB
+                jsr PrintDec    ; $75AB
                 ldx #$03    ; $75AE
-                bit $753E    ; $75B0
+                bit HexListing    ; $75B0
                 bpl $75B6    ; $75B3
                 dex    ; $75B5
                 jsr $7637    ; $75B6
-                bit $753E    ; $75B9
+                bit HexListing    ; $75B9
                 bpl $75D9    ; $75BC
                 lda #$A4    ; $75BE
-                jsr $2611    ; $75C0
+                jsr CharOut    ; $75C0
                 lda $7095    ; $75C3
-                jsr $7D81    ; $75C6
+                jsr HexByteOut    ; $75C6
                 lda $7094    ; $75C9
-                jsr $7D81    ; $75CC
+                jsr HexByteOut    ; $75CC
                 lda $7093    ; $75CF
-                jsr $7D81    ; $75D2
+                jsr HexByteOut    ; $75D2
                 ldx #$02    ; $75D5
                 bne $75E4    ; $75D7
                 lda $7094    ; $75D9
                 ldx $7093    ; $75DC
-                jsr $7A01    ; $75DF
+                jsr PrintDec    ; $75DF
                 ldx #$03    ; $75E2
                 jsr $7637    ; $75E4
                 lda $709F    ; $75E7
@@ -12587,14 +14364,14 @@
                 lda $70A0    ; $75ED
                 sta $6E07    ; $75F0
                 lda #$00    ; $75F3
-                jsr $6E9D    ; $75F5
+                jsr PrintDate    ; $75F5
                 ldx #$01    ; $75F8
                 jsr $7637    ; $75FA
                 lda $70A1    ; $75FD
-                sta $6E0B    ; $7600
+                sta Time    ; $7600
                 lda $70A2    ; $7603
                 sta $6E0C    ; $7606
-                jsr $6F2A    ; $7609
+                jsr PrintTime    ; $7609
                 ldx #$03    ; $760C
                 jsr $7637    ; $760E
                 lda $7096    ; $7611
@@ -12602,20 +14379,22 @@
                 lda $7097    ; $7617
                 sta $6E07    ; $761A
                 lda #$00    ; $761D
-                jsr $6E9D    ; $761F
+                jsr PrintDate    ; $761F
                 ldx #$01    ; $7622
                 jsr $7637    ; $7624
                 lda $7098    ; $7627
-                sta $6E0B    ; $762A
+                sta Time    ; $762A
                 lda $7099    ; $762D
                 sta $6E0C    ; $7630
-                jsr $6F2A    ; $7633
+                jsr PrintTime    ; $7633
                 rts    ; $7636
                 lda #$A0    ; $7637
-                jsr $2611    ; $7639
+                jsr CharOut    ; $7639
                 dex    ; $763C
                 bne $7639    ; $763D
                 rts    ; $763F
+;
+; === FTypeTable ===
                 tsb $D4    ; $7640
                 cld    ; $7642
         dfb $D4        ; $7643  (data/65C02-bit)
@@ -12647,11 +14426,13 @@
                 cmp ($C5)    ; $7671
                 cpy $D3FF    ; $7673
                 cmp: $00D3,y    ; $7676
+;
+; === PrintType ===
                 ldy #$00    ; $7679
-                cmp $7640,y    ; $767B
+                cmp FTypeTable,y    ; $767B
                 beq $7698    ; $767E
                 tax    ; $7680
-                lda $7640,y    ; $7681
+                lda FTypeTable,y    ; $7681
                 beq $768E    ; $7684
                 tya    ; $7686
                 clc    ; $7687
@@ -12660,23 +14441,25 @@
                 txa    ; $768B
                 bne $767B    ; $768C
                 lda #$A4    ; $768E
-                jsr $2611    ; $7690
+                jsr CharOut    ; $7690
                 txa    ; $7693
-                jsr $7D81    ; $7694
+                jsr HexByteOut    ; $7694
                 rts    ; $7697
                 iny    ; $7698
                 ldx #$02    ; $7699
-                lda $7640,y    ; $769B
-                jsr $2611    ; $769E
+                lda FTypeTable,y    ; $769B
+                jsr CharOut    ; $769E
                 iny    ; $76A1
                 dex    ; $76A2
                 bpl $769B    ; $76A3
                 rts    ; $76A5
-                jsr $77C0    ; $76A6
-                jsr $70AA    ; $76A9
+;
+; === DSK:Create ===
+                jsr GetTheTime    ; $76A6
+                jsr MakePath    ; $76A9
                 lda #$C3    ; $76AC
                 sta $6D74    ; $76AE
-                lda $6D83    ; $76B1
+                lda DefFileType    ; $76B1
                 sta $6D75    ; $76B4
                 lda #$00    ; $76B7
                 tax    ; $76B9
@@ -12688,7 +14471,9 @@
                 lda #$C0    ; $76C4
                 jsr $6D52    ; $76C6
                 rts    ; $76C9
-                jsr $70AA    ; $76CA
+;
+; === DSK:Delete ===
+                jsr MakePath    ; $76CA
                 lda #$01    ; $76CD
                 sta $6D72    ; $76CF
                 lda #$03    ; $76D2
@@ -12700,6 +14485,8 @@
                 bcc $76E3    ; $76E0
                 dex    ; $76E2
                 rts    ; $76E3
+;
+; === Compiler ===
                 brk    ; $76E4
                 brk    ; $76E5
                 brk    ; $76E6
@@ -12764,14 +14551,16 @@
                 brk    ; $7721
                 brk    ; $7722
                 brk    ; $7723
-                jsr $6DD1    ; $7724
+;
+; === Compile ===
+                jsr DSK:ChkExit    ; $7724
                 jsr $77B3    ; $7727
                 beq $772D    ; $772A
                 rts    ; $772C
-                lda $76E4    ; $772D
+                lda Compiler    ; $772D
                 beq $774D    ; $7730
                 ldx #$00    ; $7732
-                lda $76E4,x    ; $7734
+                lda Compiler,x    ; $7734
                 sta $0200,x    ; $7737
                 inx    ; $773A
                 cmp #$00    ; $773B
@@ -12779,9 +14568,9 @@
                 dex    ; $773F
                 lda #$8D    ; $7740
                 sta $0200,x    ; $7742
-                jsr $729D    ; $7745
+                jsr DSK:OpenFile    ; $7745
                 beq $7750    ; $7748
-                jsr $29B9    ; $774A
+                jsr Beep    ; $774A
                 lda #$01    ; $774D
                 rts    ; $774F
                 lda $6D51    ; $7750
@@ -12789,16 +14578,16 @@
                 bne $774A    ; $7755
                 ldx #$17    ; $7757
                 lda #$07    ; $7759
-                sta $BF58,x    ; $775B
+                sta SysMemMap,x    ; $775B
                 dex    ; $775E
                 lda #$00    ; $775F
-                sta $BF58,x    ; $7761
+                sta SysMemMap,x    ; $7761
                 dex    ; $7764
                 bpl $7761    ; $7765
                 lda #$CF    ; $7767
-                sta $BF58    ; $7769
-                ldx $0301    ; $776C
-                lda $0301,x    ; $776F
+                sta SysMemMap    ; $7769
+                ldx ThePathname    ; $776C
+                lda ThePathname,x    ; $776F
                 and #$7F    ; $7772
                 sta $0280,x    ; $7774
                 dex    ; $7777
@@ -12807,74 +14596,84 @@
                 sta $77AE    ; $777D
                 ldx #$00    ; $7780
                 lda $7796,x    ; $7782
-                sta $0801,x    ; $7785
+                sta LoRamPoint,x    ; $7785
                 inx    ; $7788
                 cpx #$1D    ; $7789
                 bcc $7782    ; $778B
-                lda $77BF    ; $778D
-                sta $BF06    ; $7790
-                jmp $0801    ; $7793
-                sta $C08A    ; $7796
-                sta $C08A    ; $7799
-                jsr $BF00    ; $779C
+                lda ClockPatch    ; $778D
+                sta ReadClock    ; $7790
+                jmp LoRamPoint    ; $7793
+                sta RdRomBank    ; $7796
+                sta RdRomBank    ; $7799
+                jsr MLI    ; $779C
                 dex    ; $779F
                 clc    ; $77A0
                 php    ; $77A1
-                jsr $BF00    ; $77A2
+                jsr MLI    ; $77A2
                 cpy $0816    ; $77A5
                 jmp $2000    ; $77A8
                 ora ($00,x)    ; $77AB
                 tsb $00    ; $77AD
                 brk    ; $77AF
                 jsr $8000    ; $77B0
-                jsr $7A7F    ; $77B3
+                jsr AnyArgument?    ; $77B3
                 bne $77BC    ; $77B6
-                jsr $D503    ; $77B8
+                jsr BufferDump    ; $77B8
                 rts    ; $77BB
                 lda #$00    ; $77BC
                 rts    ; $77BE
+;
+; === ClockPatch ===
                 brk    ; $77BF
+;
+; === GetTheTime ===
                 ldx #$20    ; $77C0
                 lda $0200,x    ; $77C2
-                sta $0381,x    ; $77C5
+                sta rm_PathComp,x    ; $77C5
                 dex    ; $77C8
                 bpl $77C2    ; $77C9
-                lda $77BF    ; $77CB
-                sta $BF06    ; $77CE
-                jsr $BF00    ; $77D1
+                lda ClockPatch    ; $77CB
+                sta ReadClock    ; $77CE
+                jsr MLI    ; $77D1
         dfb $82        ; $77D4  (data/65C02-bit)
                 brk    ; $77D5
                 brk    ; $77D6
                 lda $0204    ; $77D7
                 sbc #$AF    ; $77DA
-                sta $77F0    ; $77DC
+                sta DayOfWeek    ; $77DC
                 lda #$60    ; $77DF
-                sta $BF06    ; $77E1
+                sta ReadClock    ; $77E1
                 ldx #$20    ; $77E4
-                lda $0381,x    ; $77E6
+                lda rm_PathComp,x    ; $77E6
                 sta $0200,x    ; $77E9
                 dex    ; $77EC
                 bpl $77E6    ; $77ED
                 rts    ; $77EF
+;
+; === DayOfWeek ===
                 brk    ; $77F0
+;
+; === ExitPrompt ===
         dfb $FF        ; $77F1  (data/65C02-bit)
-                bit $77F1    ; $77F2
+;
+; === SafetyCheck ===
+                bit ExitPrompt    ; $77F2
                 bpl $782F    ; $77F5
-                jsr $7A7F    ; $77F7
+                jsr AnyArgument?    ; $77F7
                 beq $782F    ; $77FA
-                ldx $0F3A    ; $77FC
+                ldx SelectedBuff    ; $77FC
                 stx $7831    ; $77FF
                 stx $7830    ; $7802
-                lda $0F3C,x    ; $7805
+                lda BuffActList,x    ; $7805
                 bpl $7820    ; $7808
-                jsr $42FC    ; $780A
+                jsr PointToBInfo    ; $780A
                 ldy #$55    ; $780D
-                lda ($5E),y    ; $780F
+                lda (BuffPoint),y    ; $780F
                 and #$02    ; $7811
                 beq $7820    ; $7813
                 ldx $7830    ; $7815
-                jsr $45EB    ; $7818
-                jsr $681F    ; $781B
+                jsr SI:OpenBuff    ; $7818
+                jsr MaybeSave    ; $781B
                 bne $782F    ; $781E
                 ldx $7830    ; $7820
                 inx    ; $7823
@@ -12886,23 +14685,37 @@
                 rts    ; $782F
                 brk    ; $7830
                 brk    ; $7831
+;
+; === CommandChar ===
                 brk    ; $7832
+;
+; === LastCommand ===
                 brk    ; $7833
+;
+; === CommandVector ===
                 brk    ; $7834
                 brk    ; $7835
+;
+; === LastComVect ===
                 brk    ; $7836
                 brk    ; $7837
+;
+; === DisplayCode ===
                 brk    ; $7838
+;
+; === DispatchTab ===
                 sty $4F    ; $7839
                 brk    ; $783B
                 brk    ; $783C
-                sta $7832    ; $783D
+;
+; === Dispatch ===
+                sta CommandChar    ; $783D
                 sta $783B    ; $7840
                 lda #$00    ; $7843
                 sta $783C    ; $7845
                 asl $783B    ; $7848
                 rol $783C    ; $784B
-                lda $7839    ; $784E
+                lda DispatchTab    ; $784E
                 clc    ; $7851
                 adc $783B    ; $7852
                 sta $00    ; $7855
@@ -12918,26 +14731,34 @@
                 sta $7835    ; $7869
                 pla    ; $786C
                 sta $00    ; $786D
-                sta $7834    ; $786F
+                sta CommandVector    ; $786F
                 ora $01    ; $7872
                 bne $7879    ; $7874
-                jmp $789B    ; $7876
-                lda $7832    ; $7879
-                jsr $7898    ; $787C
-                sta $7838    ; $787F
-                lda $7832    ; $7882
-                sta $7833    ; $7885
-                lda $7834    ; $7888
-                sta $7836    ; $788B
+                jmp CharError    ; $7876
+                lda CommandChar    ; $7879
+                jsr CallTemp    ; $787C
+                sta DisplayCode    ; $787F
+                lda CommandChar    ; $7882
+                sta LastCommand    ; $7885
+                lda CommandVector    ; $7888
+                sta LastComVect    ; $788B
                 lda $7835    ; $788E
                 sta $7837    ; $7891
-                lda $7838    ; $7894
+                lda DisplayCode    ; $7894
                 rts    ; $7897
+;
+; === CallTemp ===
                 jmp ($0000)    ; $7898
-                lda $7832    ; $789B
-                jmp $5833    ; $789E
+;
+; === CharError ===
+                lda CommandChar    ; $789B
+;
+; === BadCharacter ===
+                jmp BadCharMsg    ; $789E
                 brk    ; $78A1
-                jsr $2843    ; $78A2
+;
+; === NextByte ===
+                jsr GatherTYI    ; $78A2
                 inc $00    ; $78A5
                 bne $78AB    ; $78A7
                 inc $01    ; $78A9
@@ -12946,10 +14767,10 @@
                 bcc $78D8    ; $78AF
                 bne $78C9    ; $78B1
                 lda $00    ; $78B3
-                cmp $6A    ; $78B5
+                cmp GapTop    ; $78B5
                 bcc $78D8    ; $78B7
                 bne $78C9    ; $78B9
-                lda $6C    ; $78BB
+                lda GapBot    ; $78BB
                 sta $00    ; $78BD
                 lda $6D    ; $78BF
                 sta $01    ; $78C1
@@ -12960,7 +14781,7 @@
                 cmp $69    ; $78CB
                 bcc $78D8    ; $78CD
                 lda $00    ; $78CF
-                cmp $68    ; $78D1
+                cmp BuffBot    ; $78D1
                 bcc $78D8    ; $78D3
                 lda #$FF    ; $78D5
                 rts    ; $78D7
@@ -12968,7 +14789,9 @@
                 jsr $D000    ; $78DA
                 ldy #$00    ; $78DD
                 rts    ; $78DF
-                lda $66    ; $78E0
+;
+; === UnMerlinify ===
+                lda BuffTop    ; $78E0
                 sta $00    ; $78E2
                 lda $67    ; $78E4
                 sta $01    ; $78E6
@@ -12978,7 +14801,7 @@
                 dec $00    ; $78EE
                 lda #$8D    ; $78F0
                 sta $78A1    ; $78F2
-                jsr $78A2    ; $78F5
+                jsr NextByte    ; $78F5
                 beq $78FD    ; $78F8
                 jmp $79FB    ; $78FA
                 ora #$80    ; $78FD
@@ -13005,7 +14828,7 @@
                 cmp #$A7    ; $792B
                 bne $78F2    ; $792D
                 sta $7954    ; $792F
-                jsr $78A2    ; $7932
+                jsr NextByte    ; $7932
                 php    ; $7935
                 ora #$80    ; $7936
                 jsr $D054    ; $7938
@@ -13022,19 +14845,21 @@
                 bne $7932    ; $7950
                 beq $78F2    ; $7952
                 brk    ; $7954
-                jsr $78A2    ; $7955
+                jsr NextByte    ; $7955
                 bne $78FA    ; $7958
                 ora #$80    ; $795A
                 jsr $D054    ; $795C
                 cmp #$8D    ; $795F
                 bne $7955    ; $7961
                 beq $78F2    ; $7963
+;
+; === Merlinify ===
                 ldx #$FF    ; $7965
-                jsr $7A7F    ; $7967
+                jsr AnyArgument?    ; $7967
                 bne $796E    ; $796A
                 ldx #$7F    ; $796C
                 stx $79AD    ; $796E
-                lda $66    ; $7971
+                lda BuffTop    ; $7971
                 sta $00    ; $7973
                 lda $67    ; $7975
                 sta $01    ; $7977
@@ -13044,7 +14869,7 @@
                 dec $00    ; $797F
                 lda #$8D    ; $7981
                 sta $78A1    ; $7983
-                jsr $78A2    ; $7986
+                jsr NextByte    ; $7986
                 bne $79F8    ; $7989
                 pha    ; $798B
                 and $79AD    ; $798C
@@ -13063,7 +14888,7 @@
                 beq $79D5    ; $79A8
                 jmp $7983    ; $79AA
                 brk    ; $79AD
-                jsr $78A2    ; $79AE
+                jsr NextByte    ; $79AE
                 bne $79F8    ; $79B1
                 pha    ; $79B3
                 and $79AD    ; $79B4
@@ -13084,7 +14909,7 @@
                 lda $78A1    ; $79D5
                 cmp #$8D    ; $79D8
                 bne $7983    ; $79DA
-                jsr $78A2    ; $79DC
+                jsr NextByte    ; $79DC
                 bne $79F8    ; $79DF
                 pha    ; $79E1
                 and $79AD    ; $79E2
@@ -13097,10 +14922,12 @@
                 lda #$20    ; $79F1
                 jsr $D054    ; $79F3
                 bne $79DC    ; $79F6
-                jsr $4C3C    ; $79F8
-                jsr $300C    ; $79FB
+                jsr SetModified    ; $79F8
+                jsr DisplayPage    ; $79FB
                 lda #$01    ; $79FE
                 rts    ; $7A00
+;
+; === PrintDec ===
                 sta $7A47    ; $7A01
                 stx $7A48    ; $7A04
                 ldx #$09    ; $7A07
@@ -13125,9 +14952,9 @@
                 sta $7A49    ; $7A33
                 bit $7A49    ; $7A36
                 bmi $7A40    ; $7A39
-                lda $7A54    ; $7A3B
+                lda PD:Justify    ; $7A3B
                 bpl $7A43    ; $7A3E
-                jsr $2611    ; $7A40
+                jsr CharOut    ; $7A40
                 dex    ; $7A43
                 bpl $7A0C    ; $7A44
                 rts    ; $7A46
@@ -13141,45 +14968,63 @@
                 inx    ; $7A50
         dfb $03        ; $7A51  (data/65C02-bit)
                 bpl $7A7B    ; $7A52
+;
+; === PD:Justify ===
                 brk    ; $7A54
+;
+; === ZeroJustify ===
                 lda #$00    ; $7A55
-                sta $7A54    ; $7A57
+                sta PD:Justify    ; $7A57
                 rts    ; $7A5A
+;
+; === Argument ===
                 ora ($00,x)    ; $7A5B
+;
+; === ExplicitArg ===
                 brk    ; $7A5D
+;
+; === ArgSign ===
                 brk    ; $7A5E
                 brk    ; $7A5F
-                lda $7A5E    ; $7A60
+;
+; === GetArgSign ===
+                lda ArgSign    ; $7A60
                 pha    ; $7A63
                 lda #$00    ; $7A64
-                sta $7A5E    ; $7A66
+                sta ArgSign    ; $7A66
                 pla    ; $7A69
                 rts    ; $7A6A
+;
+; === InitArgument ===
                 lda #$00    ; $7A6B
-                sta $7A5E    ; $7A6D
-                sta $7A5D    ; $7A70
+                sta ArgSign    ; $7A6D
+                sta ExplicitArg    ; $7A70
                 sta $7A5F    ; $7A73
                 sta $7A5C    ; $7A76
                 lda #$01    ; $7A79
-                sta $7A5B    ; $7A7B
+                sta Argument    ; $7A7B
                 rts    ; $7A7E
-                bit $7A5D    ; $7A7F
+;
+; === AnyArgument? ===
+                bit ExplicitArg    ; $7A7F
                 bmi $7A98    ; $7A82
                 lda $7A5C    ; $7A84
                 bne $7A98    ; $7A87
-                lda $7A5B    ; $7A89
+                lda Argument    ; $7A89
                 cmp #$01    ; $7A8C
                 bne $7A98    ; $7A8E
-                lda $7A5E    ; $7A90
+                lda ArgSign    ; $7A90
                 bmi $7A98    ; $7A93
                 lda #$FF    ; $7A95
                 rts    ; $7A97
                 lda #$00    ; $7A98
                 rts    ; $7A9A
+;
+; === AddArgDigit ===
                 pha    ; $7A9B
                 lda $7A5C    ; $7A9C
                 sta $01    ; $7A9F
-                lda $7A5B    ; $7AA1
+                lda Argument    ; $7AA1
                 sta $00    ; $7AA4
                 asl    ; $7AA6
                 rol $7A5C    ; $7AA7
@@ -13191,106 +15036,118 @@
                 rol $01    ; $7AB4
                 clc    ; $7AB6
                 adc $00    ; $7AB7
-                sta $7A5B    ; $7AB9
+                sta Argument    ; $7AB9
                 lda $7A5C    ; $7ABC
                 adc $01    ; $7ABF
                 sta $7A5C    ; $7AC1
                 pla    ; $7AC4
                 clc    ; $7AC5
-                adc $7A5B    ; $7AC6
-                sta $7A5B    ; $7AC9
+                adc Argument    ; $7AC6
+                sta Argument    ; $7AC9
                 bcc $7AD1    ; $7ACC
                 inc $7A5C    ; $7ACE
                 rts    ; $7AD1
+;
+; === ArgumentDigit ===
                 bit $7A5F    ; $7AD2
                 bmi $7AE9    ; $7AD5
                 pha    ; $7AD7
                 lda #$00    ; $7AD8
-                sta $7A5B    ; $7ADA
+                sta Argument    ; $7ADA
                 sta $7A5C    ; $7ADD
                 lda #$FF    ; $7AE0
                 sta $7A5F    ; $7AE2
-                sta $7A5D    ; $7AE5
+                sta ExplicitArg    ; $7AE5
                 pla    ; $7AE8
                 ora #$80    ; $7AE9
                 sec    ; $7AEB
                 sbc #$B0    ; $7AEC
-                jsr $7A9B    ; $7AEE
+                jsr AddArgDigit    ; $7AEE
                 pla    ; $7AF1
                 pla    ; $7AF2
                 jmp $7B29    ; $7AF3
-                lda $C000    ; $7AF6
+;
+; === ZeroArg? ===
+                lda HardKey    ; $7AF6
                 ora #$80    ; $7AF9
                 cmp #$87    ; $7AFB
                 bne $7B0A    ; $7AFD
                 lda #$00    ; $7AFF
-                sta $7A5B    ; $7B01
+                sta Argument    ; $7B01
                 sta $7A5C    ; $7B04
-                jsr $29B9    ; $7B07
-                lda $7A5B    ; $7B0A
+                jsr Beep    ; $7B07
+                lda Argument    ; $7B0A
                 ora $7A5C    ; $7B0D
                 rts    ; $7B10
-                jsr $7A6B    ; $7B11
+;
+; === NegativeArg ===
+                jsr InitArgument    ; $7B11
                 lda #$FF    ; $7B14
-                sta $7A5E    ; $7B16
+                sta ArgSign    ; $7B16
                 jmp $7B29    ; $7B19
                 brk    ; $7B1C
-                asl $7A5B    ; $7B1D
+;
+; === UniversalArg ===
+                asl Argument    ; $7B1D
                 rol $7A5C    ; $7B20
-                asl $7A5B    ; $7B23
+                asl Argument    ; $7B23
                 rol $7A5C    ; $7B26
                 jsr $7B59    ; $7B29
                 sta $7B58    ; $7B2C
                 ora #$80    ; $7B2F
                 cmp #$AD    ; $7B31
                 bne $7B42    ; $7B33
-                bit $7A5E    ; $7B35
+                bit ArgSign    ; $7B35
                 bmi $7B4D    ; $7B38
-                bit $7A5D    ; $7B3A
+                bit ExplicitArg    ; $7B3A
                 bmi $7B4D    ; $7B3D
-                jmp $7B11    ; $7B3F
+                jmp NegativeArg    ; $7B3F
                 cmp #$B0    ; $7B42
                 bcc $7B4D    ; $7B44
                 cmp #$BA    ; $7B46
                 bcs $7B4D    ; $7B48
-                jsr $7AD2    ; $7B4A
+                jsr ArgumentDigit    ; $7B4A
                 lda #$00    ; $7B4D
                 sta $7B1C    ; $7B4F
                 lda $7B58    ; $7B52
-                jmp $783D    ; $7B55
+                jmp Dispatch    ; $7B55
                 brk    ; $7B58
                 bit $7B1C    ; $7B59
                 bpl $7B64    ; $7B5C
                 jsr $7B7F    ; $7B5E
-                jmp $292E    ; $7B61
+                jmp BlinkCursor    ; $7B61
                 lda #$03    ; $7B64
-                sta $28B9    ; $7B66
-                lda $24    ; $7B69
-                sta $28B7    ; $7B6B
-                lda $25    ; $7B6E
+                sta BlinkTime    ; $7B66
+                lda CH    ; $7B69
+                sta Cursor2    ; $7B6B
+                lda CV    ; $7B6E
                 sta $28B8    ; $7B70
-                jsr $28BB    ; $7B73
+                jsr TimedBlink    ; $7B73
                 beq $7B7E    ; $7B76
                 dec $7B1C    ; $7B78
                 jmp $7B59    ; $7B7B
                 rts    ; $7B7E
-                jsr $57CC    ; $7B7F
-                jsr $5968    ; $7B82
+                jsr NewEchoArea    ; $7B7F
+                jsr PrintMessage    ; $7B82
                 cmp ($F2,x)    ; $7B85
         dfb $E7        ; $7B87  (data/65C02-bit)
                 tsx    ; $7B88
                 brk    ; $7B89
                 lda #$AD    ; $7B8A
-                bit $7A5E    ; $7B8C
+                bit ArgSign    ; $7B8C
                 bpl $7B94    ; $7B8F
-                jsr $2611    ; $7B91
-                jsr $7B9A    ; $7B94
-                jmp $57FA    ; $7B97
-                jsr $7A55    ; $7B9A
+                jsr CharOut    ; $7B91
+                jsr PrintArgument    ; $7B94
+                jmp CloseEchoArea    ; $7B97
+;
+; === PrintArgument ===
+                jsr ZeroJustify    ; $7B9A
                 lda $7A5C    ; $7B9D
-                ldx $7A5B    ; $7BA0
-                jmp $7A01    ; $7BA3
+                ldx Argument    ; $7BA0
+                jmp PrintDec    ; $7BA3
         dfb $9B        ; $7BA6  (data/65C02-bit)
+;
+; === StringArgs ===
                 brk    ; $7BA7
                 brk    ; $7BA8
                 brk    ; $7BA9
@@ -13419,14 +15276,22 @@
                 brk    ; $7C24
                 brk    ; $7C25
                 brk    ; $7C26
+;
+; === ArgCount ===
                 brk    ; $7C27
+;
+; === ArgIndex ===
                 brk    ; $7C28
+;
+; === InitStrArgs ===
                 lda #$00    ; $7C29
-                sta $7C28    ; $7C2B
-                sta $7C27    ; $7C2E
+                sta ArgIndex    ; $7C2B
+                sta ArgCount    ; $7C2E
                 rts    ; $7C31
-                ldx $7C28    ; $7C32
-                cpx $7C27    ; $7C35
+;
+; === GetStrArg ===
+                ldx ArgIndex    ; $7C32
+                cpx ArgCount    ; $7C35
                 bcs $7C65    ; $7C38
                 ldy #$FF    ; $7C3A
                 iny    ; $7C3C
@@ -13438,7 +15303,7 @@
                 cpx #$FF    ; $7C47
                 bne $7C3C    ; $7C49
                 inx    ; $7C4B
-                lda $7BA7,y    ; $7C4C
+                lda StringArgs,y    ; $7C4C
                 cmp #$9B    ; $7C4F
                 beq $7C5A    ; $7C51
                 sta $0200,x    ; $7C53
@@ -13447,63 +15312,71 @@
                 bpl $7C4C    ; $7C58
                 lda #$8D    ; $7C5A
                 sta $0200,x    ; $7C5C
-                inc $7C28    ; $7C5F
+                inc ArgIndex    ; $7C5F
                 lda #$00    ; $7C62
                 rts    ; $7C64
                 lda #$FF    ; $7C65
                 rts    ; $7C67
+;
+; === PointForward ===
                 lda $61    ; $7C68
                 cmp $6B    ; $7C6A
                 bcc $7C8F    ; $7C6C
                 bne $7C88    ; $7C6E
-                lda $60    ; $7C70
-                cmp $6A    ; $7C72
+                lda TheBuffer    ; $7C70
+                cmp GapTop    ; $7C72
                 bcc $7C8F    ; $7C74
                 bne $7C88    ; $7C76
-                jsr $7CB4    ; $7C78
+                jsr GapBotPoint    ; $7C78
                 cmp $69    ; $7C7B
                 bne $7CAB    ; $7C7D
-                lda $60    ; $7C7F
-                cmp $68    ; $7C81
+                lda TheBuffer    ; $7C7F
+                cmp BuffBot    ; $7C81
                 bne $7CAB    ; $7C83
                 lda #$FF    ; $7C85
                 rts    ; $7C87
-                jsr $7CC2    ; $7C88
+                jsr PointBuffBot?    ; $7C88
                 bne $7CAB    ; $7C8B
                 beq $7C85    ; $7C8D
-                inc $60    ; $7C8F
+                inc TheBuffer    ; $7C8F
                 bne $7C95    ; $7C91
                 inc $61    ; $7C93
                 lda $61    ; $7C95
                 cmp $6B    ; $7C97
                 bne $7CB1    ; $7C99
-                lda $60    ; $7C9B
-                cmp $6A    ; $7C9D
+                lda TheBuffer    ; $7C9B
+                cmp GapTop    ; $7C9D
                 bne $7CB1    ; $7C9F
-                jsr $7CB4    ; $7CA1
-                jsr $7CC2    ; $7CA4
+                jsr GapBotPoint    ; $7CA1
+                jsr PointBuffBot?    ; $7CA4
                 bne $7CB1    ; $7CA7
                 beq $7C85    ; $7CA9
-                inc $60    ; $7CAB
+                inc TheBuffer    ; $7CAB
                 bne $7CB1    ; $7CAD
                 inc $61    ; $7CAF
                 lda #$00    ; $7CB1
                 rts    ; $7CB3
-                lda $6C    ; $7CB4
+;
+; === GapBotPoint ===
+                lda GapBot    ; $7CB4
                 clc    ; $7CB6
                 adc #$01    ; $7CB7
-                sta $60    ; $7CB9
+                sta TheBuffer    ; $7CB9
                 lda $6D    ; $7CBB
                 adc #$00    ; $7CBD
                 sta $61    ; $7CBF
                 rts    ; $7CC1
-                lda $60    ; $7CC2
-                cmp $68    ; $7CC4
+;
+; === PointBuffBot? ===
+                lda TheBuffer    ; $7CC2
+                cmp BuffBot    ; $7CC4
                 bne $7CCC    ; $7CC6
                 lda $61    ; $7CC8
                 cmp $69    ; $7CCA
                 rts    ; $7CCC
-                ldx $6C    ; $7CCD
+;
+; === PointBackward ===
+                ldx GapBot    ; $7CCD
                 lda $6D    ; $7CCF
                 inx    ; $7CD1
                 bne $7CD7    ; $7CD2
@@ -13512,29 +15385,29 @@
                 cmp $61    ; $7CD7
                 beq $7CE8    ; $7CD9
                 bcs $7D11    ; $7CDB
-                lda $60    ; $7CDD
+                lda TheBuffer    ; $7CDD
                 bne $7CE3    ; $7CDF
                 dec $61    ; $7CE1
-                dec $60    ; $7CE3
+                dec TheBuffer    ; $7CE3
                 lda #$00    ; $7CE5
                 rts    ; $7CE7
-                cpx $60    ; $7CE8
+                cpx TheBuffer    ; $7CE8
                 bcc $7CDD    ; $7CEA
                 bne $7D11    ; $7CEC
-                lda $6A    ; $7CEE
+                lda GapTop    ; $7CEE
                 sbc #$01    ; $7CF0
-                sta $60    ; $7CF2
+                sta TheBuffer    ; $7CF2
                 lda $6B    ; $7CF4
                 sbc #$00    ; $7CF6
                 sta $61    ; $7CF8
                 cmp $67    ; $7CFA
                 bcc $7D06    ; $7CFC
                 bne $7CB1    ; $7CFE
-                lda $60    ; $7D00
-                cmp $66    ; $7D02
+                lda TheBuffer    ; $7D00
+                cmp BuffTop    ; $7D02
                 bcs $7CB1    ; $7D04
-                lda $66    ; $7D06
-                sta $60    ; $7D08
+                lda BuffTop    ; $7D06
+                sta TheBuffer    ; $7D08
                 lda $67    ; $7D0A
                 sta $61    ; $7D0C
                 lda #$FF    ; $7D0E
@@ -13542,56 +15415,62 @@
                 lda $61    ; $7D11
                 cmp $67    ; $7D13
                 bne $7CDD    ; $7D15
-                lda $60    ; $7D17
-                cmp $66    ; $7D19
+                lda TheBuffer    ; $7D17
+                cmp BuffTop    ; $7D19
                 bne $7CDD    ; $7D1B
                 lda #$FF    ; $7D1D
                 rts    ; $7D1F
-                jsr $5968    ; $7D20
+;
+; === GetYOrNp ===
+                jsr PrintMessage    ; $7D20
                 ldy #$A8    ; $7D23
                 cmp $EFA0,y    ; $7D25
                 sbc ($A0)    ; $7D28
                 dec $BFA9    ; $7D2A
                 brk    ; $7D2D
-                jsr $292E    ; $7D2E
+                jsr BlinkCursor    ; $7D2E
                 cmp #$87    ; $7D31
                 beq $7D47    ; $7D33
-                jsr $36FD    ; $7D35
+                jsr UpperCon    ; $7D35
                 cmp #$CE    ; $7D38
                 beq $7D47    ; $7D3A
                 cmp #$D9    ; $7D3C
                 beq $7D46    ; $7D3E
-                jsr $29B9    ; $7D40
+                jsr Beep    ; $7D40
                 jmp $7D2E    ; $7D43
                 rts    ; $7D46
                 ldy #$FF    ; $7D47
                 rts    ; $7D49
+;
+; === ReadAltKey ===
                 lda #$FF    ; $7D4A
                 sta $B4    ; $7D4C
-                jsr $292E    ; $7D4E
+                jsr BlinkCursor    ; $7D4E
                 cmp #$87    ; $7D51
                 beq $7D80    ; $7D53
                 cmp #$9B    ; $7D55
                 bne $7D60    ; $7D57
-                jsr $5954    ; $7D59
+                jsr print_meta    ; $7D59
                 lda #$7F    ; $7D5C
                 bne $7D69    ; $7D5E
                 cmp #$9A    ; $7D60
                 bne $7D80    ; $7D62
-                jsr $5951    ; $7D64
+                jsr print_c_meta    ; $7D64
                 lda #$3F    ; $7D67
                 sta $B4    ; $7D69
-                jsr $292E    ; $7D6B
+                jsr BlinkCursor    ; $7D6B
                 cmp #$87    ; $7D6E
                 beq $7D80    ; $7D70
                 pha    ; $7D72
-                jsr $2611    ; $7D73
+                jsr CharOut    ; $7D73
                 pla    ; $7D76
                 ora #$80    ; $7D77
-                jsr $36FD    ; $7D79
+                jsr UpperCon    ; $7D79
                 and $B4    ; $7D7C
                 ldx #$FF    ; $7D7E
                 rts    ; $7D80
+;
+; === HexByteOut ===
                 pha    ; $7D81
                 lsr    ; $7D82
                 lsr    ; $7D83
@@ -13604,22 +15483,30 @@
                 cmp #$BA    ; $7D8E
                 bcc $7D94    ; $7D90
                 adc #$06    ; $7D92
-                jmp $2611    ; $7D94
-                jsr $5968    ; $7D97
+                jmp CharOut    ; $7D94
+;
+; === PrintDone ===
+                jsr PrintMessage    ; $7D97
                 sta $EFC4    ; $7D9A
                 inc $AEE5    ; $7D9D
                 sta $6000    ; $7DA0
+;
+; === PrintReturn ===
                 lda #$8D    ; $7DA3
                 bne $7DA9    ; $7DA5
+;
+; === PrintSpace ===
                 lda #$A0    ; $7DA7
-                jmp $2611    ; $7DA9
+                jmp CharOut    ; $7DA9
+;
+; === Plurilize ===
                 dex    ; $7DAC
                 bne $7DB3    ; $7DAD
                 tax    ; $7DAF
                 bne $7DB3    ; $7DB0
                 rts    ; $7DB2
                 lda #$F3    ; $7DB3
-                jmp $2611    ; $7DB5
+                jmp CharOut    ; $7DB5
 ; ---- $7DB8-$7DDD  data  C_XCharacters (38 extended-key chars) ----
         dfb $8F,$96,$93,$98,$81,$BD,$BB,$C5,$82,$C2,$CB,$86,$C6,$B1,$B2,$CF    ; $7DB8  .....=;E.BK.F12O
         dfb $DE,$8C,$95,$83,$84,$FF,$94,$8E,$A8,$A9,$97,$C8,$89,$D6,$C3,$C1    ; $7DC8  ^.......().H.VCA
@@ -13633,60 +15520,74 @@
 ; ---- $7E2A-$7E2A  data  C_XCharCount ($26 = 38) ----
         dfb $26    ; $7E2A  &
 ; ---- $7E2B-$9B36  code ----
-                jsr $4DCD    ; $7E2B
-                jsr $4C52    ; $7E2E
+;
+; === SwapMark ===
+                jsr SwapPointMark    ; $7E2B
+                jsr SetGap    ; $7E2E
                 lda #$01    ; $7E31
                 rts    ; $7E33
+;
+; === SetGoalCol ===
                 lda #$08    ; $7E34
                 sta $00    ; $7E36
                 lda #$34    ; $7E38
                 sta $01    ; $7E3A
                 jmp $7E52    ; $7E3C
+;
+; === SetFillCol ===
                 lda #$AC    ; $7E3F
                 sta $00    ; $7E41
                 lda #$1F    ; $7E43
                 sta $01    ; $7E45
                 jmp $7E52    ; $7E47
+;
+; === SetCommCol ===
                 lda #$FF    ; $7E4A
                 sta $00    ; $7E4C
                 lda #$1C    ; $7E4E
                 sta $01    ; $7E50
-                bit $7A5D    ; $7E52
+                bit ExplicitArg    ; $7E52
                 bpl $7E63    ; $7E55
                 lda $7A5C    ; $7E57
                 bne $7E63    ; $7E5A
-                lda $7A5B    ; $7E5C
+                lda Argument    ; $7E5C
                 cmp #$50    ; $7E5F
                 bcc $7E74    ; $7E61
                 lda $01    ; $7E63
                 pha    ; $7E65
                 lda $00    ; $7E66
                 pha    ; $7E68
-                jsr $2D88    ; $7E69
+                jsr FindPoint    ; $7E69
                 pla    ; $7E6C
                 sta $00    ; $7E6D
                 pla    ; $7E6F
                 sta $01    ; $7E70
-                lda $24    ; $7E72
+                lda CH    ; $7E72
                 ldy #$00    ; $7E74
                 sta ($00),y    ; $7E76
                 lda #$00    ; $7E78
                 rts    ; $7E7A
+;
+; === ToggleRO ===
                 lda #$01    ; $7E7B
-                jsr $4C2B    ; $7E7D
+                jsr BuffFlagOn?    ; $7E7D
                 php    ; $7E80
                 lda #$01    ; $7E81
                 plp    ; $7E83
                 beq $7E8F    ; $7E84
-                jsr $4C17    ; $7E86
-                jsr $537E    ; $7E89
+                jsr SetBuffFlag    ; $7E86
+                jsr MakeModeLine    ; $7E89
                 lda #$01    ; $7E8C
                 rts    ; $7E8E
-                jsr $4C20    ; $7E8F
+                jsr ClrBuffFlag    ; $7E8F
                 jmp $7E89    ; $7E92
+;
+; === FunPtr ===
                 brk    ; $7E95
                 brk    ; $7E96
-                jsr $7EA8    ; $7E97
+;
+; === FindFunKey ===
+                jsr FindFunRef    ; $7E97
                 ldy #$00    ; $7E9A
                 lda ($00),y    ; $7E9C
                 pha    ; $7E9E
@@ -13696,12 +15597,14 @@
                 pla    ; $7EA4
                 sta $00    ; $7EA5
                 rts    ; $7EA7
+;
+; === FindFunRef ===
                 sta $00    ; $7EA8
                 lda #$00    ; $7EAA
                 sta $01    ; $7EAC
                 asl $00    ; $7EAE
                 rol $01    ; $7EB0
-                lda $7839    ; $7EB2
+                lda DispatchTab    ; $7EB2
                 clc    ; $7EB5
                 adc $00    ; $7EB6
                 sta $00    ; $7EB8
@@ -13709,6 +15612,8 @@
                 adc $01    ; $7EBD
                 sta $01    ; $7EBF
                 rts    ; $7EC1
+;
+; === GetFunName ===
                 lda #$37    ; $7EC2
                 sta $00    ; $7EC4
                 lda #$9B    ; $7EC6
@@ -13731,36 +15636,38 @@
                 sta $01    ; $7EE5
                 dey    ; $7EE7
                 rts    ; $7EE8
-                jsr $5A56    ; $7EE9
-                jsr $5A2E    ; $7EEC
+                jsr PushCompPoint    ; $7EE9
+                jsr FunctionRef    ; $7EEC
                 lda $00    ; $7EEF
-                cmp $7E95    ; $7EF1
+                cmp FunPtr    ; $7EF1
                 bne $7F03    ; $7EF4
                 lda $01    ; $7EF6
                 cmp $7E96    ; $7EF8
                 bne $7F03    ; $7EFB
-                jsr $5A3D    ; $7EFD
+                jsr PopCompPoint    ; $7EFD
                 lda #$00    ; $7F00
                 rts    ; $7F02
-                jsr $5A3D    ; $7F03
-                jsr $5A68    ; $7F06
+                jsr PopCompPoint    ; $7F03
+                jsr SkipEnt    ; $7F06
                 jmp $7ECA    ; $7F09
                 brk    ; $7F0C
                 brk    ; $7F0D
                 brk    ; $7F0E
-                jsr $3F8D    ; $7F0F
+;
+; === SetKey ===
+                jsr ReadFunction    ; $7F0F
                 beq $7F17    ; $7F12
                 jmp $808A    ; $7F14
-                jsr $57D8    ; $7F17
+                jsr OpenEchoArea    ; $7F17
                 lda $00    ; $7F1A
                 sta $7F0C    ; $7F1C
                 lda $01    ; $7F1F
                 sta $7F0D    ; $7F21
-                bit $7A5D    ; $7F24
+                bit ExplicitArg    ; $7F24
                 bpl $7F2F    ; $7F27
-                lda $7A5B    ; $7F29
+                lda Argument    ; $7F29
                 jmp $7F48    ; $7F2C
-                jsr $5968    ; $7F2F
+                jsr PrintMessage    ; $7F2F
                 sta $EECF    ; $7F32
                 ldy #$F7    ; $7F35
                 inx    ; $7F37
@@ -13769,12 +15676,12 @@
                 sbc $F9    ; $7F3C
                 tsx    ; $7F3E
                 brk    ; $7F3F
-                jsr $7D4A    ; $7F40
+                jsr ReadAltKey    ; $7F40
                 bne $7F48    ; $7F43
                 jmp $8082    ; $7F45
                 sta $7F0E    ; $7F48
-                jsr $289E    ; $7F4B
-                jsr $5968    ; $7F4E
+                jsr Home    ; $7F4B
+                jsr PrintMessage    ; $7F4E
                 bne $7F48    ; $7F51
         dfb $F4        ; $7F53  (data/65C02-bit)
                 ldy #$00    ; $7F54
@@ -13782,17 +15689,17 @@
                 sta $00    ; $7F59
                 lda $7F0D    ; $7F5B
                 sta $01    ; $7F5E
-                jsr $598F    ; $7F60
-                jsr $5968    ; $7F63
+                jsr DCIStringOut    ; $7F60
+                jsr PrintMessage    ; $7F63
                 ldy #$EF    ; $7F66
                 inc: $00A0    ; $7F68
                 lda $7F0E    ; $7F6B
-                jsr $586C    ; $7F6E
-                jsr $2862    ; $7F71
-                jsr $7D20    ; $7F74
+                jsr PrettyPrint    ; $7F6E
+                jsr ClearEOL    ; $7F71
+                jsr GetYOrNp    ; $7F74
                 bne $7F45    ; $7F77
                 lda $7F0E    ; $7F79
-                jsr $7EA8    ; $7F7C
+                jsr FindFunRef    ; $7F7C
                 lda $01    ; $7F7F
                 pha    ; $7F81
                 lda $00    ; $7F82
@@ -13801,7 +15708,7 @@
                 sta $00    ; $7F88
                 lda $7F0D    ; $7F8A
                 sta $01    ; $7F8D
-                jsr $5A2E    ; $7F8F
+                jsr FunctionRef    ; $7F8F
                 lda $00    ; $7F92
                 sta $7F0C    ; $7F94
                 lda $01    ; $7F97
@@ -13817,13 +15724,15 @@
                 lda $7F0D    ; $7FAA
                 sta ($00),y    ; $7FAD
                 jmp $7F14    ; $7FAF
+;
+; === BindIfNot ===
                 tax    ; $7FB2
                 lda $01    ; $7FB3
                 pha    ; $7FB5
                 lda $00    ; $7FB6
                 pha    ; $7FB8
                 txa    ; $7FB9
-                jsr $7EA8    ; $7FBA
+                jsr FindFunRef    ; $7FBA
                 ldy #$00    ; $7FBD
                 lda ($00),y    ; $7FBF
                 iny    ; $7FC1
@@ -13834,16 +15743,20 @@
                 pla    ; $7FC9
                 sta $01    ; $7FCA
                 rts    ; $7FCC
+;
+; === UnBindKey ===
                 ldx #$00    ; $7FCD
                 stx $00    ; $7FCF
                 stx $01    ; $7FD1
+;
+; === BindKey ===
                 tax    ; $7FD3
                 lda $01    ; $7FD4
                 pha    ; $7FD6
                 lda $00    ; $7FD7
                 pha    ; $7FD9
                 txa    ; $7FDA
-                jsr $7EA8    ; $7FDB
+                jsr FindFunRef    ; $7FDB
                 ldy #$00    ; $7FDE
                 pla    ; $7FE0
                 sta ($00),y    ; $7FE1
@@ -13851,43 +15764,47 @@
                 iny    ; $7FE4
                 sta ($00),y    ; $7FE5
                 rts    ; $7FE7
+;
+; === WhatKey ===
                 tsx    ; $7FE8
                 stx $8077    ; $7FE9
                 lda #$78    ; $7FEC
-                sta $2A97    ; $7FEE
+                sta TypeoutAbort    ; $7FEE
                 lda #$80    ; $7FF1
                 sta $2A98    ; $7FF3
-                jsr $57CC    ; $7FF6
-                jsr $5968    ; $7FF9
+                jsr NewEchoArea    ; $7FF6
+                jsr PrintMessage    ; $7FF9
                 cmp $BFAD    ; $7FFC
                 ldy #$00    ; $7FFF
-                jsr $7D4A    ; $8001
+                jsr ReadAltKey    ; $8001
                 bne $8009    ; $8004
                 jmp $8082    ; $8006
                 sta $7F0E    ; $8009
-                jsr $57FA    ; $800C
-                jsr $2AC4    ; $800F
+                jsr CloseEchoArea    ; $800C
+                jsr OpenTypeout    ; $800F
                 lda $7F0E    ; $8012
                 cmp #$98    ; $8015
                 bne $801C    ; $8017
-                jmp $8090    ; $8019
-                jsr $7E97    ; $801C
+                jmp WhatCtrlX    ; $8019
+                jsr FindFunKey    ; $801C
                 lda $00    ; $801F
-                sta $7E95    ; $8021
+                sta FunPtr    ; $8021
                 lda $01    ; $8024
                 sta $7E96    ; $8026
-                jsr $7EC2    ; $8029
+                jsr GetFunName    ; $8029
                 lda $7F0E    ; $802C
-                jsr $586C    ; $802F
+                jsr PrettyPrint    ; $802F
                 lda $01    ; $8032
                 bne $803C    ; $8034
-                jsr $5858    ; $8036
+                jsr PrUnDefined    ; $8036
                 jmp $803F    ; $8039
-                jsr $8045    ; $803C
-                jsr $2B0F    ; $803F
+                jsr PrFunDoc    ; $803C
+                jsr CloseTypeout    ; $803F
                 lda #$01    ; $8042
                 rts    ; $8044
-                jsr $5968    ; $8045
+;
+; === PrFunDoc ===
+                jsr PrintMessage    ; $8045
                 ldy #$F2    ; $8048
                 sbc $EE,x    ; $804A
         dfb $F3        ; $804C  (data/65C02-bit)
@@ -13899,80 +15816,84 @@
                 sbc #$EF    ; $8057
                 inc: $00A0    ; $8059
                 tya    ; $805C
-                jsr $5991    ; $805D
-                jsr $5968    ; $8060
+                jsr DCIStringOut1    ; $805D
+                jsr PrintMessage    ; $8060
                 tsx    ; $8063
                 sta: $0089    ; $8064
-                jsr $5A12    ; $8067
+                jsr DocRef    ; $8067
                 lda #$08    ; $806A
-                jsr $5991    ; $806C
-                jsr $5968    ; $806F
+                jsr DCIStringOut1    ; $806C
+                jsr PrintMessage    ; $806F
                 ldx $8D8D    ; $8072
                 brk    ; $8075
                 rts    ; $8076
                 brk    ; $8077
                 ldx $8077    ; $8078
                 txs    ; $807B
-                jsr $2B19    ; $807C
+                jsr CloseTypeout1    ; $807C
                 lda #$01    ; $807F
                 rts    ; $8081
-                jsr $29B9    ; $8082
+                jsr Beep    ; $8082
                 lda #$87    ; $8085
-                jsr $2611    ; $8087
-                jsr $57FA    ; $808A
+                jsr CharOut    ; $8087
+                jsr CloseEchoArea    ; $808A
                 lda #$01    ; $808D
                 rts    ; $808F
+;
+; === WhatCtrlX ===
                 lda #$98    ; $8090
-                jsr $586C    ; $8092
+                jsr PrettyPrint    ; $8092
                 lda #$9C    ; $8095
                 sta $00    ; $8097
                 lda #$BE    ; $8099
                 sta $01    ; $809B
                 lda #$00    ; $809D
-                jsr $5991    ; $809F
-                jsr $292E    ; $80A2
+                jsr DCIStringOut1    ; $809F
+                jsr BlinkCursor    ; $80A2
                 cmp #$87    ; $80A5
                 beq $8078    ; $80A7
                 sta $7F0E    ; $80A9
-                jsr $5968    ; $80AC
+                jsr PrintMessage    ; $80AC
                 sta: $008D    ; $80AF
                 lda $7F0E    ; $80B2
                 cmp #$AA    ; $80B5
                 beq $80E2    ; $80B7
                 cmp #$80    ; $80B9
                 bcc $80CE    ; $80BB
-                jsr $36FD    ; $80BD
-                jsr $810B    ; $80C0
+                jsr UpperCon    ; $80BD
+                jsr FindXKey    ; $80C0
                 bne $80CE    ; $80C3
                 lda $7F0E    ; $80C5
-                jsr $8135    ; $80C8
+                jsr PrCtrlXDoc    ; $80C8
                 jmp $803F    ; $80CB
                 lda #$98    ; $80CE
-                jsr $586C    ; $80D0
-                jsr $7DA7    ; $80D3
+                jsr PrettyPrint    ; $80D0
+                jsr PrintSpace    ; $80D3
                 lda $7F0E    ; $80D6
-                jsr $586C    ; $80D9
-                jsr $5858    ; $80DC
+                jsr PrettyPrint    ; $80D9
+                jsr PrUnDefined    ; $80DC
                 jmp $803F    ; $80DF
                 ldx #$00    ; $80E2
                 stx $7F0C    ; $80E4
                 ldx $7F0C    ; $80E7
-                cpx $7E2A    ; $80EA
+                cpx C_XCharCount    ; $80EA
                 bcs $8105    ; $80ED
-                lda $7DB8,x    ; $80EF
+                lda C_XCharacters,x    ; $80EF
                 sta $7F0E    ; $80F2
-                jsr $810B    ; $80F5
+                jsr FindXKey    ; $80F5
                 bne $8100    ; $80F8
                 lda $7F0E    ; $80FA
-                jsr $8135    ; $80FD
+                jsr PrCtrlXDoc    ; $80FD
                 inc $7F0C    ; $8100
                 bne $80E7    ; $8103
-                jsr $7D97    ; $8105
+                jsr PrintDone    ; $8105
                 jmp $803F    ; $8108
+;
+; === FindXKey ===
                 ldx #$00    ; $810B
-                cpx $7E2A    ; $810D
+                cpx C_XCharCount    ; $810D
                 bcs $811A    ; $8110
-                cmp $7DB8,x    ; $8112
+                cmp C_XCharacters,x    ; $8112
                 beq $811C    ; $8115
                 inx    ; $8117
                 bne $810D    ; $8118
@@ -13981,24 +15902,30 @@
                 txa    ; $811C
                 asl    ; $811D
                 tax    ; $811E
-                lda $7DDE,x    ; $811F
-                sta $7E95    ; $8122
+                lda C_XVectors,x    ; $811F
+                sta FunPtr    ; $8122
                 lda $7DDF,x    ; $8125
                 sta $7E96    ; $8128
-                jsr $7EC2    ; $812B
+                jsr GetFunName    ; $812B
                 lda $01    ; $812E
                 beq $811A    ; $8130
                 lda #$00    ; $8132
                 rts    ; $8134
+;
+; === PrCtrlXDoc ===
                 pha    ; $8135
                 lda #$98    ; $8136
-                jsr $586C    ; $8138
+                jsr PrettyPrint    ; $8138
                 lda #$A0    ; $813B
-                jsr $2611    ; $813D
+                jsr CharOut    ; $813D
                 pla    ; $8140
-                jsr $586C    ; $8141
-                jmp $8045    ; $8144
+                jsr PrettyPrint    ; $8141
+                jmp PrFunDoc    ; $8144
+;
+; === DefMajor ===
                 brk    ; $8147
+;
+; === TheModes ===
                 sbc ($81)    ; $8148
                 lda ($81),y    ; $814A
                 adc $6D81,x    ; $814C
@@ -14012,78 +15939,94 @@
                 sta $00    ; $815C
                 lda #$83    ; $815E
                 sta $01    ; $8160
-                jsr $8225    ; $8162
-                jsr $81D9    ; $8165
+                jsr SetModeComm    ; $8162
+                jsr BlockBind    ; $8165
                 lda #$04    ; $8168
-                jmp $81FF    ; $816A
+                jmp ModeFinish    ; $816A
+;
+; === MODE:Lisp ===
                 lda #$05    ; $816D
                 sta $00    ; $816F
                 lda #$83    ; $8171
                 sta $01    ; $8173
-                jsr $8225    ; $8175
+                jsr SetModeComm    ; $8175
                 lda #$03    ; $8178
-                jmp $81FF    ; $817A
+                jmp ModeFinish    ; $817A
+;
+; === MODE:Merlin ===
                 lda #$05    ; $817D
                 sta $00    ; $817F
                 lda #$83    ; $8181
                 sta $01    ; $8183
-                jsr $8225    ; $8185
+                jsr SetModeComm    ; $8185
                 lda #$65    ; $8188
                 sta $00    ; $818A
                 lda #$79    ; $818C
                 sta $01    ; $818E
                 lda #$0D    ; $8190
-                jsr $7FD3    ; $8192
+                jsr BindKey    ; $8192
                 lda #$E0    ; $8195
                 sta $00    ; $8197
                 lda #$78    ; $8199
                 sta $01    ; $819B
                 lda #$4D    ; $819D
-                jsr $7FD3    ; $819F
+                jsr BindKey    ; $819F
                 lda #$02    ; $81A2
                 eor #$FF    ; $81A4
                 ldy #$40    ; $81A6
-                and ($72),y    ; $81A8
-                sta ($72),y    ; $81AA
+                and (BuffData),y    ; $81A8
+                sta (BuffData),y    ; $81AA
                 lda #$02    ; $81AC
-                jmp $81FF    ; $81AE
+                jmp ModeFinish    ; $81AE
+;
+; === MODE:Text ===
                 lda #$03    ; $81B1
                 sta $00    ; $81B3
                 lda #$83    ; $81B5
                 sta $01    ; $81B7
-                jsr $8225    ; $81B9
+                jsr SetModeComm    ; $81B9
                 lda #$02    ; $81BC
-                jsr $81EB    ; $81BE
+                jsr SetMinorMd    ; $81BE
                 lda #$01    ; $81C1
-                jmp $81FF    ; $81C3
+                jmp ModeFinish    ; $81C3
+;
+; === MODE:Pascal ===
                 lda #$0E    ; $81C6
                 sta $00    ; $81C8
                 lda #$83    ; $81CA
                 sta $01    ; $81CC
-                jsr $8225    ; $81CE
-                jsr $81D9    ; $81D1
+                jsr SetModeComm    ; $81CE
+                jsr BlockBind    ; $81D1
                 lda #$05    ; $81D4
-                jmp $81FF    ; $81D6
+                jmp ModeFinish    ; $81D6
+;
+; === BlockBind ===
                 lda #$04    ; $81D9
-                jsr $81EB    ; $81DB
+                jsr SetMinorMd    ; $81DB
                 lda #$72    ; $81DE
                 sta $00    ; $81E0
                 lda #$25    ; $81E2
                 sta $01    ; $81E4
                 lda #$0D    ; $81E6
-                jmp $7FD3    ; $81E8
+                jmp BindKey    ; $81E8
+;
+; === SetMinorMd ===
                 ldy #$40    ; $81EB
-                ora ($72),y    ; $81ED
-                sta ($72),y    ; $81EF
+                ora (BuffData),y    ; $81ED
+                sta (BuffData),y    ; $81EF
                 rts    ; $81F1
+;
+; === MODE:Fund ===
                 lda #$05    ; $81F2
                 sta $00    ; $81F4
                 lda #$83    ; $81F6
                 sta $01    ; $81F8
-                jsr $8225    ; $81FA
+                jsr SetModeComm    ; $81FA
                 lda #$00    ; $81FD
+;
+; === ModeFinish ===
                 ldy #$3F    ; $81FF
-                sta ($72),y    ; $8201
+                sta (BuffData),y    ; $8201
                 cmp #$06    ; $8203
                 bcc $8209    ; $8205
                 lda #$00    ; $8207
@@ -14095,31 +16038,35 @@
                 sta $01    ; $8213
                 ldy #$09    ; $8215
                 lda ($00),y    ; $8217
-                sta $26C5,y    ; $8219
+                sta TabTable,y    ; $8219
                 dey    ; $821C
                 bpl $8217    ; $821D
-                jsr $537E    ; $821F
+                jsr MakeModeLine    ; $821F
                 lda #$01    ; $8222
                 rts    ; $8224
+;
+; === SetModeComm ===
                 ldy #$FF    ; $8225
                 iny    ; $8227
                 lda ($00),y    ; $8228
-                sta $1D00,y    ; $822A
+                sta CommentBegin,y    ; $822A
                 bne $8227    ; $822D
                 ldx #$FF    ; $822F
                 iny    ; $8231
                 inx    ; $8232
                 lda ($00),y    ; $8233
-                sta $1D05,x    ; $8235
+                sta CommentEnd,x    ; $8235
                 bne $8231    ; $8238
                 rts    ; $823A
                 lda $ADAA    ; $823B
                 brk    ; $823E
+;
+; === ParseMode ===
                 lda #$3B    ; $823F
-                sta $1D0A    ; $8241
+                sta StringPntr    ; $8241
                 lda #$82    ; $8244
                 sta $1D0B    ; $8246
-                jsr $1D0C    ; $8249
+                jsr StringInLine    ; $8249
                 bne $8291    ; $824C
                 ldy #$00    ; $824E
                 jsr $D000    ; $8250
@@ -14140,7 +16087,7 @@
                 beq $8262    ; $826E
                 jsr $D000    ; $8270
                 ora #$80    ; $8273
-                jsr $36FD    ; $8275
+                jsr UpperCon    ; $8275
                 sta $0200,x    ; $8278
                 inx    ; $827B
                 bmi $8291    ; $827C
@@ -14157,25 +16104,31 @@
                 rts    ; $8291
                 lda #$00    ; $8292
                 sta $01FF,x    ; $8294
-                jsr $82B7    ; $8297
+                jsr SI:ParseMode    ; $8297
                 bne $8291    ; $829A
+;
+; === SelectMode ===
                 pha    ; $829C
                 lda #$84    ; $829D
-                sta $7839    ; $829F
+                sta DispatchTab    ; $829F
                 lda #$4F    ; $82A2
                 sta $783A    ; $82A4
                 pla    ; $82A7
                 asl    ; $82A8
                 tax    ; $82A9
-                lda $8148,x    ; $82AA
+                lda TheModes,x    ; $82AA
                 sta $00    ; $82AD
                 lda $8149,x    ; $82AF
                 sta $01    ; $82B2
                 jmp ($0000)    ; $82B4
+;
+; === SI:ParseMode ===
                 lda #$6A    ; $82B7
                 sta $00    ; $82B9
                 lda #$53    ; $82BB
                 sta $01    ; $82BD
+;
+; === SI:ListScan ===
                 ldx #$00    ; $82BF
                 stx $04    ; $82C1
                 ldy $04    ; $82C3
@@ -14192,7 +16145,7 @@
                 lda ($02),y    ; $82D7
                 bmi $82EC    ; $82D9
                 ora #$80    ; $82DB
-                jsr $36FD    ; $82DD
+                jsr UpperCon    ; $82DD
                 cmp $0200,x    ; $82E0
                 bne $82C3    ; $82E3
                 iny    ; $82E5
@@ -14200,7 +16153,7 @@
                 bpl $82D7    ; $82E7
                 lda #$FF    ; $82E9
                 rts    ; $82EB
-                jsr $36FD    ; $82EC
+                jsr UpperCon    ; $82EC
                 cmp $0200,x    ; $82EF
                 bne $82C3    ; $82F2
                 inx    ; $82F4
@@ -14235,6 +16188,8 @@
                 ldx $E5E8    ; $831C
                 cpx $B0F0    ; $831F
                 brk    ; $8322
+;
+; === SystemPath ===
         dfb $AF        ; $8323  (data/65C02-bit)
                 sbc ($ED,x)    ; $8324
                 sbc ($E3,x)    ; $8326
@@ -14283,8 +16238,10 @@
                 brk    ; $8352
                 brk    ; $8353
         dfb $9F        ; $8354  (data/65C02-bit)
+;
+; === SetSysPath ===
                 ldy #$00    ; $8355
-                lda $8323,y    ; $8357
+                lda SystemPath,y    ; $8357
                 sta $0200,y    ; $835A
                 beq $8362    ; $835D
                 iny    ; $835F
@@ -14299,20 +16256,24 @@
                 lda #$8D    ; $836F
                 sta $0200,y    ; $8371
                 rts    ; $8374
+;
+; === GetHelpFile ===
                 sta $8321    ; $8375
-                jsr $8355    ; $8378
+                jsr SetSysPath    ; $8378
                 lda #$12    ; $837B
                 sta $00    ; $837D
                 lda #$83    ; $837F
                 sta $01    ; $8381
-                jsr $845A    ; $8383
-                jsr $729D    ; $8386
+                jsr SetMyFile    ; $8383
+                jsr DSK:OpenFile    ; $8386
                 bne $8390    ; $8389
-                jsr $72FE    ; $838B
+                jsr PrepRead    ; $838B
                 lda #$00    ; $838E
                 rts    ; $8390
-                jsr $57CC    ; $8391
-                jsr $5968    ; $8394
+;
+; === Help ===
+                jsr NewEchoArea    ; $8391
+                jsr PrintMessage    ; $8394
                 cpy $EF    ; $8397
         dfb $E3        ; $8399  (data/65C02-bit)
                 ldy #$A8    ; $839A
@@ -14325,20 +16286,20 @@
                 beq $8350    ; $83A5
                 tsx    ; $83A7
                 brk    ; $83A8
-                jsr $292E    ; $83A9
+                jsr BlinkCursor    ; $83A9
                 pha    ; $83AC
-                jsr $57FA    ; $83AD
+                jsr CloseEchoArea    ; $83AD
                 pla    ; $83B0
                 jsr $83B7    ; $83B1
-                jmp $8391    ; $83B4
+                jmp Help    ; $83B4
                 ldx #$00    ; $83B7
-                jsr $36FD    ; $83B9
+                jsr UpperCon    ; $83B9
                 cmp $83E9,x    ; $83BC
                 beq $83CA    ; $83BF
                 inx    ; $83C1
                 cpx #$0A    ; $83C2
                 bcc $83BC    ; $83C4
-                jsr $29B9    ; $83C6
+                jsr Beep    ; $83C6
                 rts    ; $83C9
                 cpx #$07    ; $83CA
                 bcs $83D1    ; $83CC
@@ -14349,7 +16310,7 @@
                 asl    ; $83D4
                 tax    ; $83D5
                 lda $83F3,x    ; $83D6
-                sta $7834    ; $83D9
+                sta CommandVector    ; $83D9
                 sta $00    ; $83DC
                 lda $83F4,x    ; $83DE
                 sta $7835    ; $83E1
@@ -14363,7 +16324,7 @@
         dfb $FF        ; $83F1  (data/65C02-bit)
                 ldy #$91    ; $83F2
                 stz $CD    ; $83F4
-                trb $5184    ; $83F6
+                trb Describe    ; $83F6
                 inx    ; $83F9
         dfb $7F        ; $83FA  (data/65C02-bit)
                 bcs $8462    ; $83FB
@@ -14375,38 +16336,40 @@
         dfb $54        ; $8408  (data/65C02-bit)
         dfb $83        ; $8409  (data/65C02-bit)
                 jsr $83B7    ; $840A
-                jsr $579B    ; $840D
+                jsr ClrEchoArea    ; $840D
                 lda #$01    ; $8410
                 rts    ; $8412
-                jsr $29B9    ; $8413
+                jsr Beep    ; $8413
                 lda #$87    ; $8416
-                jsr $5726    ; $8418
+                jsr EchoOutput    ; $8418
                 jmp $8410    ; $841B
-                lda $2690    ; $841E
+                lda UseTabTable?    ; $841E
                 pha    ; $8421
                 lda #$00    ; $8422
-                sta $2690    ; $8424
+                sta UseTabTable?    ; $8424
                 lda #$B0    ; $8427
-                jsr $8375    ; $8429
+                jsr GetHelpFile    ; $8429
                 php    ; $842C
-                jsr $2AA1    ; $842D
-                jsr $2AC4    ; $8430
+                jsr InitTypeout    ; $842D
+                jsr OpenTypeout    ; $8430
                 lda #$50    ; $8433
-                sta $2A97    ; $8435
+                sta TypeoutAbort    ; $8435
                 lda #$84    ; $8438
                 sta $2A98    ; $843A
                 plp    ; $843D
                 bne $844D    ; $843E
-                jsr $72AB    ; $8440
+                jsr DSK:ReadByte    ; $8440
                 bne $8450    ; $8443
                 ora #$80    ; $8445
-                jsr $2611    ; $8447
+                jsr CharOut    ; $8447
                 jmp $8440    ; $844A
-                jsr $29B9    ; $844D
-                jsr $2B19    ; $8450
+                jsr Beep    ; $844D
+                jsr CloseTypeout1    ; $8450
                 pla    ; $8453
-                sta $2690    ; $8454
-                jmp $8391    ; $8457
+                sta UseTabTable?    ; $8454
+                jmp Help    ; $8457
+;
+; === SetMyFile ===
                 tya    ; $845A
                 tax    ; $845B
                 ldy #$00    ; $845C
@@ -14419,18 +16382,28 @@
                 lda #$8D    ; $8469
                 sta $0200,x    ; $846B
                 rts    ; $846E
+;
+; === QueryFlag ===
                 brk    ; $846F
+;
+; === CaseReplace ===
                 brk    ; $8470
                 brk    ; $8471
                 brk    ; $8472
                 brk    ; $8473
                 brk    ; $8474
+;
+; === QueryReplace ===
                 lda #$FF    ; $8475
-                bmi $847B    ; $8477
+                bmi ReplaceEm    ; $8477
+;
+; === Replace ===
                 lda #$00    ; $8479
-                sta $846F    ; $847B
-                jsr $4C1E    ; $847E
-                lda $60    ; $8481
+;
+; === ReplaceEm ===
+                sta QueryFlag    ; $847B
+                jsr ClrLastKill    ; $847E
+                lda TheBuffer    ; $8481
                 sta $8471    ; $8483
                 lda $61    ; $8486
                 sta $8472    ; $8488
@@ -14441,24 +16414,24 @@
                 sta $F0    ; $8495
                 lda #$02    ; $8497
                 sta $F1    ; $8499
-                jsr $86AB    ; $849B
+                jsr TecoSearch    ; $849B
                 beq $84A3    ; $849E
                 jmp $8541    ; $84A0
                 sty $E0    ; $84A3
                 lda $00    ; $84A5
-                sta $60    ; $84A7
+                sta TheBuffer    ; $84A7
                 lda $01    ; $84A9
                 sta $61    ; $84AB
-                jsr $4C52    ; $84AD
-                bit $846F    ; $84B0
+                jsr SetGap    ; $84AD
+                bit QueryFlag    ; $84B0
                 bpl $84C3    ; $84B3
                 jsr $8565    ; $84B5
                 beq $84C3    ; $84B8
-                jsr $7C68    ; $84BA
-                jsr $4C52    ; $84BD
+                jsr PointForward    ; $84BA
+                jsr SetGap    ; $84BD
                 jmp $8493    ; $84C0
-                jsr $4C3C    ; $84C3
-                lda $6C    ; $84C6
+                jsr SetModified    ; $84C3
+                lda GapBot    ; $84C6
                 sta $E2    ; $84C8
                 lda $6D    ; $84CA
                 sta $E3    ; $84CC
@@ -14474,7 +16447,7 @@
                 bcs $8513    ; $84E1
                 lda #$E2    ; $84E3
                 jsr $D048    ; $84E5
-                jsr $867B    ; $84E8
+                jsr AlphaChar?    ; $84E8
                 bcs $84DE    ; $84EB
                 cmp #$DB    ; $84ED
                 bcc $84F8    ; $84EF
@@ -14487,7 +16460,7 @@
                 bcs $8513    ; $84FE
                 lda #$E2    ; $8500
                 jsr $D048    ; $8502
-                jsr $867B    ; $8505
+                jsr AlphaChar?    ; $8505
                 bcs $8513    ; $8508
                 cmp #$E1    ; $850A
                 bcc $8513    ; $850C
@@ -14495,8 +16468,8 @@
                 sta $8473    ; $8510
                 lda $E0    ; $8513
                 clc    ; $8515
-                adc $6C    ; $8516
-                sta $6C    ; $8518
+                adc GapBot    ; $8516
+                sta GapBot    ; $8518
                 bcc $851E    ; $851A
                 inc $6D    ; $851C
                 ldx #$00    ; $851E
@@ -14504,36 +16477,36 @@
                 ldx $E1    ; $8522
                 lda $0200,x    ; $8524
                 bne $8534    ; $8527
-                bit $846F    ; $8529
+                bit QueryFlag    ; $8529
                 bpl $8531    ; $852C
-                jsr $300C    ; $852E
+                jsr DisplayPage    ; $852E
                 jmp $8493    ; $8531
                 jsr $868F    ; $8534
-                jsr $4B84    ; $8537
+                jsr BuffInsert    ; $8537
                 inc $E1    ; $853A
                 bpl $8522    ; $853C
-                jsr $29B9    ; $853E
+                jsr Beep    ; $853E
                 lda $8471    ; $8541
-                sta $60    ; $8544
+                sta TheBuffer    ; $8544
                 lda $8472    ; $8546
                 sta $61    ; $8549
-                jsr $579B    ; $854B
-                jsr $4C52    ; $854E
-                bit $846F    ; $8551
+                jsr ClrEchoArea    ; $854B
+                jsr SetGap    ; $854E
+                bit QueryFlag    ; $8551
                 bpl $855F    ; $8554
-                jsr $2D88    ; $8556
+                jsr FindPoint    ; $8556
                 beq $855F    ; $8559
                 lda #$06    ; $855B
                 bne $8564    ; $855D
-                jsr $300C    ; $855F
+                jsr DisplayPage    ; $855F
                 lda #$01    ; $8562
                 rts    ; $8564
-                jsr $2D88    ; $8565
+                jsr FindPoint    ; $8565
                 beq $856D    ; $8568
-                jsr $31F7    ; $856A
-                jsr $2992    ; $856D
-                jsr $57CC    ; $8570
-                jsr $5968    ; $8573
+                jsr CenterPage    ; $856A
+                jsr CursorOff    ; $856D
+                jsr NewEchoArea    ; $8570
+                jsr PrintMessage    ; $8573
                 cmp ($E5)    ; $8576
                 beq $8566    ; $8578
                 sbc ($E3,x)    ; $857A
@@ -14555,40 +16528,40 @@
                 lda $A9C7    ; $8595
         dfb $BF        ; $8598  (data/65C02-bit)
                 brk    ; $8599
-                jsr $292E    ; $859A
+                jsr BlinkCursor    ; $859A
                 pha    ; $859D
-                jsr $57FA    ; $859E
-                jsr $2D88    ; $85A1
-                jsr $2992    ; $85A4
+                jsr CloseEchoArea    ; $859E
+                jsr FindPoint    ; $85A1
+                jsr CursorOff    ; $85A4
                 pla    ; $85A7
-                jsr $36FD    ; $85A8
+                jsr UpperCon    ; $85A8
                 cmp #$87    ; $85AB
                 beq $85C1    ; $85AD
                 cmp #$A1    ; $85AF
                 bne $85B9    ; $85B1
                 lda #$00    ; $85B3
-                sta $846F    ; $85B5
+                sta QueryFlag    ; $85B5
                 rts    ; $85B8
                 cmp #$D9    ; $85B9
                 php    ; $85BB
-                jsr $5726    ; $85BC
+                jsr EchoOutput    ; $85BC
                 plp    ; $85BF
                 rts    ; $85C0
-                jsr $5726    ; $85C1
-                jsr $29B9    ; $85C4
+                jsr EchoOutput    ; $85C1
+                jsr Beep    ; $85C4
                 pla    ; $85C7
                 pla    ; $85C8
                 lda $8471    ; $85C9
-                sta $60    ; $85CC
+                sta TheBuffer    ; $85CC
                 lda $8472    ; $85CE
                 sta $61    ; $85D1
-                jsr $4C52    ; $85D3
+                jsr SetGap    ; $85D3
                 lda #$06    ; $85D6
                 rts    ; $85D8
-                jsr $7C32    ; $85D9
+                jsr GetStrArg    ; $85D9
                 beq $85FF    ; $85DC
-                jsr $57CC    ; $85DE
-                jsr $5968    ; $85E1
+                jsr NewEchoArea    ; $85DE
+                jsr PrintMessage    ; $85E1
         dfb $D3        ; $85E4  (data/65C02-bit)
                 sbc $E1    ; $85E5
                 sbc ($E3)    ; $85E7
@@ -14597,11 +16570,11 @@
         dfb $EF        ; $85EC  (data/65C02-bit)
                 sbc ($BA)    ; $85ED
                 brk    ; $85EF
-                jsr $3B23    ; $85F0
+                jsr ReadArgLine    ; $85F0
                 php    ; $85F3
                 txa    ; $85F4
                 pha    ; $85F5
-                jsr $57FA    ; $85F6
+                jsr CloseEchoArea    ; $85F6
                 pla    ; $85F9
                 tax    ; $85FA
                 plp    ; $85FB
@@ -14619,10 +16592,10 @@
                 beq $8616    ; $8611
                 inx    ; $8613
                 bpl $860B    ; $8614
-                jsr $7C32    ; $8616
+                jsr GetStrArg    ; $8616
                 beq $863E    ; $8619
-                jsr $57D8    ; $861B
-                jsr $5968    ; $861E
+                jsr OpenEchoArea    ; $861B
+                jsr PrintMessage    ; $861E
                 sta $E5D2    ; $8621
                 beq $8612    ; $8624
                 sbc ($E3,x)    ; $8626
@@ -14632,11 +16605,11 @@
                 inx    ; $862D
                 tsx    ; $862E
                 brk    ; $862F
-                jsr $3B23    ; $8630
+                jsr ReadArgLine    ; $8630
                 php    ; $8633
                 txa    ; $8634
                 pha    ; $8635
-                jsr $57FA    ; $8636
+                jsr CloseEchoArea    ; $8636
                 pla    ; $8639
                 tax    ; $863A
                 plp    ; $863B
@@ -14648,11 +16621,11 @@
                 rts    ; $8648
                 ldx #$00    ; $8649
                 stx $8474    ; $864B
-                bit $8470    ; $864E
+                bit CaseReplace    ; $864E
                 bmi $8677    ; $8651
                 lda $0280,x    ; $8653
                 beq $8664    ; $8656
-                jsr $867B    ; $8658
+                jsr AlphaChar?    ; $8658
                 bcs $8661    ; $865B
                 cmp #$E1    ; $865D
                 bcc $8677    ; $865F
@@ -14661,7 +16634,7 @@
                 ldx #$00    ; $8664
                 lda $0200,x    ; $8666
                 beq $867A    ; $8669
-                jsr $867B    ; $866B
+                jsr AlphaChar?    ; $866B
                 bcs $8674    ; $866E
                 cmp #$E1    ; $8670
                 bcc $8677    ; $8672
@@ -14669,6 +16642,8 @@
                 bne $8666    ; $8675
                 dec $8474    ; $8677
                 rts    ; $867A
+;
+; === AlphaChar? ===
                 cmp #$C1    ; $867B
                 bcc $868B    ; $867D
                 cmp #$FB    ; $867F
@@ -14691,12 +16666,14 @@
                 bne $86A6    ; $869D
                 cpx #$00    ; $869F
                 bne $86A7    ; $86A1
-                jsr $36FD    ; $86A3
+                jsr UpperCon    ; $86A3
                 rts    ; $86A6
-                jsr $3708    ; $86A7
+                jsr LowerCon    ; $86A7
                 rts    ; $86AA
-                jsr $4C52    ; $86AB
-                lda $6C    ; $86AE
+;
+; === TecoSearch ===
+                jsr SetGap    ; $86AB
+                lda GapBot    ; $86AE
                 sta $00    ; $86B0
                 lda $6D    ; $86B2
                 sta $01    ; $86B4
@@ -14707,11 +16684,11 @@
                 inc $00    ; $86C0
                 bne $86C6    ; $86C2
                 inc $01    ; $86C4
-                lda $C000    ; $86C6
+                lda HardKey    ; $86C6
                 ora #$80    ; $86C9
                 cmp #$87    ; $86CB
                 beq $86EC    ; $86CD
-                jsr $2843    ; $86CF
+                jsr GatherTYI    ; $86CF
                 ldx #$00    ; $86D2
                 stx $F4    ; $86D4
                 ldy #$00    ; $86D6
@@ -14724,7 +16701,7 @@
                 cmp $69    ; $86E2
                 bne $86EF    ; $86E4
                 lda $F3    ; $86E6
-                cmp $68    ; $86E8
+                cmp BuffBot    ; $86E8
                 bne $86EF    ; $86EA
                 lda #$FF    ; $86EC
                 rts    ; $86EE
@@ -14746,10 +16723,10 @@
                 inx    ; $870D
                 jsr $8764    ; $870E
                 beq $872A    ; $8711
-                jsr $5E8E    ; $8713
+                jsr SearchCase    ; $8713
                 sta $F2    ; $8716
                 jsr $D000    ; $8718
-                jsr $5E8E    ; $871B
+                jsr SearchCase    ; $871B
                 cmp $F2    ; $871E
                 bne $8749    ; $8720
                 bit $F4    ; $8722
@@ -14761,14 +16738,14 @@
                 rts    ; $872C
                 jsr $D000    ; $872D
                 stx $F2    ; $8730
-                jsr $37A7    ; $8732
+                jsr WhiteSpace?    ; $8732
                 php    ; $8735
                 ldx $F2    ; $8736
                 plp    ; $8738
                 bne $86C0    ; $8739
                 iny    ; $873B
                 jsr $D000    ; $873C
-                jsr $37A7    ; $873F
+                jsr WhiteSpace?    ; $873F
                 beq $873B    ; $8742
                 ldx $F2    ; $8744
                 jmp $8727    ; $8746
@@ -14788,43 +16765,53 @@
                 jmp $86D6    ; $8761
                 lda $8765,x    ; $8764
                 rts    ; $8767
+;
+; === CountOccurs ===
                 jsr $8939    ; $8768
                 lda #$00    ; $876B
-                beq $87B1    ; $876D
+                beq IN:Occur    ; $876D
+;
+; === Occur ===
                 jsr $8939    ; $876F
                 lda #$FF    ; $8772
-                bmi $87B1    ; $8774
+                bmi IN:Occur    ; $8774
+;
+; === Bccur ===
                 jsr $8939    ; $8776
-                jsr $4C52    ; $8779
-                lda $60    ; $877C
+                jsr SetGap    ; $8779
+                lda TheBuffer    ; $877C
                 sta $87A9    ; $877E
                 lda $61    ; $8781
                 sta $87AA    ; $8783
-                lda $66    ; $8786
-                sta $60    ; $8788
+                lda BuffTop    ; $8786
+                sta TheBuffer    ; $8788
                 lda $67    ; $878A
                 sta $61    ; $878C
-                jsr $4C52    ; $878E
+                jsr SetGap    ; $878E
                 lda #$FF    ; $8791
-                jsr $87B1    ; $8793
-                jsr $4CBE    ; $8796
+                jsr IN:Occur    ; $8793
+                jsr KillGap    ; $8796
                 lda $87A9    ; $8799
-                sta $60    ; $879C
+                sta TheBuffer    ; $879C
                 lda $87AA    ; $879E
                 sta $61    ; $87A1
-                jsr $4C52    ; $87A3
+                jsr SetGap    ; $87A3
                 lda #$01    ; $87A6
                 rts    ; $87A8
                 brk    ; $87A9
                 brk    ; $87AA
+;
+; === PrintOccurs ===
                 brk    ; $87AB
                 brk    ; $87AC
                 brk    ; $87AD
                 brk    ; $87AE
                 brk    ; $87AF
                 brk    ; $87B0
-                sta $87AB    ; $87B1
-                lda $60    ; $87B4
+;
+; === IN:Occur ===
+                sta PrintOccurs    ; $87B1
+                lda TheBuffer    ; $87B4
                 sta $87AC    ; $87B6
                 lda $61    ; $87B9
                 sta $87AD    ; $87BB
@@ -14835,26 +16822,26 @@
                 sta $F0    ; $87C8
                 lda #$02    ; $87CA
                 sta $F1    ; $87CC
-                bit $87AB    ; $87CE
+                bit PrintOccurs    ; $87CE
                 bpl $87E4    ; $87D1
-                jsr $2AC4    ; $87D3
+                jsr OpenTypeout    ; $87D3
                 lda #$8A    ; $87D6
-                sta $2A97    ; $87D8
+                sta TypeoutAbort    ; $87D8
                 lda #$88    ; $87DB
                 sta $2A98    ; $87DD
                 tsx    ; $87E0
                 stx $87B0    ; $87E1
-                jsr $86AB    ; $87E4
+                jsr TecoSearch    ; $87E4
                 bne $883E    ; $87E7
                 lda $00    ; $87E9
-                sta $60    ; $87EB
+                sta TheBuffer    ; $87EB
                 lda $01    ; $87ED
                 sta $61    ; $87EF
-                jsr $4C52    ; $87F1
+                jsr SetGap    ; $87F1
                 inc $87AE    ; $87F4
                 bne $87FC    ; $87F7
                 inc $87AF    ; $87F9
-                bit $87AB    ; $87FC
+                bit PrintOccurs    ; $87FC
                 bpl $8804    ; $87FF
                 jsr $88A2    ; $8801
                 ldy #$00    ; $8804
@@ -14865,41 +16852,41 @@
                 bne $8806    ; $880D
                 lda $7A5C    ; $880F
                 pha    ; $8812
-                lda $7A5B    ; $8813
+                lda Argument    ; $8813
                 pha    ; $8816
-                lda $7A5E    ; $8817
+                lda ArgSign    ; $8817
                 pha    ; $881A
-                sty $7A5B    ; $881B
+                sty Argument    ; $881B
                 lda #$00    ; $881E
-                sta $7A5E    ; $8820
+                sta ArgSign    ; $8820
                 sta $7A5C    ; $8823
-                jsr $3439    ; $8826
+                jsr DownRealLine    ; $8826
                 pla    ; $8829
-                sta $7A5E    ; $882A
+                sta ArgSign    ; $882A
                 pla    ; $882D
-                sta $7A5B    ; $882E
+                sta Argument    ; $882E
                 pla    ; $8831
                 sta $7A5C    ; $8832
-                jsr $34BA    ; $8835
-                jsr $4C52    ; $8838
+                jsr EndOfLine    ; $8835
+                jsr SetGap    ; $8838
                 jmp $87E4    ; $883B
                 lda $87AC    ; $883E
-                sta $60    ; $8841
+                sta TheBuffer    ; $8841
                 lda $87AD    ; $8843
                 sta $61    ; $8846
-                jsr $4C52    ; $8848
-                bit $87AB    ; $884B
+                jsr SetGap    ; $8848
+                bit PrintOccurs    ; $884B
                 bpl $8859    ; $884E
-                jsr $7D97    ; $8850
-                jsr $2B0F    ; $8853
+                jsr PrintDone    ; $8850
+                jsr CloseTypeout    ; $8853
                 lda #$01    ; $8856
                 rts    ; $8858
-                jsr $57CC    ; $8859
-                jsr $7A55    ; $885C
+                jsr NewEchoArea    ; $8859
+                jsr ZeroJustify    ; $885C
                 lda $87AF    ; $885F
                 ldx $87AE    ; $8862
-                jsr $7A01    ; $8865
-                jsr $5968    ; $8868
+                jsr PrintDec    ; $8865
+                jsr PrintMessage    ; $8868
                 ldy #$EF    ; $886B
         dfb $E3        ; $886D  (data/65C02-bit)
         dfb $E3        ; $886E  (data/65C02-bit)
@@ -14909,60 +16896,60 @@
                 sbc $00    ; $8874
                 lda $87AF    ; $8876
                 ldx $87AE    ; $8879
-                jsr $7DAC    ; $887C
+                jsr Plurilize    ; $887C
                 lda #$AE    ; $887F
-                jsr $2611    ; $8881
-                jsr $57FA    ; $8884
+                jsr CharOut    ; $8881
+                jsr CloseEchoArea    ; $8884
                 jmp $8856    ; $8887
                 ldx $87B0    ; $888A
                 txs    ; $888D
-                jsr $2B19    ; $888E
+                jsr CloseTypeout1    ; $888E
                 lda $87AC    ; $8891
-                sta $60    ; $8894
+                sta TheBuffer    ; $8894
                 lda $87AD    ; $8896
                 sta $61    ; $8899
-                jsr $4C52    ; $889B
+                jsr SetGap    ; $889B
                 lda #$01    ; $889E
                 rts    ; $88A0
                 brk    ; $88A1
-                lda $7A5B    ; $88A2
+                lda Argument    ; $88A2
                 sta $88A1    ; $88A5
                 lda $61    ; $88A8
                 pha    ; $88AA
-                lda $60    ; $88AB
+                lda TheBuffer    ; $88AB
                 pha    ; $88AD
-                lsr $7A5B    ; $88AE
+                lsr Argument    ; $88AE
                 lda #$00    ; $88B1
                 sta $7A5C    ; $88B3
-                lda $25    ; $88B6
+                lda CV    ; $88B6
                 pha    ; $88B8
-                lda $24    ; $88B9
+                lda CH    ; $88B9
                 pha    ; $88BB
-                jsr $3477    ; $88BC
-                jsr $34A6    ; $88BF
+                jsr UpRealLine    ; $88BC
+                jsr BegOfLine    ; $88BF
                 pla    ; $88C2
-                sta $24    ; $88C3
+                sta CH    ; $88C3
                 pla    ; $88C5
-                sta $25    ; $88C6
-                jsr $26E9    ; $88C8
-                lda $60    ; $88CB
+                sta CV    ; $88C6
+                jsr vtab    ; $88C8
+                lda TheBuffer    ; $88CB
                 sta $04    ; $88CD
                 lda $61    ; $88CF
                 sta $05    ; $88D1
                 pla    ; $88D3
-                sta $60    ; $88D4
+                sta TheBuffer    ; $88D4
                 pla    ; $88D6
                 sta $61    ; $88D7
                 lda $88A1    ; $88D9
-                sta $7A5B    ; $88DC
+                sta Argument    ; $88DC
                 ldy #$00    ; $88DF
                 lda $04    ; $88E1
-                cmp $6A    ; $88E3
+                cmp GapTop    ; $88E3
                 bne $88FB    ; $88E5
                 lda $05    ; $88E7
                 cmp $6B    ; $88E9
                 bne $88FB    ; $88EB
-                lda $6C    ; $88ED
+                lda GapBot    ; $88ED
                 sta $04    ; $88EF
                 lda $6D    ; $88F1
                 sta $05    ; $88F3
@@ -14970,7 +16957,7 @@
                 bne $88FB    ; $88F7
                 inc $05    ; $88F9
                 lda $04    ; $88FB
-                cmp $68    ; $88FD
+                cmp BuffBot    ; $88FD
                 bne $8907    ; $88FF
                 lda $05    ; $8901
                 cmp $69    ; $8903
@@ -14978,29 +16965,29 @@
                 jsr $D012    ; $8907
                 cmp #$8D    ; $890A
                 beq $891A    ; $890C
-                jsr $2611    ; $890E
+                jsr CharOut    ; $890E
                 inc $04    ; $8911
                 bne $8917    ; $8913
                 inc $05    ; $8915
                 jmp $88E1    ; $8917
-                jsr $7DA3    ; $891A
+                jsr PrintReturn    ; $891A
                 dec $88A1    ; $891D
                 bmi $8924    ; $8920
                 bne $8911    ; $8922
-                lda $7A5B    ; $8924
+                lda Argument    ; $8924
                 cmp #$01    ; $8927
                 beq $8938    ; $8929
                 ldx #$14    ; $892B
                 lda #$AD    ; $892D
-                jsr $2611    ; $892F
+                jsr CharOut    ; $892F
                 dex    ; $8932
                 bne $892F    ; $8933
-                jsr $7DA3    ; $8935
+                jsr PrintReturn    ; $8935
                 rts    ; $8938
-                jsr $7C32    ; $8939
+                jsr GetStrArg    ; $8939
                 beq $895D    ; $893C
-                jsr $57CC    ; $893E
-                jsr $5968    ; $8941
+                jsr NewEchoArea    ; $893E
+                jsr PrintMessage    ; $8941
         dfb $CF        ; $8944  (data/65C02-bit)
         dfb $E3        ; $8945  (data/65C02-bit)
         dfb $E3        ; $8946  (data/65C02-bit)
@@ -15009,11 +16996,11 @@
         dfb $E3        ; $894B  (data/65C02-bit)
                 sbc $BA    ; $894C
                 brk    ; $894E
-                jsr $3B23    ; $894F
+                jsr ReadArgLine    ; $894F
                 php    ; $8952
                 txa    ; $8953
                 pha    ; $8954
-                jsr $57FA    ; $8955
+                jsr CloseEchoArea    ; $8955
                 pla    ; $8958
                 tax    ; $8959
                 plp    ; $895A
@@ -15025,14 +17012,16 @@
                 rts    ; $8965
                 pla    ; $8966
                 pla    ; $8967
-                jsr $579B    ; $8968
-                jsr $29B9    ; $896B
+                jsr ClrEchoArea    ; $8968
+                jsr Beep    ; $896B
                 lda #$01    ; $896E
                 rts    ; $8970
+;
+; === AccumLines ===
                 jsr $8939    ; $8971
-                jsr $4C1E    ; $8974
-                jsr $4C52    ; $8977
-                lda $60    ; $897A
+                jsr ClrLastKill    ; $8974
+                jsr SetGap    ; $8977
+                lda TheBuffer    ; $897A
                 sta $87AC    ; $897C
                 lda $61    ; $897F
                 sta $87AD    ; $8981
@@ -15040,42 +17029,46 @@
                 sta $F0    ; $8986
                 lda #$02    ; $8988
                 sta $F1    ; $898A
-                jsr $4C52    ; $898C
-                jsr $86AB    ; $898F
+                jsr SetGap    ; $898C
+                jsr TecoSearch    ; $898F
                 bne $89C7    ; $8992
                 lda $00    ; $8994
-                sta $60    ; $8996
+                sta TheBuffer    ; $8996
                 lda $01    ; $8998
                 sta $61    ; $899A
-                jsr $34A6    ; $899C
-                jsr $4C52    ; $899F
+                jsr BegOfLine    ; $899C
+                jsr SetGap    ; $899F
                 lda #$FF    ; $89A2
-                sta $7A5D    ; $89A4
-                lda $7A5E    ; $89A7
+                sta ExplicitArg    ; $89A4
+                lda ArgSign    ; $89A7
                 pha    ; $89AA
                 eor #$FF    ; $89AB
-                sta $4DE4    ; $89AD
+                sta DeleteKill?    ; $89AD
                 lda #$01    ; $89B0
-                sta $7A5B    ; $89B2
+                sta Argument    ; $89B2
                 lda #$00    ; $89B5
                 sta $7A5C    ; $89B7
-                sta $7A5E    ; $89BA
-                jsr $382E    ; $89BD
+                sta ArgSign    ; $89BA
+                jsr KillLine    ; $89BD
                 pla    ; $89C0
-                sta $7A5E    ; $89C1
+                sta ArgSign    ; $89C1
                 jmp $898C    ; $89C4
                 lda $87AC    ; $89C7
-                sta $60    ; $89CA
+                sta TheBuffer    ; $89CA
                 lda $87AD    ; $89CC
                 sta $61    ; $89CF
-                jsr $4C52    ; $89D1
+                jsr SetGap    ; $89D1
                 lda #$01    ; $89D4
-                ldx $7A5E    ; $89D6
+                ldx ArgSign    ; $89D6
                 bpl $89DD    ; $89D9
                 lda #$02    ; $89DB
                 rts    ; $89DD
+;
+; === XCharMove ===
                 brk    ; $89DE
-                lda $6C    ; $89DF
+;
+; === EOLorEOB? ===
+                lda GapBot    ; $89DF
                 clc    ; $89E1
                 adc #$01    ; $89E2
                 tay    ; $89E4
@@ -15083,18 +17076,20 @@
                 adc #$00    ; $89E7
                 cmp $69    ; $89E9
                 bcc $89F2    ; $89EB
-                cpy $68    ; $89ED
+                cpy BuffBot    ; $89ED
                 bcc $89F2    ; $89EF
                 rts    ; $89F1
                 ldy #$01    ; $89F2
                 jsr $D03F    ; $89F4
                 cmp #$8D    ; $89F7
                 rts    ; $89F9
-                bit $89DE    ; $89FA
+;
+; === XposeChars ===
+                bit XCharMove    ; $89FA
                 bmi $8A53    ; $89FD
-                jsr $89DF    ; $89FF
+                jsr EOLorEOB?    ; $89FF
                 beq $8A53    ; $8A02
-                jsr $7CCD    ; $8A04
+                jsr PointBackward    ; $8A04
                 bne $8A50    ; $8A07
                 ldy #$00    ; $8A09
                 jsr $D01B    ; $8A0B
@@ -15108,33 +17103,33 @@
                 iny    ; $8A1B
                 jsr $D093    ; $8A1C
                 sta $B5    ; $8A1F
-                lda $6C    ; $8A21
-                sta $60    ; $8A23
+                lda GapBot    ; $8A21
+                sta TheBuffer    ; $8A23
                 lda $6D    ; $8A25
                 sta $61    ; $8A27
-                inc $60    ; $8A29
+                inc TheBuffer    ; $8A29
                 bne $8A2F    ; $8A2B
                 inc $61    ; $8A2D
-                inc $60    ; $8A2F
+                inc TheBuffer    ; $8A2F
                 bne $8A35    ; $8A31
                 inc $61    ; $8A33
-                jsr $4C52    ; $8A35
-                jsr $2D88    ; $8A38
+                jsr SetGap    ; $8A35
+                jsr FindPoint    ; $8A38
                 lda $B4    ; $8A3B
                 cmp #$8D    ; $8A3D
                 beq $8A47    ; $8A3F
                 lda $B5    ; $8A41
                 cmp #$8D    ; $8A43
                 bne $8A4A    ; $8A45
-                jsr $30E0    ; $8A47
+                jsr DispToPoint    ; $8A47
                 lda #$03    ; $8A4A
                 rts    ; $8A4C
-                jsr $7C68    ; $8A4D
+                jsr PointForward    ; $8A4D
                 lda #$00    ; $8A50
                 rts    ; $8A52
-                jsr $7CCD    ; $8A53
+                jsr PointBackward    ; $8A53
                 bne $8A50    ; $8A56
-                jsr $7CCD    ; $8A58
+                jsr PointBackward    ; $8A58
                 bne $8A4D    ; $8A5B
                 ldy #$00    ; $8A5D
                 jsr $D01B    ; $8A5F
@@ -15148,20 +17143,22 @@
                 iny    ; $8A6F
                 pla    ; $8A70
                 jsr $D06F    ; $8A71
-                jsr $7C68    ; $8A74
-                jsr $7C68    ; $8A77
+                jsr PointForward    ; $8A74
+                jsr PointForward    ; $8A77
                 jmp $8A3B    ; $8A7A
-                jsr $7A6B    ; $8A7D
-                dec $7A5D    ; $8A80
-                jsr $34A6    ; $8A83
-                jsr $4C52    ; $8A86
-                jsr $4C1E    ; $8A89
-                jsr $382E    ; $8A8C
-                jsr $7CCD    ; $8A8F
-                jsr $34A6    ; $8A92
-                jsr $4EED    ; $8A95
-                jsr $7CCD    ; $8A98
-                jsr $34A6    ; $8A9B
+;
+; === XposeLines ===
+                jsr InitArgument    ; $8A7D
+                dec ExplicitArg    ; $8A80
+                jsr BegOfLine    ; $8A83
+                jsr SetGap    ; $8A86
+                jsr ClrLastKill    ; $8A89
+                jsr KillLine    ; $8A8C
+                jsr PointBackward    ; $8A8F
+                jsr BegOfLine    ; $8A92
+                jsr YankKill    ; $8A95
+                jsr PointBackward    ; $8A98
+                jsr BegOfLine    ; $8A9B
                 rts    ; $8A9E
                 brk    ; $8A9F
                 brk    ; $8AA0
@@ -15169,15 +17166,21 @@
                 brk    ; $8AA2
                 brk    ; $8AA3
                 brk    ; $8AA4
+;
+; === MacroExec ===
                 brk    ; $8AA5
+;
+; === MacroDef ===
                 brk    ; $8AA6
-                jsr $2AC4    ; $8AA7
-                sta $C009    ; $8AAA
+;
+; === ViewKbdMacro ===
+                jsr OpenTypeout    ; $8AA7
+                sta UseAuxZP    ; $8AAA
                 lda #$00    ; $8AAD
                 sta $02    ; $8AAF
                 lda #$D6    ; $8AB1
                 sta $03    ; $8AB3
-                sta $C008    ; $8AB5
+                sta UseMainZP    ; $8AB5
                 lda $8A9F    ; $8AB8
                 sta $8B02    ; $8ABB
                 lda $8AA0    ; $8ABE
@@ -15186,29 +17189,31 @@
                 ora $8B03    ; $8AC7
                 beq $8AF6    ; $8ACA
                 ldy #$00    ; $8ACC
-                sta $C009    ; $8ACE
+                sta UseAuxZP    ; $8ACE
                 lda ($02),y    ; $8AD1
-                sta $C008    ; $8AD3
-                jsr $586C    ; $8AD6
-                jsr $7DA7    ; $8AD9
-                sta $C009    ; $8ADC
+                sta UseMainZP    ; $8AD3
+                jsr PrettyPrint    ; $8AD6
+                jsr PrintSpace    ; $8AD9
+                sta UseAuxZP    ; $8ADC
                 inc $02    ; $8ADF
                 bne $8AE5    ; $8AE1
                 inc $03    ; $8AE3
-                sta $C008    ; $8AE5
+                sta UseMainZP    ; $8AE5
                 lda $8B02    ; $8AE8
                 bne $8AF0    ; $8AEB
                 dec $8B03    ; $8AED
                 dec $8B02    ; $8AF0
                 jmp $8AC4    ; $8AF3
-                jsr $7DA3    ; $8AF6
-                jsr $7D97    ; $8AF9
-                jsr $2B0F    ; $8AFC
+                jsr PrintReturn    ; $8AF6
+                jsr PrintDone    ; $8AF9
+                jsr CloseTypeout    ; $8AFC
                 lda #$01    ; $8AFF
                 rts    ; $8B01
                 brk    ; $8B02
                 brk    ; $8B03
-                lda $7A5B    ; $8B04
+;
+; === DoLastMacro ===
+                lda Argument    ; $8B04
                 sta $8AA3    ; $8B07
                 lda $7A5C    ; $8B0A
                 sta $8AA4    ; $8B0D
@@ -15216,31 +17221,33 @@
                 sta $8AA1    ; $8B12
                 sta $8AA2    ; $8B15
                 lda #$FF    ; $8B18
-                sta $8AA5    ; $8B1A
+                sta MacroExec    ; $8B1A
                 lda #$01    ; $8B1D
                 rts    ; $8B1F
+;
+; === KeyToMac ===
                 php    ; $8B20
-                bit $8AA6    ; $8B21
+                bit MacroDef    ; $8B21
                 bpl $8B63    ; $8B24
                 pha    ; $8B26
                 sty $8B66    ; $8B27
                 stx $8B65    ; $8B2A
-                sta $C009    ; $8B2D
+                sta UseAuxZP    ; $8B2D
                 ldy $8AA0    ; $8B30
                 cpy #$01    ; $8B33
                 bcc $8B47    ; $8B35
                 ldy $8A9F    ; $8B37
                 cpy #$FF    ; $8B3A
                 bcc $8B47    ; $8B3C
-                sta $C008    ; $8B3E
-                jsr $8C05    ; $8B41
+                sta UseMainZP    ; $8B3E
+                jsr EndMacro    ; $8B41
                 jmp $8B5C    ; $8B44
                 ldy #$00    ; $8B47
                 sta ($00),y    ; $8B49
                 inc $00    ; $8B4B
                 bne $8B51    ; $8B4D
                 inc $01    ; $8B4F
-                sta $C008    ; $8B51
+                sta UseMainZP    ; $8B51
                 inc $8A9F    ; $8B54
                 bne $8B5C    ; $8B57
                 inc $8AA0    ; $8B59
@@ -15251,6 +17258,8 @@
                 rts    ; $8B64
                 brk    ; $8B65
                 brk    ; $8B66
+;
+; === KeyFromMac ===
                 sty $8B66    ; $8B67
                 stx $8B65    ; $8B6A
                 lda $8AA1    ; $8B6D
@@ -15261,15 +17270,15 @@
                 dec $8AA2    ; $8B7A
                 dec $8AA1    ; $8B7D
                 ldy #$00    ; $8B80
-                sta $C009    ; $8B82
+                sta UseAuxZP    ; $8B82
                 lda ($00),y    ; $8B85
-                sta $C008    ; $8B87
-                jsr $280B    ; $8B8A
-                sta $C009    ; $8B8D
+                sta UseMainZP    ; $8B87
+                jsr PushTYI    ; $8B8A
+                sta UseAuxZP    ; $8B8D
                 inc $00    ; $8B90
                 bne $8B96    ; $8B92
                 inc $01    ; $8B94
-                sta $C008    ; $8B96
+                sta UseMainZP    ; $8B96
                 ldx $8B65    ; $8B99
                 ldy $8B66    ; $8B9C
                 rts    ; $8B9F
@@ -15280,44 +17289,50 @@
                 bne $8BB0    ; $8BAB
                 dec $8AA4    ; $8BAD
                 dec $8AA3    ; $8BB0
-                sta $C009    ; $8BB3
+                sta UseAuxZP    ; $8BB3
                 lda #$00    ; $8BB6
                 sta $00    ; $8BB8
                 lda #$D6    ; $8BBA
                 sta $01    ; $8BBC
-                sta $C008    ; $8BBE
+                sta UseMainZP    ; $8BBE
                 lda $8A9F    ; $8BC1
                 sta $8AA1    ; $8BC4
                 lda $8AA0    ; $8BC7
                 sta $8AA2    ; $8BCA
                 rts    ; $8BCD
-                jsr $8BD3    ; $8BCE
+                jsr EndMacroExec    ; $8BCE
                 beq $8B99    ; $8BD1
+;
+; === EndMacroExec ===
                 lda #$00    ; $8BD3
-                sta $8AA5    ; $8BD5
+                sta MacroExec    ; $8BD5
                 rts    ; $8BD8
-                bit $8AA5    ; $8BD9
+;
+; === StartMacro ===
+                bit MacroExec    ; $8BD9
                 bmi $8BFC    ; $8BDC
                 lda #$FF    ; $8BDE
-                sta $8AA6    ; $8BE0
-                sta $C009    ; $8BE3
+                sta MacroDef    ; $8BE0
+                sta UseAuxZP    ; $8BE3
                 lda #$00    ; $8BE6
                 sta $00    ; $8BE8
                 lda #$D6    ; $8BEA
                 sta $01    ; $8BEC
-                sta $C008    ; $8BEE
+                sta UseMainZP    ; $8BEE
                 lda #$00    ; $8BF1
                 sta $8A9F    ; $8BF3
                 sta $8AA0    ; $8BF6
-                jsr $537E    ; $8BF9
+                jsr MakeModeLine    ; $8BF9
                 lda #$01    ; $8BFC
                 rts    ; $8BFE
-                jsr $29B9    ; $8BFF
+                jsr Beep    ; $8BFF
                 lda #$01    ; $8C02
                 rts    ; $8C04
-                bit $8AA5    ; $8C05
+;
+; === EndMacro ===
+                bit MacroExec    ; $8C05
                 bmi $8C28    ; $8C08
-                bit $8AA6    ; $8C0A
+                bit MacroDef    ; $8C0A
                 bpl $8BFF    ; $8C0D
                 lda $8A9F    ; $8C0F
                 sec    ; $8C12
@@ -15327,10 +17342,12 @@
                 sbc #$00    ; $8C1B
                 sta $8AA0    ; $8C1D
                 lda #$00    ; $8C20
-                sta $8AA6    ; $8C22
-                jsr $537E    ; $8C25
+                sta MacroDef    ; $8C22
+                jsr MakeModeLine    ; $8C25
                 lda #$01    ; $8C28
                 rts    ; $8C2A
+;
+; === RegionQSize ===
         dfb $F4        ; $8C2B  (data/65C02-bit)
                 ora ($A5,x)    ; $8C2C
                 rts    ; $8C2E
@@ -15342,13 +17359,13 @@
                 cmp $8C2C    ; $8C37
                 bcc $8CAB    ; $8C3A
                 bne $8C43    ; $8C3C
-                cpx $8C2B    ; $8C3E
+                cpx RegionQSize    ; $8C3E
                 bcc $8CAB    ; $8C41
                 pha    ; $8C43
                 txa    ; $8C44
                 pha    ; $8C45
-                jsr $57CC    ; $8C46
-                jsr $5968    ; $8C49
+                jsr NewEchoArea    ; $8C46
+                jsr PrintMessage    ; $8C49
                 cmp $F5EF,y    ; $8C4C
                 ldy #$E1    ; $8C4F
                 sbc ($E5)    ; $8C51
@@ -15363,12 +17380,12 @@
         dfb $F4        ; $8C5F  (data/65C02-bit)
                 ldy #$EF    ; $8C60
                 inc: $00A0    ; $8C62
-                sty $7A54    ; $8C65
+                sty PD:Justify    ; $8C65
                 pla    ; $8C68
                 tax    ; $8C69
                 pla    ; $8C6A
-                jsr $7A01    ; $8C6B
-                jsr $5968    ; $8C6E
+                jsr PrintDec    ; $8C6B
+                jsr PrintMessage    ; $8C6E
                 ldy #$E3    ; $8C71
                 inx    ; $8C73
                 sbc ($F2,x)    ; $8C74
@@ -15391,26 +17408,30 @@
                 inc $E9F4    ; $8C8F
                 inc $E5F5    ; $8C92
                 brk    ; $8C95
-                jsr $7D20    ; $8C96
+                jsr GetYOrNp    ; $8C96
                 php    ; $8C99
                 pha    ; $8C9A
-                jsr $2611    ; $8C9B
-                jsr $57FA    ; $8C9E
+                jsr CharOut    ; $8C9B
+                jsr CloseEchoArea    ; $8C9E
                 pla    ; $8CA1
                 cmp #$87    ; $8CA2
                 bne $8CA9    ; $8CA4
-                jsr $29B9    ; $8CA6
+                jsr Beep    ; $8CA6
                 plp    ; $8CA9
                 rts    ; $8CAA
                 lda #$00    ; $8CAB
                 rts    ; $8CAD
+;
+; === TheRegion ===
                 brk    ; $8CAE
                 brk    ; $8CAF
                 brk    ; $8CB0
                 brk    ; $8CB1
                 brk    ; $8CB2
-                jsr $4C52    ; $8CB3
-                jsr $4DBA    ; $8CB6
+;
+; === OpenRegion ===
+                jsr SetGap    ; $8CB3
+                jsr GetTempMark    ; $8CB6
                 lda #$FF    ; $8CB9
                 sta $8CB2    ; $8CBB
                 lda $01    ; $8CBE
@@ -15418,13 +17439,13 @@
                 bcc $8CE0    ; $8CC2
                 bne $8CCE    ; $8CC4
                 lda $00    ; $8CC6
-                cmp $60    ; $8CC8
+                cmp TheBuffer    ; $8CC8
                 bcc $8CE0    ; $8CCA
                 beq $8CE0    ; $8CCC
                 inc $8CB2    ; $8CCE
                 lda $61    ; $8CD1
                 pha    ; $8CD3
-                lda $60    ; $8CD4
+                lda TheBuffer    ; $8CD4
                 pha    ; $8CD6
                 jsr $8D2B    ; $8CD7
                 pla    ; $8CDA
@@ -15432,34 +17453,36 @@
                 pla    ; $8CDD
                 sta $01    ; $8CDE
                 lda $00    ; $8CE0
-                sta $8CAE    ; $8CE2
+                sta TheRegion    ; $8CE2
                 lda $01    ; $8CE5
                 sta $8CAF    ; $8CE7
-                lda $60    ; $8CEA
+                lda TheBuffer    ; $8CEA
                 sta $8CB0    ; $8CEC
                 lda $61    ; $8CEF
                 sta $8CB1    ; $8CF1
                 rts    ; $8CF4
+;
+; === CloseRegion ===
                 lda $8CB0    ; $8CF5
-                sta $60    ; $8CF8
+                sta TheBuffer    ; $8CF8
                 lda $8CB1    ; $8CFA
                 sta $61    ; $8CFD
                 bit $8CB2    ; $8CFF
                 bmi $8D0E    ; $8D02
-                lda $8CAE    ; $8D04
-                sta $60    ; $8D07
+                lda TheRegion    ; $8D04
+                sta TheBuffer    ; $8D07
                 lda $8CAF    ; $8D09
                 sta $61    ; $8D0C
                 lda $61    ; $8D0E
                 cmp $6B    ; $8D10
                 bcc $8D1E    ; $8D12
                 bne $8D1F    ; $8D14
-                lda $60    ; $8D16
-                cmp $6A    ; $8D18
+                lda TheBuffer    ; $8D16
+                cmp GapTop    ; $8D18
                 bcc $8D1E    ; $8D1A
                 bne $8D1F    ; $8D1C
                 rts    ; $8D1E
-                lda $60    ; $8D1F
+                lda TheBuffer    ; $8D1F
                 sta $00    ; $8D21
                 lda $61    ; $8D23
                 sta $01    ; $8D25
@@ -15467,15 +17490,15 @@
                 rts    ; $8D2A
                 lda $00    ; $8D2B
                 sec    ; $8D2D
-                sbc $6A    ; $8D2E
+                sbc GapTop    ; $8D2E
                 sta $00    ; $8D30
                 lda $01    ; $8D32
                 sbc $6B    ; $8D34
                 sta $01    ; $8D36
                 lda $00    ; $8D38
                 sec    ; $8D3A
-                adc $6C    ; $8D3B
-                sta $60    ; $8D3D
+                adc GapBot    ; $8D3B
+                sta TheBuffer    ; $8D3D
                 lda $01    ; $8D3F
                 adc $6D    ; $8D41
                 sta $61    ; $8D43
@@ -15483,52 +17506,64 @@
                 cmp $69    ; $8D47
                 bcc $8D5D    ; $8D49
                 bne $8D55    ; $8D4B
-                lda $60    ; $8D4D
-                cmp $68    ; $8D4F
+                lda TheBuffer    ; $8D4D
+                cmp BuffBot    ; $8D4F
                 bcc $8D5D    ; $8D51
                 beq $8D5D    ; $8D53
-                lda $68    ; $8D55
-                sta $60    ; $8D57
+                lda BuffBot    ; $8D55
+                sta TheBuffer    ; $8D57
                 lda $69    ; $8D59
                 sta $61    ; $8D5B
-                jsr $4C52    ; $8D5D
+                jsr SetGap    ; $8D5D
                 rts    ; $8D60
-                jsr $8CB3    ; $8D61
+;
+; === LCaseRegion ===
+                jsr OpenRegion    ; $8D61
                 jsr $8C2D    ; $8D64
                 bne $8D6C    ; $8D67
-                jsr $369F    ; $8D69
-                jsr $8CF5    ; $8D6C
-                jsr $300C    ; $8D6F
+                jsr IN:LowerReg    ; $8D69
+                jsr CloseRegion    ; $8D6C
+                jsr DisplayPage    ; $8D6F
                 lda #$01    ; $8D72
                 rts    ; $8D74
-                jsr $8CB3    ; $8D75
+;
+; === UCaseRegion ===
+                jsr OpenRegion    ; $8D75
                 jsr $8C2D    ; $8D78
                 bne $8D6C    ; $8D7B
-                jsr $3686    ; $8D7D
+                jsr IN:UpperReg    ; $8D7D
                 jmp $8D6C    ; $8D80
-                jsr $8CB3    ; $8D83
+;
+; === CCaseRegion ===
+                jsr OpenRegion    ; $8D83
                 jsr $8C2D    ; $8D86
                 bne $8D6C    ; $8D89
-                jsr $36B8    ; $8D8B
+                jsr IN:CapReg    ; $8D8B
                 jmp $8D6C    ; $8D8E
                 brk    ; $8D91
+;
+; === CopyRegion ===
                 lda #$FF    ; $8D92
-                sta $4DE4    ; $8D94
+                sta DeleteKill?    ; $8D94
                 sta $8D91    ; $8D97
-                jsr $8CB3    ; $8D9A
-                jsr $37FA    ; $8D9D
+;
+; === KRegion ===
+                jsr OpenRegion    ; $8D9A
+                jsr KillTempPoint    ; $8D9D
                 lda #$00    ; $8DA0
                 bit $8D91    ; $8DA2
                 bmi $8DAA    ; $8DA5
                 sta $8CB2    ; $8DA7
                 sta $8D91    ; $8DAA
                 jmp $8D6C    ; $8DAD
-                jsr $8DDA    ; $8DB0
-                jsr $57CC    ; $8DB3
+;
+; === CLinesRegion ===
+                jsr CLInternal    ; $8DB0
+                jsr NewEchoArea    ; $8DB3
                 lda $8E09    ; $8DB6
-                ldx $8E08    ; $8DB9
-                jsr $7A01    ; $8DBC
-                jsr $5968    ; $8DBF
+                ldx LsInReg    ; $8DB9
+                jsr PrintDec    ; $8DBC
+                jsr PrintMessage    ; $8DBF
                 ldy #$EC    ; $8DC2
                 sbc #$EE    ; $8DC4
                 sbc $F3    ; $8DC6
@@ -15537,43 +17572,49 @@
                 sbc $E7    ; $8DCD
                 sbc #$EF    ; $8DCF
                 inc: $00AE    ; $8DD1
-                jsr $57FA    ; $8DD4
+                jsr CloseEchoArea    ; $8DD4
                 lda #$01    ; $8DD7
                 rts    ; $8DD9
-                jsr $8CB3    ; $8DDA
+;
+; === CLInternal ===
+                jsr OpenRegion    ; $8DDA
                 ldy #$00    ; $8DDD
-                sty $8E08    ; $8DDF
+                sty LsInReg    ; $8DDF
                 sty $8E09    ; $8DE2
-                sty $7A54    ; $8DE5
-                jsr $36F2    ; $8DE8
+                sty PD:Justify    ; $8DE5
+                jsr EqTempPoint?    ; $8DE8
                 bne $8DF1    ; $8DEB
-                jsr $8CF5    ; $8DED
+                jsr CloseRegion    ; $8DED
                 rts    ; $8DF0
                 jsr $D000    ; $8DF1
                 cmp #$8D    ; $8DF4
                 bne $8E00    ; $8DF6
-                inc $8E08    ; $8DF8
+                inc LsInReg    ; $8DF8
                 bne $8E00    ; $8DFB
                 inc $8E09    ; $8DFD
                 inc $00    ; $8E00
                 bne $8E06    ; $8E02
                 inc $01    ; $8E04
                 bne $8DE8    ; $8E06
+;
+; === LsInReg ===
                 brk    ; $8E08
                 brk    ; $8E09
-                jsr $7A7F    ; $8E0A
+;
+; === FillRegion ===
+                jsr AnyArgument?    ; $8E0A
                 bne $8E14    ; $8E0D
-                lda $7A5B    ; $8E0F
+                lda Argument    ; $8E0F
                 bne $8E17    ; $8E12
-                lda $1FAC    ; $8E14
+                lda FillColumn    ; $8E14
                 sta $EF    ; $8E17
-                jsr $8CB3    ; $8E19
+                jsr OpenRegion    ; $8E19
                 ldy #$00    ; $8E1C
                 lda $00    ; $8E1E
                 bne $8E24    ; $8E20
                 dec $01    ; $8E22
                 dec $00    ; $8E24
-                jsr $36F2    ; $8E26
+                jsr EqTempPoint?    ; $8E26
                 beq $8E9B    ; $8E29
                 inc $00    ; $8E2B
                 bne $8E31    ; $8E2D
@@ -15583,8 +17624,8 @@
                 beq $8E26    ; $8E36
                 lda #$00    ; $8E38
                 sta $EB    ; $8E3A
-                sta $24    ; $8E3C
-                jsr $36F2    ; $8E3E
+                sta CH    ; $8E3C
+                jsr EqTempPoint?    ; $8E3E
                 beq $8E9B    ; $8E41
                 jsr $D000    ; $8E43
                 cmp #$A0    ; $8E46
@@ -15594,7 +17635,7 @@
                 inc $00    ; $8E4E
                 bne $8E54    ; $8E50
                 inc $01    ; $8E52
-                jsr $36F2    ; $8E54
+                jsr EqTempPoint?    ; $8E54
                 beq $8E9B    ; $8E57
                 jsr $D000    ; $8E59
                 cmp #$8D    ; $8E5C
@@ -15613,11 +17654,11 @@
                 inc $00    ; $8E77
                 bne $8E7D    ; $8E79
                 inc $01    ; $8E7B
-                jsr $2DE0    ; $8E7D
+                jsr GetXCharLen    ; $8E7D
                 txa    ; $8E80
                 clc    ; $8E81
-                adc $24    ; $8E82
-                sta $24    ; $8E84
+                adc CH    ; $8E82
+                sta CH    ; $8E84
                 cmp $EF    ; $8E86
                 bcc $8E3E    ; $8E88
                 lda $EB    ; $8E8A
@@ -15628,46 +17669,52 @@
                 lda #$8D    ; $8E94
                 jsr $D054    ; $8E96
                 bne $8E1C    ; $8E99
-                jsr $8CF5    ; $8E9B
-                jsr $2D88    ; $8E9E
+                jsr CloseRegion    ; $8E9B
+                jsr FindPoint    ; $8E9E
                 bne $8EA9    ; $8EA1
-                jsr $300C    ; $8EA3
+                jsr DisplayPage    ; $8EA3
                 lda #$01    ; $8EA6
                 rts    ; $8EA8
                 lda #$06    ; $8EA9
                 rts    ; $8EAB
-                jsr $4D2F    ; $8EAC
-                jsr $3238    ; $8EAF
-                jsr $8CB3    ; $8EB2
-                jsr $9176    ; $8EB5
+;
+; === PrintBuffer ===
+                jsr MarkBuffer    ; $8EAC
+                jsr GenDisplay    ; $8EAF
+;
+; === PrintRegion ===
+                jsr OpenRegion    ; $8EB2
+                jsr PrintText    ; $8EB5
                 jmp $8D6C    ; $8EB8
-                lda $7A5B    ; $8EBB
-                eor $7A5E    ; $8EBE
+;
+; === IndentReg ===
+                lda Argument    ; $8EBB
+                eor ArgSign    ; $8EBE
                 sta $8F33    ; $8EC1
                 bpl $8EC9    ; $8EC4
                 inc $8F33    ; $8EC6
-                jsr $7A6B    ; $8EC9
-                jsr $8DDA    ; $8ECC
-                jsr $8CB3    ; $8ECF
+                jsr InitArgument    ; $8EC9
+                jsr CLInternal    ; $8ECC
+                jsr OpenRegion    ; $8ECF
                 lda $00    ; $8ED2
-                sta $60    ; $8ED4
+                sta TheBuffer    ; $8ED4
                 lda $01    ; $8ED6
                 sta $61    ; $8ED8
-                jsr $4C52    ; $8EDA
-                jsr $2526    ; $8EDD
+                jsr SetGap    ; $8EDA
+                jsr BackToIndent    ; $8EDD
                 tya    ; $8EE0
                 clc    ; $8EE1
                 adc $8F33    ; $8EE2
                 bpl $8EE9    ; $8EE5
                 lda #$00    ; $8EE7
-                inc $24A5    ; $8EE9
-                jsr $24A6    ; $8EEC
-                dec $24A5    ; $8EEF
-                lda $8E08    ; $8EF2
+                inc IndentVbtm    ; $8EE9
+                jsr IndentLine    ; $8EEC
+                dec IndentVbtm    ; $8EEF
+                lda LsInReg    ; $8EF2
                 ora $8E09    ; $8EF5
                 bne $8F1C    ; $8EF8
-                jsr $4C52    ; $8EFA
-                lda $60    ; $8EFD
+                jsr SetGap    ; $8EFA
+                lda TheBuffer    ; $8EFD
                 sta $8CB0    ; $8EFF
                 lda $61    ; $8F02
                 sta $8CB1    ; $8F04
@@ -15677,23 +17724,33 @@
                 sta $00    ; $8F0F
                 lda $8CB1    ; $8F11
                 sta $01    ; $8F14
-                jsr $4D03    ; $8F16
+                jsr MarkTemp    ; $8F16
                 jmp $8D6C    ; $8F19
-                jsr $34BA    ; $8F1C
-                jsr $7C68    ; $8F1F
-                jsr $4C52    ; $8F22
-                lda $8E08    ; $8F25
+                jsr EndOfLine    ; $8F1C
+                jsr PointForward    ; $8F1F
+                jsr SetGap    ; $8F22
+                lda LsInReg    ; $8F25
                 bne $8F2D    ; $8F28
                 dec $8E09    ; $8F2A
-                dec $8E08    ; $8F2D
+                dec LsInReg    ; $8F2D
                 jmp $8EDD    ; $8F30
                 brk    ; $8F33
+;
+; === PrinterSlot ===
                 ora ($42,x)    ; $8F34
+;
+; === PLinesPage ===
                 bit $0150,x    ; $8F36
                 brk    ; $8F39
+;
+; === FileLine? ===
                 brk    ; $8F3A
+;
+; === AutoNumber ===
                 ora ($DC,x)    ; $8F3B
                 brk    ; $8F3D
+;
+; === ContextBeg ===
                 brk    ; $8F3E
                 brk    ; $8F3F
                 brk    ; $8F40
@@ -15704,6 +17761,8 @@
                 brk    ; $8F45
                 brk    ; $8F46
                 brk    ; $8F47
+;
+; === ContextEnd ===
                 brk    ; $8F48
                 brk    ; $8F49
                 brk    ; $8F4A
@@ -15716,6 +17775,8 @@
                 brk    ; $8F51
                 brk    ; $8F52
                 brk    ; $8F53
+;
+; === PInitStr ===
                 brk    ; $8F54
                 brk    ; $8F55
                 brk    ; $8F56
@@ -15726,11 +17787,15 @@
                 brk    ; $8F5B
                 brk    ; $8F5C
                 brk    ; $8F5D
+;
+; === LeftMargin ===
                 brk    ; $8F5E
+;
+; === RightMargin ===
                 brk    ; $8F5F
                 brk    ; $8F60
                 brk    ; $8F61
-                lda $8F34    ; $8F62
+                lda PrinterSlot    ; $8F62
                 ora #$C0    ; $8F65
                 cmp $37    ; $8F67
                 beq $8F7C    ; $8F69
@@ -15740,54 +17805,56 @@
                 sta $8F61    ; $8F71
                 inc $8F61    ; $8F74
                 lda #$8D    ; $8F77
-                jsr $8FB9    ; $8F79
+                jsr PrintOut    ; $8F79
                 lda #$00    ; $8F7C
                 sta $8F52    ; $8F7E
                 sta $8F60    ; $8F81
-                ldx $8F3B    ; $8F84
+                ldx AutoNumber    ; $8F84
                 bmi $8F93    ; $8F87
                 beq $8FA1    ; $8F89
                 sta $8F39    ; $8F8B
-                stx $8F38    ; $8F8E
+                stx PageNum    ; $8F8E
                 bpl $8FA1    ; $8F91
-                lda $8F38    ; $8F93
+                lda PageNum    ; $8F93
                 lsr    ; $8F96
                 bcs $8FA1    ; $8F97
-                inc $8F38    ; $8F99
+                inc PageNum    ; $8F99
                 bne $8FA1    ; $8F9C
                 inc $8F39    ; $8F9E
-                lda $8F37    ; $8FA1
+                lda PrinterCols    ; $8FA1
                 sec    ; $8FA4
-                sbc $8F5F    ; $8FA5
+                sbc RightMargin    ; $8FA5
                 sta $8F53    ; $8FA8
                 ldy #$00    ; $8FAB
-                lda $8F54,y    ; $8FAD
+                lda PInitStr,y    ; $8FAD
                 beq $8FB8    ; $8FB0
-                jsr $8FB9    ; $8FB2
+                jsr PrintOut    ; $8FB2
                 iny    ; $8FB5
                 bne $8FAD    ; $8FB6
                 rts    ; $8FB8
+;
+; === PrintOut ===
                 pha    ; $8FB9
-                lda $C08A    ; $8FBA
-                lda $C08A    ; $8FBD
+                lda RdRomBank    ; $8FBA
+                lda RdRomBank    ; $8FBD
                 pla    ; $8FC0
                 pha    ; $8FC1
                 jsr $8FCD    ; $8FC2
-                lda $C083    ; $8FC5
-                lda $C083    ; $8FC8
+                lda RdWrBank2    ; $8FC5
+                lda RdWrBank2    ; $8FC8
                 pla    ; $8FCB
                 rts    ; $8FCC
                 jmp ($0036)    ; $8FCD
-                lda $8F35    ; $8FD0
+                lda SheetLines    ; $8FD0
                 sec    ; $8FD3
-                sbc $8F36    ; $8FD4
+                sbc PLinesPage    ; $8FD4
                 lsr    ; $8FD7
                 beq $8FF8    ; $8FD8
                 pha    ; $8FDA
-                bit $8F3A    ; $8FDB
+                bit FileLine?    ; $8FDB
                 bpl $8FEB    ; $8FDE
                 jsr $8FF9    ; $8FE0
-                inc $8F38    ; $8FE3
+                inc PageNum    ; $8FE3
                 bne $8FEB    ; $8FE6
                 inc $8F39    ; $8FE8
                 pla    ; $8FEB
@@ -15801,20 +17868,20 @@
                 rts    ; $8FF8
                 lda #$00    ; $8FF9
                 sta $8F60    ; $8FFB
-                lda $8F5E    ; $8FFE
+                lda LeftMargin    ; $8FFE
                 jsr $9090    ; $9001
-                lda $8F3A    ; $9004
+                lda FileLine?    ; $9004
                 cmp #$80    ; $9007
                 beq $9040    ; $9009
                 cmp #$81    ; $900B
                 beq $9015    ; $900D
-                lda $8F38    ; $900F
+                lda PageNum    ; $900F
                 lsr    ; $9012
                 bcs $9040    ; $9013
                 jsr $905E    ; $9015
                 ldy #$00    ; $9018
                 ldx #$00    ; $901A
-                lda ($72),y    ; $901C
+                lda (BuffData),y    ; $901C
                 beq $9024    ; $901E
                 iny    ; $9020
                 inx    ; $9021
@@ -15845,19 +17912,19 @@
                 rts    ; $905D
                 lda $2607    ; $905E
                 pha    ; $9061
-                lda $2606    ; $9062
+                lda CoutDef    ; $9062
                 pha    ; $9065
                 lda #$B9    ; $9066
-                sta $2606    ; $9068
+                sta CoutDef    ; $9068
                 lda #$8F    ; $906B
                 sta $2607    ; $906D
                 lda #$A0    ; $9070
-                sta $7A54    ; $9072
+                sta PD:Justify    ; $9072
                 lda $8F39    ; $9075
-                ldx $8F38    ; $9078
-                jsr $7A01    ; $907B
+                ldx PageNum    ; $9078
+                jsr PrintDec    ; $907B
                 pla    ; $907E
-                sta $2606    ; $907F
+                sta CoutDef    ; $907F
                 pla    ; $9082
                 sta $2607    ; $9083
                 lda #$05    ; $9086
@@ -15875,15 +17942,15 @@
                 rts    ; $909C
                 pha    ; $909D
                 lda #$A0    ; $909E
-                jsr $8FB9    ; $90A0
+                jsr PrintOut    ; $90A0
                 pla    ; $90A3
                 rts    ; $90A4
                 ldy #$00    ; $90A5
-                lda ($72),y    ; $90A7
+                lda (BuffData),y    ; $90A7
                 beq $90B5    ; $90A9
                 cmp #$AC    ; $90AB
                 beq $90B5    ; $90AD
-                jsr $8FB9    ; $90AF
+                jsr PrintOut    ; $90AF
                 iny    ; $90B2
                 bne $90A7    ; $90B3
                 tya    ; $90B5
@@ -15891,14 +17958,14 @@
                 adc $8F60    ; $90B7
                 sta $8F60    ; $90BA
                 rts    ; $90BD
-                lda $8F35    ; $90BE
+                lda SheetLines    ; $90BE
                 sec    ; $90C1
                 sbc $8F61    ; $90C2
                 beq $90D5    ; $90C5
                 bmi $90D5    ; $90C7
                 pha    ; $90C9
                 lda #$8D    ; $90CA
-                jsr $8FB9    ; $90CC
+                jsr PrintOut    ; $90CC
                 pla    ; $90CF
                 sec    ; $90D0
                 sbc #$01    ; $90D1
@@ -15935,7 +18002,7 @@
                 cmp #$8C    ; $910D
                 beq $914C    ; $910F
                 pha    ; $9111
-                jsr $8FB9    ; $9112
+                jsr PrintOut    ; $9112
                 ldx #$01    ; $9115
                 pla    ; $9117
                 cmp #$A0    ; $9118
@@ -15950,22 +18017,22 @@
                 jsr $90F3    ; $912A
                 rts    ; $912D
                 lda #$8D    ; $912E
-                jsr $8FB9    ; $9130
+                jsr PrintOut    ; $9130
                 inc $8F61    ; $9133
                 lda #$00    ; $9136
                 sta $8F60    ; $9138
                 lda $8F61    ; $913B
-                cmp $8F36    ; $913E
+                cmp PLinesPage    ; $913E
                 bcs $914C    ; $9141
-                lda $8F5E    ; $9143
+                lda LeftMargin    ; $9143
                 jsr $9090    ; $9146
                 jmp $912A    ; $9149
                 jsr $90BE    ; $914C
                 jsr $8FD0    ; $914F
                 jmp $912A    ; $9152
                 lda $8F60    ; $9155
-                jsr $2691    ; $9158
-                cmp $8F37    ; $915B
+                jsr TabBump    ; $9158
+                cmp PrinterCols    ; $915B
                 bcs $912E    ; $915E
                 pha    ; $9160
                 sec    ; $9161
@@ -15978,27 +18045,29 @@
                 pla    ; $916F
                 sta $8F60    ; $9170
                 jmp $912A    ; $9173
+;
+; === PrintText ===
                 jsr $8F62    ; $9176
                 lda #$8D    ; $9179
                 jsr $9102    ; $917B
-                bit $8F3A    ; $917E
+                bit FileLine?    ; $917E
                 bpl $9196    ; $9181
                 jsr $8FF9    ; $9183
-                inc $8F38    ; $9186
+                inc PageNum    ; $9186
                 bne $918E    ; $9189
                 inc $8F39    ; $918B
                 lda #$8D    ; $918E
                 jsr $9102    ; $9190
                 jsr $9102    ; $9193
                 ldy #$00    ; $9196
-                jsr $36F2    ; $9198
+                jsr EqTempPoint?    ; $9198
                 beq $91B9    ; $919B
-                lda $C000    ; $919D
+                lda HardKey    ; $919D
                 ora #$80    ; $91A0
                 cmp #$87    ; $91A2
                 beq $91B9    ; $91A4
                 jsr $D000    ; $91A6
-                cmp $8F3C    ; $91A9
+                cmp HCEscape    ; $91A9
                 beq $91BD    ; $91AC
                 jsr $9102    ; $91AE
                 inc $00    ; $91B1
@@ -16013,14 +18082,18 @@
                 sta $8F52    ; $91C4
                 bmi $91CB    ; $91C7
                 ldx #$0A    ; $91C9
-                lda $8F3E,x    ; $91CB
+                lda ContextBeg,x    ; $91CB
                 beq $91B1    ; $91CE
-                jsr $8FB9    ; $91D0
+                jsr PrintOut    ; $91D0
                 inx    ; $91D3
                 bpl $91CB    ; $91D4
                 bmi $91B1    ; $91D6
+;
+; === BaseLibAddr ===
                 brk    ; $91D8
                 cld    ; $91D9
+;
+; === LibCount ===
                 brk    ; $91DA
                 cpx $E2E9    ; $91DB
         dfb $AF        ; $91DE  (data/65C02-bit)
@@ -16030,36 +18103,38 @@
                 ldy #$20    ; $91E5
         dfb $7F        ; $91E7  (data/65C02-bit)
                 ply    ; $91E8
-                bne $91F6    ; $91E9
-                lda $7A5E    ; $91EB
+                bne SI:LoadLib    ; $91E9
+                lda ArgSign    ; $91EB
                 bmi $91F3    ; $91EE
-                jsr $7A6B    ; $91F0
-                jsr $92BB    ; $91F3
-                jsr $7C32    ; $91F6
+                jsr InitArgument    ; $91F0
+                jsr FlushLibs    ; $91F3
+;
+; === SI:LoadLib ===
+                jsr GetStrArg    ; $91F6
                 beq $9224    ; $91F9
-                jsr $57CC    ; $91FB
-                jsr $5968    ; $91FE
+                jsr NewEchoArea    ; $91FB
+                jsr PrintMessage    ; $91FE
                 cpy $E2E9    ; $9201
                 sbc ($E1)    ; $9204
                 sbc ($F9)    ; $9206
                 tsx    ; $9208
                 brk    ; $9209
-                jsr $3B23    ; $920A
+                jsr ReadArgLine    ; $920A
                 php    ; $920D
                 txa    ; $920E
                 pha    ; $920F
-                jsr $57FA    ; $9210
+                jsr CloseEchoArea    ; $9210
                 pla    ; $9213
                 tax    ; $9214
                 plp    ; $9215
                 bne $921B    ; $9216
                 txa    ; $9218
                 bne $9224    ; $9219
-                jsr $579B    ; $921B
-                jsr $29B9    ; $921E
+                jsr ClrEchoArea    ; $921B
+                jsr Beep    ; $921E
                 lda #$01    ; $9221
                 rts    ; $9223
-                jsr $93A8    ; $9224
+                jsr IN:LibLoad    ; $9224
                 bne $921B    ; $9227
                 lda $00    ; $9229
                 sta $B2    ; $922B
@@ -16069,7 +18144,7 @@
                 sta $00    ; $9233
                 lda #$9B    ; $9235
                 sta $01    ; $9237
-                jsr $9339    ; $9239
+                jsr GetLinkEnd    ; $9239
                 lda #$FF    ; $923C
                 sta ($00),y    ; $923E
                 iny    ; $9240
@@ -16095,7 +18170,7 @@
                 sta $00    ; $9264
                 lda #$97    ; $9266
                 sta $01    ; $9268
-                jsr $9339    ; $926A
+                jsr GetLinkEnd    ; $926A
                 lda #$FF    ; $926D
                 sta ($00),y    ; $926F
                 iny    ; $9271
@@ -16121,23 +18196,25 @@
                 bcc $928A    ; $9293
                 jsr $9322    ; $9295
                 lda #$37    ; $9298
-                sta $5987    ; $929A
+                sta CompList    ; $929A
                 lda #$9B    ; $929D
                 sta $5988    ; $929F
                 dey    ; $92A2
                 lda #$9B    ; $92A3
                 sta $0200,y    ; $92A5
-                jsr $5AE5    ; $92A8
-                lda $598B    ; $92AB
+                jsr SI:CompleteMe    ; $92A8
+                lda CompCount    ; $92AB
                 cmp #$01    ; $92AE
                 bne $92B8    ; $92B0
-                jsr $5A2E    ; $92B2
-                jsr $7898    ; $92B5
+                jsr FunctionRef    ; $92B2
+                jsr CallTemp    ; $92B5
                 jmp $9221    ; $92B8
-                jsr $7A7F    ; $92BB
-                beq $92E0    ; $92BE
-                jsr $57CC    ; $92C0
-                jsr $5968    ; $92C3
+;
+; === FlushLibs ===
+                jsr AnyArgument?    ; $92BB
+                beq SI:FlushLibs    ; $92BE
+                jsr NewEchoArea    ; $92C0
+                jsr PrintMessage    ; $92C3
                 dec $EC    ; $92C6
                 sbc $F3,x    ; $92C8
                 inx    ; $92CA
@@ -16147,16 +18224,18 @@
                 sbc ($E9)    ; $92D1
                 sbc $F3    ; $92D3
                 brk    ; $92D5
-                jsr $7D20    ; $92D6
+                jsr GetYOrNp    ; $92D6
                 php    ; $92D9
-                jsr $57FA    ; $92DA
+                jsr CloseEchoArea    ; $92DA
                 plp    ; $92DD
                 bne $930D    ; $92DE
+;
+; === SI:FlushLibs ===
                 lda #$5D    ; $92E0
                 sta $00    ; $92E2
                 lda #$97    ; $92E4
                 sta $01    ; $92E6
-                jsr $5AD4    ; $92E8
+                jsr GetCompLink    ; $92E8
                 ldy #$00    ; $92EB
                 tya    ; $92ED
                 sta ($00),y    ; $92EE
@@ -16164,18 +18243,20 @@
                 sta $00    ; $92F2
                 lda #$9B    ; $92F4
                 sta $01    ; $92F6
-                jsr $5AD4    ; $92F8
+                jsr GetCompLink    ; $92F8
                 ldy #$00    ; $92FB
                 tya    ; $92FD
                 sta ($00),y    ; $92FE
-                sta $91DA    ; $9300
+                sta LibCount    ; $9300
                 lda #$00    ; $9303
-                sta $91D8    ; $9305
+                sta BaseLibAddr    ; $9305
                 lda #$D8    ; $9308
                 sta $91D9    ; $930A
                 lda #$01    ; $930D
                 rts    ; $930F
-                jsr $8355    ; $9310
+;
+; === CopyLibPfx ===
+                jsr SetSysPath    ; $9310
                 ldx #$00    ; $9313
                 lda $91DB,x    ; $9315
                 sta $0200,y    ; $9318
@@ -16184,7 +18265,7 @@
                 cpx #$04    ; $931D
                 bcc $9315    ; $931F
                 rts    ; $9321
-                ldx $91DA    ; $9322
+                ldx LibCount    ; $9322
                 dex    ; $9325
                 txa    ; $9326
                 asl    ; $9327
@@ -16192,14 +18273,16 @@
                 asl    ; $9329
                 asl    ; $932A
                 tax    ; $932B
-                lda $D480,x    ; $932C
+                lda LibNames,x    ; $932C
                 sta $0200,y    ; $932F
                 inx    ; $9332
                 iny    ; $9333
                 cmp #$8D    ; $9334
                 bne $932C    ; $9336
                 rts    ; $9338
-                jsr $5AD4    ; $9339
+;
+; === GetLinkEnd ===
+                jsr GetCompLink    ; $9339
                 ldy #$00    ; $933C
                 lda ($00),y    ; $933E
                 beq $9351    ; $9340
@@ -16211,7 +18294,7 @@
                 sta $01    ; $9349
                 pla    ; $934B
                 sta $00    ; $934C
-                jmp $9339    ; $934E
+                jmp GetLinkEnd    ; $934E
                 rts    ; $9351
                 sta $04    ; $9352
                 ldy #$00    ; $9354
@@ -16266,18 +18349,20 @@
                 bcc $93A5    ; $93A1
                 inc $01    ; $93A3
                 jmp $9354    ; $93A5
-                jsr $93FA    ; $93A8
+;
+; === IN:LibLoad ===
+                jsr AddLibName    ; $93A8
                 bne $93DD    ; $93AB
-                jsr $9310    ; $93AD
+                jsr CopyLibPfx    ; $93AD
                 jsr $9322    ; $93B0
-                jsr $729D    ; $93B3
+                jsr DSK:OpenFile    ; $93B3
                 bne $93DA    ; $93B6
-                jsr $72FE    ; $93B8
-                lda $91D8    ; $93BB
+                jsr PrepRead    ; $93B8
+                lda BaseLibAddr    ; $93BB
                 sta $00    ; $93BE
                 lda $91D9    ; $93C0
                 sta $01    ; $93C3
-                jsr $72AB    ; $93C5
+                jsr DSK:ReadByte    ; $93C5
                 bne $93E3    ; $93C8
                 ldy #$00    ; $93CA
                 sta ($00),y    ; $93CC
@@ -16287,29 +18372,31 @@
                 lda $01    ; $93D4
                 cmp #$E0    ; $93D6
                 bcc $93C5    ; $93D8
-                dec $91DA    ; $93DA
-                jsr $73E5    ; $93DD
+                dec LibCount    ; $93DA
+                jsr DSK:CloseFile    ; $93DD
                 lda #$FF    ; $93E0
                 rts    ; $93E2
                 ldx #$01    ; $93E3
                 lda $00,x    ; $93E5
                 pha    ; $93E7
-                lda $91D8,x    ; $93E8
+                lda BaseLibAddr,x    ; $93E8
                 sta $00,x    ; $93EB
                 pla    ; $93ED
-                sta $91D8,x    ; $93EE
+                sta BaseLibAddr,x    ; $93EE
                 dex    ; $93F1
                 bpl $93E5    ; $93F2
-                jsr $73E5    ; $93F4
+                jsr DSK:CloseFile    ; $93F4
                 lda #$00    ; $93F7
                 rts    ; $93F9
-                lda $91DA    ; $93FA
+;
+; === AddLibName ===
+                lda LibCount    ; $93FA
                 cmp #$08    ; $93FD
                 bcs $9435    ; $93FF
                 ldy #$00    ; $9401
                 lda $0200,y    ; $9403
                 ora #$80    ; $9406
-                jsr $36FD    ; $9408
+                jsr UpperCon    ; $9408
                 sta $0200,y    ; $940B
                 iny    ; $940E
                 cmp #$8D    ; $940F
@@ -16318,7 +18405,7 @@
                 stx $04    ; $9415
                 ldy #$00    ; $9417
                 lda $04    ; $9419
-                cmp $91DA    ; $941B
+                cmp LibCount    ; $941B
                 bcs $943C    ; $941E
                 asl    ; $9420
                 asl    ; $9421
@@ -16326,7 +18413,7 @@
                 asl    ; $9423
                 tax    ; $9424
                 lda $0200,y    ; $9425
-                cmp $D480,x    ; $9428
+                cmp LibNames,x    ; $9428
                 bne $9438    ; $942B
                 cmp #$8D    ; $942D
                 beq $9435    ; $942F
@@ -16337,7 +18424,7 @@
                 rts    ; $9437
                 inc $04    ; $9438
                 bne $943C    ; $943A
-                lda $91DA    ; $943C
+                lda LibCount    ; $943C
                 asl    ; $943F
                 asl    ; $9440
                 asl    ; $9441
@@ -16345,14 +18432,14 @@
                 tay    ; $9443
                 ldx #$00    ; $9444
                 lda $0200,x    ; $9446
-                sta $D480,y    ; $9449
+                sta LibNames,y    ; $9449
                 inx    ; $944C
                 cpx #$10    ; $944D
                 bcs $9456    ; $944F
                 iny    ; $9451
                 cmp #$8D    ; $9452
                 bne $9446    ; $9454
-                inc $91DA    ; $9456
+                inc LibCount    ; $9456
                 lda #$00    ; $9459
                 rts    ; $945B
                 tax    ; $945C
@@ -16361,6 +18448,8 @@
         dfb $D3        ; $9460  (data/65C02-bit)
                 tax    ; $9461
                 brk    ; $9462
+;
+; === TheTag ===
                 brk    ; $9463
                 brk    ; $9464
                 brk    ; $9465
@@ -16391,6 +18480,8 @@
                 brk    ; $947E
                 brk    ; $947F
                 brk    ; $9480
+;
+; === TagsFindFile ===
         dfb $FF        ; $9481  (data/65C02-bit)
                 brk    ; $9482
                 brk    ; $9483
@@ -16398,29 +18489,31 @@
                 brk    ; $9485
                 brk    ; $9486
                 brk    ; $9487
+;
+; === GetTagBuff ===
                 ldy #$FF    ; $9488
                 iny    ; $948A
                 lda $945C,y    ; $948B
                 sta $0200,y    ; $948E
                 bne $948A    ; $9491
-                jsr $47E7    ; $9493
+                jsr FindBuffer    ; $9493
                 bne $94D0    ; $9496
-                cpx $0F3A    ; $9498
+                cpx SelectedBuff    ; $9498
                 bne $94B3    ; $949B
-                jsr $4CBE    ; $949D
-                lda $66    ; $94A0
+                jsr KillGap    ; $949D
+                lda BuffTop    ; $94A0
                 sta $00    ; $94A2
                 lda $67    ; $94A4
                 sta $01    ; $94A6
-                lda $6A    ; $94A8
+                lda GapTop    ; $94A8
                 sta $02    ; $94AA
                 lda $6B    ; $94AC
                 sta $03    ; $94AE
                 jmp $94C4    ; $94B0
-                jsr $42FC    ; $94B3
+                jsr PointToBInfo    ; $94B3
                 ldy #$0E    ; $94B6
                 ldx #$00    ; $94B8
-                lda ($5E),y    ; $94BA
+                lda (BuffPoint),y    ; $94BA
                 sta $00,x    ; $94BC
                 iny    ; $94BE
                 inx    ; $94BF
@@ -16433,14 +18526,18 @@
                 lda #$00    ; $94CE
                 rts    ; $94D0
                 brk    ; $94D1
+;
+; === ScanForTag ===
                 lda #$00    ; $94D2
                 beq $94D8    ; $94D4
+;
+; === WhatTagFile ===
                 lda #$FF    ; $94D6
                 sta $94D1    ; $94D8
-                jsr $9488    ; $94DB
+                jsr GetTagBuff    ; $94DB
                 beq $9506    ; $94DE
-                jsr $57CC    ; $94E0
-                jsr $5968    ; $94E3
+                jsr NewEchoArea    ; $94E0
+                jsr PrintMessage    ; $94E3
                 cmp $F3E9    ; $94E6
         dfb $F3        ; $94E9  (data/65C02-bit)
                 sbc #$EE    ; $94EA
@@ -16457,10 +18554,10 @@
                 ldx $2000    ; $94FB
                 plx    ; $94FE
         dfb $57        ; $94FF  (data/65C02-bit)
-                jsr $29B9    ; $9500
+                jsr Beep    ; $9500
                 lda #$01    ; $9503
                 rts    ; $9505
-                jsr $7A7F    ; $9506
+                jsr AnyArgument?    ; $9506
                 bne $952E    ; $9509
                 lda $00    ; $950B
                 clc    ; $950D
@@ -16477,9 +18574,9 @@
                 adc $9485    ; $9526
                 sta $01    ; $9529
                 jmp $9580    ; $952B
-                jsr $7C32    ; $952E
+                jsr GetStrArg    ; $952E
                 beq $956D    ; $9531
-                jsr $57CC    ; $9533
+                jsr NewEchoArea    ; $9533
                 lda #$20    ; $9536
                 sta $00    ; $9538
                 lda #$97    ; $953A
@@ -16490,12 +18587,12 @@
                 sta $00    ; $9545
                 lda #$97    ; $9547
                 sta $01    ; $9549
-                jsr $598F    ; $954B
-                jsr $3B23    ; $954E
+                jsr DCIStringOut    ; $954B
+                jsr ReadArgLine    ; $954E
                 php    ; $9551
                 txa    ; $9552
                 pha    ; $9553
-                jsr $57FA    ; $9554
+                jsr CloseEchoArea    ; $9554
                 pla    ; $9557
                 tax    ; $9558
                 plp    ; $9559
@@ -16503,19 +18600,19 @@
                 txa    ; $955C
                 bne $956D    ; $955D
                 bne $9567    ; $955F
-                jsr $579B    ; $9561
+                jsr ClrEchoArea    ; $9561
                 jmp $956A    ; $9564
-                jsr $29B9    ; $9567
+                jsr Beep    ; $9567
                 lda #$01    ; $956A
                 rts    ; $956C
                 lda #$8D    ; $956D
                 sta $0200,x    ; $956F
                 ldx #$1D    ; $9572
                 lda $0200,x    ; $9574
-                sta $9463,x    ; $9577
+                sta TheTag,x    ; $9577
                 dex    ; $957A
                 bpl $9574    ; $957B
-                jsr $9488    ; $957D
+                jsr GetTagBuff    ; $957D
                 ldy #$00    ; $9580
                 ldx #$00    ; $9582
                 jsr $D000    ; $9584
@@ -16532,12 +18629,12 @@
                 bcs $9595    ; $959C
                 jsr $D000    ; $959E
                 ora #$80    ; $95A1
-                jsr $36FD    ; $95A3
+                jsr UpperCon    ; $95A3
                 sta $971D    ; $95A6
-                lda $9463,x    ; $95A9
+                lda TheTag,x    ; $95A9
                 cmp #$8D    ; $95AC
                 beq $95E0    ; $95AE
-                jsr $36FD    ; $95B0
+                jsr UpperCon    ; $95B0
                 cmp $971D    ; $95B3
                 bne $95D1    ; $95B6
                 inx    ; $95B8
@@ -16615,7 +18712,7 @@
                 cmp #$8D    ; $9650
                 bne $9642    ; $9652
                 lda $0200,x    ; $9654
-                sta $03C1,x    ; $9657
+                sta TagSpace,x    ; $9657
                 dex    ; $965A
                 bpl $9654    ; $965B
                 inx    ; $965D
@@ -16641,22 +18738,22 @@
                 bne $9677    ; $968A
                 bit $94D1    ; $968C
                 bmi $96A4    ; $968F
-                jsr $42AE    ; $9691
+                jsr PushArg    ; $9691
                 lda #$FF    ; $9694
-                sta $7A5D    ; $9696
-                bit $9481    ; $9699
+                sta ExplicitArg    ; $9696
+                bit TagsFindFile    ; $9699
                 bmi $96E3    ; $969C
-                jsr $6756    ; $969E
+                jsr VisitFile    ; $969E
                 jmp $96E6    ; $96A1
-                jsr $57CC    ; $96A4
+                jsr NewEchoArea    ; $96A4
                 ldx #$00    ; $96A7
-                lda $03C1,x    ; $96A9
+                lda TagSpace,x    ; $96A9
                 cmp #$8D    ; $96AC
                 beq $96B6    ; $96AE
-                jsr $2611    ; $96B0
+                jsr CharOut    ; $96B0
                 inx    ; $96B3
                 bne $96A9    ; $96B4
-                jsr $5968    ; $96B6
+                jsr PrintMessage    ; $96B6
                 ldy #$E3    ; $96B9
                 sbc ($EE,x)    ; $96BB
                 ldy #$E2    ; $96BD
@@ -16669,28 +18766,28 @@
                 lda $0200,y    ; $96CB
                 cmp #$8D    ; $96CE
                 beq $96D8    ; $96D0
-                jsr $2611    ; $96D2
+                jsr CharOut    ; $96D2
                 iny    ; $96D5
                 bne $96CB    ; $96D6
                 lda #$AE    ; $96D8
-                jsr $2611    ; $96DA
-                jsr $57FA    ; $96DD
+                jsr CharOut    ; $96DA
+                jsr CloseEchoArea    ; $96DD
                 lda #$01    ; $96E0
                 rts    ; $96E2
-                jsr $6BBE    ; $96E3
+                jsr FindFile    ; $96E3
                 ldx #$00    ; $96E6
-                lda $03C1,x    ; $96E8
+                lda TagSpace,x    ; $96E8
                 sta $0200,x    ; $96EB
                 inx    ; $96EE
                 cmp #$8D    ; $96EF
                 bne $96E8    ; $96F1
-                jsr $42AE    ; $96F3
-                jmp $63CA    ; $96F6
-                jsr $57CC    ; $96F9
+                jsr PushArg    ; $96F3
+                jmp LabelSearch    ; $96F6
+                jsr NewEchoArea    ; $96F9
                 lda #$A7    ; $96FC
-                jsr $2611    ; $96FE
+                jsr CharOut    ; $96FE
                 jsr $9739    ; $9701
-                jsr $5968    ; $9704
+                jsr PrintMessage    ; $9704
         dfb $A7        ; $9707  (data/65C02-bit)
                 ldy #$EE    ; $9708
         dfb $EF        ; $970A  (data/65C02-bit)
@@ -16700,8 +18797,8 @@
                 sbc $EE,x    ; $970F
                 cpx $AE    ; $9711
                 brk    ; $9713
-                jsr $57FA    ; $9714
-                jsr $29B9    ; $9717
+                jsr CloseEchoArea    ; $9714
+                jsr Beep    ; $9717
                 lda #$01    ; $971A
                 rts    ; $971C
                 brk    ; $971D
@@ -16721,21 +18818,25 @@
                 sbc ($E7,x)    ; $9736
                 dec    ; $9738
                 ldx #$00    ; $9739
-                lda $9463,x    ; $973B
+                lda TheTag,x    ; $973B
                 cmp #$8D    ; $973E
                 beq $9748    ; $9740
-                jsr $2611    ; $9742
+                jsr CharOut    ; $9742
                 inx    ; $9745
                 bne $973B    ; $9746
                 rts    ; $9748
+;
+; === VisitTags ===
                 ldx #$FF    ; $9749
-                stx $7A5D    ; $974B
+                stx ExplicitArg    ; $974B
                 inx    ; $974E
                 lda $945C,x    ; $974F
                 sta $0200,x    ; $9752
                 bne $974E    ; $9755
-                jsr $45B5    ; $9757
-                jmp $6756    ; $975A
+                jsr SelectNamed    ; $9757
+                jmp VisitFile    ; $975A
+;
+; === Variables ===
                 cmp ($F5,x)    ; $975D
         dfb $F4        ; $975F  (data/65C02-bit)
         dfb $EF        ; $9760  (data/65C02-bit)
@@ -16779,7 +18880,7 @@
                 sbc $F2    ; $97A4
                 ldy #$D3    ; $97A6
                 beq $978F    ; $97A8
-                sbc $64    ; $97AA
+                sbc MarkPnt    ; $97AA
                 bit #$9A    ; $97AC
                 eor $C3BA,y    ; $97AE
                 sbc ($F3,x)    ; $97B1
@@ -16892,7 +18993,7 @@
                 cpx $C3A0    ; $987C
         dfb $EF        ; $987F  (data/65C02-bit)
                 cpx $EDF5    ; $9880
-                ror $9A6D    ; $9883
+                ror VarList    ; $9883
                 ply    ; $9886
                 lda $EFC7,y    ; $9887
                 sbc ($EC,x)    ; $988A
@@ -16908,7 +19009,7 @@
                 ldy #$CE    ; $989E
                 sbc $ED,x    ; $98A0
         dfb $E2        ; $98A2  (data/65C02-bit)
-                sbc $72    ; $98A3
+                sbc BuffData    ; $98A3
                 lda #$9A    ; $98A5
         dfb $13        ; $98A7  (data/65C02-bit)
                 ldx $C3C8,y    ; $98A8
@@ -16981,7 +19082,7 @@
                 sbc $A0    ; $9925
                 dec $EDF5    ; $9927
         dfb $E2        ; $992A  (data/65C02-bit)
-                sbc $72    ; $992B
+                sbc BuffData    ; $992B
                 ora ($9B,x)    ; $992D
         dfb $E3        ; $992F  (data/65C02-bit)
                 ldy $C3C8,x    ; $9930
@@ -17152,12 +19253,16 @@
                 txs    ; $9A67
         dfb $02        ; $9A68  (data/65C02-bit)
         dfb $B3        ; $9A69  (data/65C02-bit)
+;
+; === VariableLink ===
                 brk    ; $9A6A
                 brk    ; $9A6B
                 brk    ; $9A6C
+;
+; === VarList ===
                 brk    ; $9A6D
         dfb $FF        ; $9A6E  (data/65C02-bit)
-                ldy: $001F    ; $9A6F
+                ldy: scrny    ; $9A6F
                 clc    ; $9A72
                 sbc $31,x    ; $9A73
                 brk    ; $9A75
@@ -17172,7 +19277,7 @@
                 and $18    ; $9A87
                 brk    ; $9A89
         dfb $FF        ; $9A8A  (data/65C02-bit)
-                eor $29    ; $9A8B
+                eor BASH    ; $9A8B
         dfb $03        ; $9A8D  (data/65C02-bit)
                 brk    ; $9A8E
         dfb $37        ; $9A8F  (data/65C02-bit)

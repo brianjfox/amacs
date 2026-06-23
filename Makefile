@@ -13,8 +13,9 @@
 GOLD    := BIN/AMACS.OBJ
 SRC     := src/amacs.s
 REGIONS := src/regions.json
+SYMBOLS := src/symbols.json
 
-.PHONY: all check setup blob disasm build verify clean
+.PHONY: all check setup blob symbols disasm build verify clean
 
 all: check
 
@@ -27,9 +28,13 @@ $(SRC): tools/make_blob_source.py $(GOLD)
 blob:
 	tools/make_blob_source.py $(GOLD) $(SRC)
 
-# Regenerate the Stage 2 disassembly from the binary + code/data region map.
+# Rebuild the address->name table from LINK.OUTPUT.S + DEFS equates.
+symbols:
+	tools/build_symbols.py $(SYMBOLS)
+
+# Regenerate the disassembly from the binary + region map + symbol table.
 disasm:
-	tools/disasm.py $(GOLD) $(SRC) $(REGIONS)
+	tools/disasm.py $(GOLD) $(SRC) $(REGIONS) $(SYMBOLS)
 
 build:
 	tools/build.sh
