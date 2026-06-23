@@ -10,10 +10,11 @@
 # The contract: `make check` must stay green. A change that alters a single
 # output byte is wrong and is caught here immediately.
 
-GOLD := BIN/AMACS.OBJ
-SRC  := src/amacs.s
+GOLD    := BIN/AMACS.OBJ
+SRC     := src/amacs.s
+REGIONS := src/regions.json
 
-.PHONY: all check setup blob build verify clean
+.PHONY: all check setup blob disasm build verify clean
 
 all: check
 
@@ -25,6 +26,10 @@ $(SRC): tools/make_blob_source.py $(GOLD)
 
 blob:
 	tools/make_blob_source.py $(GOLD) $(SRC)
+
+# Regenerate the Stage 2 disassembly from the binary + code/data region map.
+disasm:
+	tools/disasm.py $(GOLD) $(SRC) $(REGIONS)
 
 build:
 	tools/build.sh

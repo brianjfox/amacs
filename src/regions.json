@@ -1,0 +1,7 @@
+[
+  { "start": "1027", "end": "1035", "kind": "data", "name": "entry pointer block (CompList,CommandNames,CharIndex,ComTab,C_XCharacters,C_XVectors,C_XCharCount)" },
+  { "start": "7DB8", "end": "7DDE", "kind": "data", "name": "C_XCharacters (38 extended-key chars)" },
+  { "start": "7DDE", "end": "7E2A", "kind": "data", "name": "C_XVectors (38 handler addresses)" },
+  { "start": "7E2A", "end": "7E2B", "kind": "data", "name": "C_XCharCount ($26 = 38)" },
+  { "start": "9B37", "end": "A4F8", "kind": "data", "name": "CommandNames (alphabetical command-name string table, runs to EOF)" }
+]

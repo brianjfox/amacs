@@ -160,11 +160,15 @@ it from the binary; it is committed so CI needs no special step.)
 Round-trip proven green (positive + negative), output confirmed headerless,
 `org`/`dsk` semantics settled. da65/SourceGen still to be added for Phase 1.
 
-**Phase 1 — One-shot raw disassembly + symbol seed.** Produce a full da65 (or
-SourceGen) listing of $1000–$A4F7 as the working baseline. Mechanically import
-all 700 `LINK.OUTPUT.S` names as labels and the `DEFS` equates as symbol
-definitions. Goal: a listing that *reassembles byte-identical right now* even
-though most of it is still bare addresses + auto-labels. This is the safety net.
+**Phase 1 — One-shot raw disassembly. ✓ DONE.** `tools/disasm.py` is a
+round-trip-safe 65C02 linear disassembler (built in-house — no da65 needed). It
+emits Merlin source with numeric operands that **reassembles byte-identical**
+(confirmed by `make check`). Empirically verified Merlin 32 encoding rules:
+zero-page is chosen by operand value `< $100`, and the `:` mnemonic suffix forces
+absolute (`lda: $0060` → `AD 60 00`); 65C02-only modes (STZ/BRA/PHX/`($zp)`/
+JMP `($abs,x)`/BIT-imm) confirmed. Merlin 32 cannot assemble the Rockwell
+`RMB/SMB/BBR/BBS` ($x7/$xF) ops — but AMACS sets `IfNCR65C02 = 0`, so those bytes
+occur only in data and are emitted as `dfb`. Regenerate with `make disasm`.
 
 **Phase 2 — Header & vector block (done-on-paper already).** Hand-author
 $1000–$1034 from `EXTERNAL.EQUS.S` (table in §1): 13 `JMP`s + 7 word pointers.
@@ -218,9 +222,31 @@ Throughout: disassemble a region → label → reassemble → confirm byte-ident
 
 ## 6. Region tracker (filled in as we go)
 
-| Range | State | Notes |
-|-------|-------|-------|
-| $1000–$1034 | identified, not yet authored | entry vector block (see §1) |
-| $1035–$A4F7 | raw | everything else |
+The full image is **disassembled and round-trips byte-identical** (`make check`).
+Code/data split is a confident first cut, recorded in `src/regions.json`:
 
-(States: raw → disassembled → labeled → verified.)
+| Range | Kind | State | Notes |
+|-------|------|-------|-------|
+| $1000–$1026 | code | disassembled | 13-entry JMP vector block (matches EXTERNAL.EQUS, §1) |
+| $1027–$1034 | data | carved | 7 word pointers: CompList=$5987, CommandNames=$9B37, CharIndex=$3F6D, ComTab=$4F84, C_XCharacters=$7DB8, C_XVectors=$7DDE, C_XCharCount=$7E2A |
+| $1035 | data (1 byte) | noted | AMACSStack — saved stack ptr (`stx $1035` at $1047); refine in symbolication |
+| $1036–$7DB7 | code | disassembled | bulk editor code (numeric operands, not yet labeled) |
+| $7DB8–$7DDD | data | carved | C_XCharacters — 38 extended-key chars |
+| $7DDE–$7E29 | data | carved | C_XVectors — 38 handler addresses (little-endian) |
+| $7E2A | data | carved | C_XCharCount = $26 (38) |
+| $7E2B–$9B36 | code | disassembled | more editor code |
+| $9B37–$A4F7 | data | carved | CommandNames — alphabetical command-name string table to EOF |
+
+(States: raw → disassembled → carved/labeled → verified.)
+
+**Known data-table starts still inside "code" spans** (from the pointer block;
+extents not yet bounded — to be carved as symbolication reveals their edges):
+ComTab=$4F84, CharIndex=$3F6D, CompList=$5987, plus the many `*Msg`/`*String`/
+table symbols in LINK.OUTPUT. These are emitted as (harmless, round-tripping)
+pseudo-instructions for now; flagged so we don't mistake them for real code.
+
+### Stage status (per PROMPTS.md)
+- Stage 0 (orientation) ✓ · Stage 1 (harness) ✓ · Stage 2 (disassembly + first
+  code/data cut, round-trips) ✓
+- Stage 3 (symbolication from LINK.OUTPUT — the 700 names) — next.
+- Stages 4–5 (behavioral labels + bank-switch flags; comments/polish) — pending.
