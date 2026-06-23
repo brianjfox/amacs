@@ -215,6 +215,21 @@ def disassemble(out, data, start, end, sym, aliases, stats):
             out.append(f";")
             out.append(f"; === {sym[key]}{extra} ===")
         op = data[i]
+        # Collapse $00/$FF fill runs into a `ds' directive. We're at an
+        # instruction boundary here, so this never splits a real instruction;
+        # 4+ consecutive $00/$FF in a code span is zero/fill data, not code.
+        if op in (0x00, 0xFF):
+            j = i
+            while j < off1 and data[j] == op:
+                j += 1
+            if j - i >= 4:
+                if op == 0x00:
+                    out.append(f"        ds {j - i}        ; ${addr:04X}  {j - i} bytes $00 fill")
+                else:
+                    out.append(f"        ds {j - i},$FF    ; ${addr:04X}  {j - i} bytes $FF fill")
+                stats["fill"] += 1
+                i = j
+                continue
         entry = OPC.get(op)
         if entry is None:
             out.append(f"        dfb ${op:02X}        ; ${addr:04X}  (data/65C02-bit)")
@@ -311,7 +326,7 @@ def main(argv):
 
     out += [f"        org ${ORG:04X}", "        dsk AMACS.OBJ", ";"]
 
-    stats = {"instrs": 0, "operands": 0, "named": 0, "bank": 0}
+    stats = {"instrs": 0, "operands": 0, "named": 0, "bank": 0, "fill": 0}
     names = {(int(str(r["start"]), 16)): r.get("name", "") for r in regions}
     for (s, e, kind) in spans:
         nm = names.get(s, "")
@@ -330,7 +345,8 @@ def main(argv):
     pct = (100 * stats["named"] // stats["operands"]) if stats["operands"] else 0
     print(f"wrote {out_s}: {len(out)} lines, {len(data)} bytes, {len(spans)} regions; "
           f"{stats['instrs']} instrs, {stats['named']}/{stats['operands']} "
-          f"address operands named ({pct}%), {stats['bank']} bank-switch sites flagged")
+          f"address operands named ({pct}%), {stats['bank']} bank-switch sites flagged, "
+          f"{stats['fill']} fill runs collapsed")
     return 0
 
 

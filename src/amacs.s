@@ -2447,20 +2447,7 @@ IIcLoc             = $FBC0
 ;
 ; === CommentColumn ===
                 jsr $00BB    ; $1CFF
-                brk    ; $1D02
-                brk    ; $1D03
-                brk    ; $1D04
-;
-; === CommentEnd ===
-                brk    ; $1D05
-                brk    ; $1D06
-                brk    ; $1D07
-                brk    ; $1D08
-                brk    ; $1D09
-;
-; === StringPntr ===
-                brk    ; $1D0A
-                brk    ; $1D0B
+        ds 10        ; $1D02  10 bytes $00 fill
 ;
 ; === StringInLine ===
                 jsr SetGap    ; $1D0C
@@ -2913,13 +2900,7 @@ IIcLoc             = $FBC0
                 rts    ; $20A4
 ;
 ; === FillPrefix ===
-                brk    ; $20A5
-                brk    ; $20A6
-                brk    ; $20A7
-                brk    ; $20A8
-                brk    ; $20A9
-                brk    ; $20AA
-                brk    ; $20AB
+        ds 7        ; $20A5  7 bytes $00 fill
 ;
 ; === SetFillPrefix ===
                 jsr SetGap    ; $20AC
@@ -3035,12 +3016,7 @@ IIcLoc             = $FBC0
 ; === LabelChars ===
                 tay    ; $2198
         dfb $DB        ; $2199  (data/65C02-bit)
-                brk    ; $219A
-                brk    ; $219B
-                brk    ; $219C
-;
-; === AlphaLabel ===
-                brk    ; $219D
+        ds 4        ; $219A  4 bytes $00 fill
 ;
 ; === LabelChar? ===
                 sta $21CE    ; $219E
@@ -3462,12 +3438,7 @@ IIcLoc             = $FBC0
                 beq $251F    ; $251B
                 lda #$02    ; $251D
                 rts    ; $251F
-                brk    ; $2520
-                brk    ; $2521
-                brk    ; $2522
-                brk    ; $2523
-                brk    ; $2524
-                brk    ; $2525
+        ds 6        ; $2520  6 bytes $00 fill
 ;
 ; === BackToIndent ===
                 jsr BegOfLine    ; $2526
@@ -3581,10 +3552,7 @@ IIcLoc             = $FBC0
                 lda $2600    ; $25F9
                 jsr IndentLine    ; $25FC
                 rts    ; $25FF
-                brk    ; $2600
-                brk    ; $2601
-                brk    ; $2602
-                brk    ; $2603
+        ds 4        ; $2600  4 bytes $00 fill
 ;
 ; === AltmodeChar ===
                 ldy $00    ; $2604
@@ -3646,10 +3614,7 @@ IIcLoc             = $FBC0
                 lda $2675    ; $2670
                 plp    ; $2673
                 rts    ; $2674
-                brk    ; $2675
-                brk    ; $2676
-                brk    ; $2677
-                brk    ; $2678
+        ds 4        ; $2675  4 bytes $00 fill
 ;
 ; === PrintCR ===
                 jsr ClearEOL    ; $2679
@@ -3842,77 +3807,7 @@ IIcLoc             = $FBC0
                 rts    ; $27A6
 ;
 ; === TYIBuff ===
-                brk    ; $27A7
-                brk    ; $27A8
-                brk    ; $27A9
-                brk    ; $27AA
-                brk    ; $27AB
-                brk    ; $27AC
-                brk    ; $27AD
-                brk    ; $27AE
-                brk    ; $27AF
-                brk    ; $27B0
-                brk    ; $27B1
-                brk    ; $27B2
-                brk    ; $27B3
-                brk    ; $27B4
-                brk    ; $27B5
-                brk    ; $27B6
-                brk    ; $27B7
-                brk    ; $27B8
-                brk    ; $27B9
-                brk    ; $27BA
-                brk    ; $27BB
-                brk    ; $27BC
-                brk    ; $27BD
-                brk    ; $27BE
-                brk    ; $27BF
-                brk    ; $27C0
-                brk    ; $27C1
-                brk    ; $27C2
-                brk    ; $27C3
-                brk    ; $27C4
-                brk    ; $27C5
-                brk    ; $27C6
-                brk    ; $27C7
-                brk    ; $27C8
-                brk    ; $27C9
-                brk    ; $27CA
-                brk    ; $27CB
-                brk    ; $27CC
-                brk    ; $27CD
-                brk    ; $27CE
-                brk    ; $27CF
-                brk    ; $27D0
-                brk    ; $27D1
-                brk    ; $27D2
-                brk    ; $27D3
-                brk    ; $27D4
-                brk    ; $27D5
-                brk    ; $27D6
-                brk    ; $27D7
-                brk    ; $27D8
-                brk    ; $27D9
-                brk    ; $27DA
-                brk    ; $27DB
-                brk    ; $27DC
-                brk    ; $27DD
-                brk    ; $27DE
-                brk    ; $27DF
-                brk    ; $27E0
-                brk    ; $27E1
-                brk    ; $27E2
-                brk    ; $27E3
-                brk    ; $27E4
-                brk    ; $27E5
-                brk    ; $27E6
-;
-; === TYI_PopIndex ===
-                brk    ; $27E7
-;
-; === TYI_PushIndex ===
-                brk    ; $27E8
-                brk    ; $27E9
+        ds 67        ; $27A7  67 bytes $00 fill
 ;
 ; === KillTYI ===
                 lda TYI_PopIndex    ; $27EA
@@ -4038,12 +3933,7 @@ IIcLoc             = $FBC0
                 rts    ; $28B6
 ;
 ; === Cursor2 ===
-                brk    ; $28B7
-                brk    ; $28B8
-;
-; === BlinkTime ===
-                brk    ; $28B9
-                brk    ; $28BA
+        ds 4        ; $28B7  4 bytes $00 fill
 ;
 ; === TimedBlink ===
                 lda CV    ; $28BB
@@ -4198,13 +4088,7 @@ IIcLoc             = $FBC0
                 rts    ; $29D4
 ;
 ; === ParenFlag ===
-                brk    ; $29D5
-;
-; === ParenPos ===
-                brk    ; $29D6
-                brk    ; $29D7
-                brk    ; $29D8
-                brk    ; $29D9
+        ds 5        ; $29D5  5 bytes $00 fill
                 bit ParenFlag    ; $29DA
                 bpl $2A36    ; $29DD
                 tya    ; $29DF
@@ -4316,20 +4200,7 @@ IIcLoc             = $FBC0
                 ora $2B    ; $2A97
 ;
 ; === AbortedTO? ===
-                brk    ; $2A99
-;
-; === TOAbortStk ===
-                brk    ; $2A9A
-;
-; === TypeoutMax ===
-                brk    ; $2A9B
-                brk    ; $2A9C
-                brk    ; $2A9D
-                brk    ; $2A9E
-;
-; === TypeoutCH ===
-                brk    ; $2A9F
-                brk    ; $2AA0
+        ds 8        ; $2A99  8 bytes $00 fill
 ;
 ; === InitTypeout ===
                 lda WindowTop    ; $2AA1
@@ -4419,12 +4290,7 @@ IIcLoc             = $FBC0
                 bcc $2B47    ; $2B4F
                 jsr vtab1    ; $2B51
                 rts    ; $2B54
-                brk    ; $2B55
-                brk    ; $2B56
-                brk    ; $2B57
-                brk    ; $2B58
-                brk    ; $2B59
-                brk    ; $2B5A
+        ds 6        ; $2B55  6 bytes $00 fill
 ;
 ; === GetTypeWind ===
                 ldy #$00    ; $2B5B
@@ -4479,10 +4345,7 @@ IIcLoc             = $FBC0
                 jsr RstrWind    ; $2BBA
                 lda #$01    ; $2BBD
                 rts    ; $2BBF
-                brk    ; $2BC0
-                brk    ; $2BC1
-                brk    ; $2BC2
-                brk    ; $2BC3
+        ds 4        ; $2BC0  4 bytes $00 fill
                 jsr UnTYI    ; $2BC4
                 ldx #$FF    ; $2BC7
                 stx AbortedTO?    ; $2BC9
@@ -4808,10 +4671,7 @@ IIcLoc             = $FBC0
                 cmp #$8D    ; $2E5A
                 bne $2E37    ; $2E5C
                 rts    ; $2E5E
-                brk    ; $2E5F
-                brk    ; $2E60
-                brk    ; $2E61
-                brk    ; $2E62
+        ds 4        ; $2E5F  4 bytes $00 fill
 ;
 ; === BackScrLine ===
                 lda WindowTop    ; $2E63
@@ -5453,17 +5313,7 @@ IIcLoc             = $FBC0
                 jmp $329F    ; $32FC
 ;
 ; === ScrollLineTop ===
-                brk    ; $32FF
-;
-; === ScrollLineBot ===
-                brk    ; $3300
-;
-; === ScrollDir ===
-                brk    ; $3301
-;
-; === ScrollDest ===
-                brk    ; $3302
-                brk    ; $3303
+        ds 5        ; $32FF  5 bytes $00 fill
 ;
 ; === Scroll ===
                 lda WindowRgt    ; $3304
@@ -5586,15 +5436,7 @@ IIcLoc             = $FBC0
                 jmp $33E6    ; $33FF
                 lda #$00    ; $3402
                 rts    ; $3404
-                brk    ; $3405
-;
-; === GoalColumn ===
-                brk    ; $3406
-                brk    ; $3407
-;
-; === UserGoal ===
-                brk    ; $3408
-                brk    ; $3409
+        ds 5        ; $3405  5 bytes $00 fill
 ;
 ; === GetGoalColumn ===
                 lda UserGoal    ; $340A
@@ -7895,10 +7737,7 @@ IIcLoc             = $FBC0
                 jsr $472F    ; $4725
                 lda #$06    ; $4728
                 rts    ; $472A
-                brk    ; $472B
-                brk    ; $472C
-                brk    ; $472D
-                brk    ; $472E
+        ds 4        ; $472B  4 bytes $00 fill
                 ldy #$52    ; $472F
                 ldx #$00    ; $4731
                 lda $0200,x    ; $4733
@@ -7922,12 +7761,7 @@ IIcLoc             = $FBC0
                 jsr $472F    ; $4754
                 lda #$01    ; $4757
                 rts    ; $4759
-                brk    ; $475A
-                brk    ; $475B
-                brk    ; $475C
-                brk    ; $475D
-                brk    ; $475E
-                brk    ; $475F
+        ds 6        ; $475A  6 bytes $00 fill
                 lda $475E    ; $4760
                 sta $00    ; $4763
                 lda $475F    ; $4765
@@ -8626,25 +8460,7 @@ IIcLoc             = $FBC0
                 rts    ; $4CE9
 ;
 ; === MarkStack ===
-                brk    ; $4CEA
-                brk    ; $4CEB
-                brk    ; $4CEC
-                brk    ; $4CED
-                brk    ; $4CEE
-                brk    ; $4CEF
-                brk    ; $4CF0
-                brk    ; $4CF1
-                brk    ; $4CF2
-                brk    ; $4CF3
-                brk    ; $4CF4
-                brk    ; $4CF5
-                brk    ; $4CF6
-                brk    ; $4CF7
-                brk    ; $4CF8
-                brk    ; $4CF9
-;
-; === MarkStackPntr ===
-                brk    ; $4CFA
+        ds 17        ; $4CEA  17 bytes $00 fill
 ;
 ; === PushMark ===
                 lda TheBuffer    ; $4CFB
@@ -9021,16 +8837,7 @@ IIcLoc             = $FBC0
                 sbc $E6,x    ; $5070
                 inc $E5    ; $5072
                 sbc ($73)    ; $5074
-                brk    ; $5076
-                brk    ; $5077
-                brk    ; $5078
-                brk    ; $5079
-                brk    ; $507A
-                brk    ; $507B
-                brk    ; $507C
-                brk    ; $507D
-                brk    ; $507E
-                brk    ; $507F
+        ds 10        ; $5076  10 bytes $00 fill
                 ldx $1B    ; $5080
                 inc $AB37,x    ; $5082
                 and $A6,x    ; $5085
@@ -9620,10 +9427,7 @@ IIcLoc             = $FBC0
                 pla    ; $556F
                 bpl $5566    ; $5570
                 rts    ; $5572
-                brk    ; $5573
-                brk    ; $5574
-                brk    ; $5575
-                brk    ; $5576
+        ds 4        ; $5573  4 bytes $00 fill
 ;
 ; === SI:Divide ===
                 sta $5576    ; $5577
@@ -9660,23 +9464,7 @@ IIcLoc             = $FBC0
                 brk    ; $55BC
                 ora $4B32,y    ; $55BD
                 stz $00    ; $55C0
-                brk    ; $55C2
-                brk    ; $55C3
-                brk    ; $55C4
-                brk    ; $55C5
-                brk    ; $55C6
-                brk    ; $55C7
-                brk    ; $55C8
-                brk    ; $55C9
-                brk    ; $55CA
-;
-; === P:Offset ===
-                brk    ; $55CB
-                brk    ; $55CC
-;
-; === P:Total ===
-                brk    ; $55CD
-                brk    ; $55CE
+        ds 13        ; $55C2  13 bytes $00 fill
 ;
 ; === BuffPercent ===
                 lda TheBuffer    ; $55CF
@@ -9916,12 +9704,7 @@ IIcLoc             = $FBC0
                 jmp ClearPage    ; $57CF
 ;
 ; === EchoAreaSave ===
-                brk    ; $57D2
-                brk    ; $57D3
-                brk    ; $57D4
-                brk    ; $57D5
-                brk    ; $57D6
-                brk    ; $57D7
+        ds 6        ; $57D2  6 bytes $00 fill
 ;
 ; === OpenEchoArea ===
                 ldx #$00    ; $57D8
@@ -10200,10 +9983,7 @@ IIcLoc             = $FBC0
                 bcc $59E3    ; $5A09
                 bcs $59C6    ; $5A0B
                 rts    ; $5A0D
-                brk    ; $5A0E
-                brk    ; $5A0F
-                brk    ; $5A10
-                brk    ; $5A11
+        ds 4        ; $5A0E  4 bytes $00 fill
 ;
 ; === DocRef ===
                 jsr DCIStringLen    ; $5A12
@@ -10435,346 +10215,7 @@ IIcLoc             = $FBC0
                 lda $5BC6    ; $5BBF
                 eor #$FF    ; $5BC2
                 rts    ; $5BC4
-                brk    ; $5BC5
-                brk    ; $5BC6
-                brk    ; $5BC7
-;
-; === SearchDefault ===
-                brk    ; $5BC8
-                brk    ; $5BC9
-                brk    ; $5BCA
-                brk    ; $5BCB
-                brk    ; $5BCC
-                brk    ; $5BCD
-                brk    ; $5BCE
-                brk    ; $5BCF
-                brk    ; $5BD0
-                brk    ; $5BD1
-                brk    ; $5BD2
-                brk    ; $5BD3
-                brk    ; $5BD4
-                brk    ; $5BD5
-                brk    ; $5BD6
-                brk    ; $5BD7
-                brk    ; $5BD8
-                brk    ; $5BD9
-                brk    ; $5BDA
-                brk    ; $5BDB
-                brk    ; $5BDC
-                brk    ; $5BDD
-                brk    ; $5BDE
-                brk    ; $5BDF
-                brk    ; $5BE0
-                brk    ; $5BE1
-                brk    ; $5BE2
-                brk    ; $5BE3
-                brk    ; $5BE4
-                brk    ; $5BE5
-                brk    ; $5BE6
-                brk    ; $5BE7
-                brk    ; $5BE8
-                brk    ; $5BE9
-                brk    ; $5BEA
-                brk    ; $5BEB
-                brk    ; $5BEC
-                brk    ; $5BED
-                brk    ; $5BEE
-                brk    ; $5BEF
-                brk    ; $5BF0
-;
-; === SearchString ===
-                brk    ; $5BF1
-                brk    ; $5BF2
-                brk    ; $5BF3
-                brk    ; $5BF4
-                brk    ; $5BF5
-                brk    ; $5BF6
-                brk    ; $5BF7
-                brk    ; $5BF8
-                brk    ; $5BF9
-                brk    ; $5BFA
-                brk    ; $5BFB
-                brk    ; $5BFC
-                brk    ; $5BFD
-                brk    ; $5BFE
-                brk    ; $5BFF
-                brk    ; $5C00
-                brk    ; $5C01
-                brk    ; $5C02
-                brk    ; $5C03
-                brk    ; $5C04
-                brk    ; $5C05
-                brk    ; $5C06
-                brk    ; $5C07
-                brk    ; $5C08
-                brk    ; $5C09
-                brk    ; $5C0A
-                brk    ; $5C0B
-                brk    ; $5C0C
-                brk    ; $5C0D
-                brk    ; $5C0E
-                brk    ; $5C0F
-                brk    ; $5C10
-                brk    ; $5C11
-                brk    ; $5C12
-                brk    ; $5C13
-                brk    ; $5C14
-                brk    ; $5C15
-                brk    ; $5C16
-                brk    ; $5C17
-                brk    ; $5C18
-;
-; === ISearchStack ===
-                brk    ; $5C19
-                brk    ; $5C1A
-                brk    ; $5C1B
-                brk    ; $5C1C
-                brk    ; $5C1D
-                brk    ; $5C1E
-                brk    ; $5C1F
-                brk    ; $5C20
-                brk    ; $5C21
-                brk    ; $5C22
-                brk    ; $5C23
-                brk    ; $5C24
-                brk    ; $5C25
-                brk    ; $5C26
-                brk    ; $5C27
-                brk    ; $5C28
-                brk    ; $5C29
-                brk    ; $5C2A
-                brk    ; $5C2B
-                brk    ; $5C2C
-                brk    ; $5C2D
-                brk    ; $5C2E
-                brk    ; $5C2F
-                brk    ; $5C30
-                brk    ; $5C31
-                brk    ; $5C32
-                brk    ; $5C33
-                brk    ; $5C34
-                brk    ; $5C35
-                brk    ; $5C36
-                brk    ; $5C37
-                brk    ; $5C38
-                brk    ; $5C39
-                brk    ; $5C3A
-                brk    ; $5C3B
-                brk    ; $5C3C
-                brk    ; $5C3D
-                brk    ; $5C3E
-                brk    ; $5C3F
-                brk    ; $5C40
-                brk    ; $5C41
-                brk    ; $5C42
-                brk    ; $5C43
-                brk    ; $5C44
-                brk    ; $5C45
-                brk    ; $5C46
-                brk    ; $5C47
-                brk    ; $5C48
-                brk    ; $5C49
-                brk    ; $5C4A
-                brk    ; $5C4B
-                brk    ; $5C4C
-                brk    ; $5C4D
-                brk    ; $5C4E
-                brk    ; $5C4F
-                brk    ; $5C50
-                brk    ; $5C51
-                brk    ; $5C52
-                brk    ; $5C53
-                brk    ; $5C54
-                brk    ; $5C55
-                brk    ; $5C56
-                brk    ; $5C57
-                brk    ; $5C58
-                brk    ; $5C59
-                brk    ; $5C5A
-                brk    ; $5C5B
-                brk    ; $5C5C
-                brk    ; $5C5D
-                brk    ; $5C5E
-                brk    ; $5C5F
-                brk    ; $5C60
-                brk    ; $5C61
-                brk    ; $5C62
-                brk    ; $5C63
-                brk    ; $5C64
-                brk    ; $5C65
-                brk    ; $5C66
-                brk    ; $5C67
-                brk    ; $5C68
-                brk    ; $5C69
-                brk    ; $5C6A
-                brk    ; $5C6B
-                brk    ; $5C6C
-                brk    ; $5C6D
-                brk    ; $5C6E
-                brk    ; $5C6F
-                brk    ; $5C70
-                brk    ; $5C71
-                brk    ; $5C72
-                brk    ; $5C73
-                brk    ; $5C74
-                brk    ; $5C75
-                brk    ; $5C76
-                brk    ; $5C77
-                brk    ; $5C78
-                brk    ; $5C79
-                brk    ; $5C7A
-                brk    ; $5C7B
-                brk    ; $5C7C
-                brk    ; $5C7D
-                brk    ; $5C7E
-                brk    ; $5C7F
-                brk    ; $5C80
-                brk    ; $5C81
-                brk    ; $5C82
-                brk    ; $5C83
-                brk    ; $5C84
-                brk    ; $5C85
-                brk    ; $5C86
-                brk    ; $5C87
-                brk    ; $5C88
-                brk    ; $5C89
-                brk    ; $5C8A
-                brk    ; $5C8B
-                brk    ; $5C8C
-                brk    ; $5C8D
-                brk    ; $5C8E
-                brk    ; $5C8F
-                brk    ; $5C90
-                brk    ; $5C91
-                brk    ; $5C92
-                brk    ; $5C93
-                brk    ; $5C94
-                brk    ; $5C95
-                brk    ; $5C96
-                brk    ; $5C97
-                brk    ; $5C98
-                brk    ; $5C99
-                brk    ; $5C9A
-                brk    ; $5C9B
-                brk    ; $5C9C
-                brk    ; $5C9D
-                brk    ; $5C9E
-                brk    ; $5C9F
-                brk    ; $5CA0
-                brk    ; $5CA1
-                brk    ; $5CA2
-                brk    ; $5CA3
-                brk    ; $5CA4
-                brk    ; $5CA5
-                brk    ; $5CA6
-                brk    ; $5CA7
-                brk    ; $5CA8
-                brk    ; $5CA9
-                brk    ; $5CAA
-                brk    ; $5CAB
-                brk    ; $5CAC
-                brk    ; $5CAD
-                brk    ; $5CAE
-                brk    ; $5CAF
-                brk    ; $5CB0
-                brk    ; $5CB1
-                brk    ; $5CB2
-                brk    ; $5CB3
-                brk    ; $5CB4
-                brk    ; $5CB5
-                brk    ; $5CB6
-                brk    ; $5CB7
-                brk    ; $5CB8
-                brk    ; $5CB9
-                brk    ; $5CBA
-                brk    ; $5CBB
-                brk    ; $5CBC
-                brk    ; $5CBD
-                brk    ; $5CBE
-                brk    ; $5CBF
-                brk    ; $5CC0
-                brk    ; $5CC1
-                brk    ; $5CC2
-                brk    ; $5CC3
-                brk    ; $5CC4
-                brk    ; $5CC5
-                brk    ; $5CC6
-                brk    ; $5CC7
-                brk    ; $5CC8
-                brk    ; $5CC9
-                brk    ; $5CCA
-                brk    ; $5CCB
-                brk    ; $5CCC
-                brk    ; $5CCD
-                brk    ; $5CCE
-                brk    ; $5CCF
-                brk    ; $5CD0
-                brk    ; $5CD1
-                brk    ; $5CD2
-                brk    ; $5CD3
-                brk    ; $5CD4
-                brk    ; $5CD5
-                brk    ; $5CD6
-                brk    ; $5CD7
-                brk    ; $5CD8
-                brk    ; $5CD9
-                brk    ; $5CDA
-                brk    ; $5CDB
-                brk    ; $5CDC
-                brk    ; $5CDD
-                brk    ; $5CDE
-                brk    ; $5CDF
-                brk    ; $5CE0
-                brk    ; $5CE1
-                brk    ; $5CE2
-                brk    ; $5CE3
-                brk    ; $5CE4
-                brk    ; $5CE5
-                brk    ; $5CE6
-                brk    ; $5CE7
-                brk    ; $5CE8
-                brk    ; $5CE9
-                brk    ; $5CEA
-                brk    ; $5CEB
-                brk    ; $5CEC
-                brk    ; $5CED
-                brk    ; $5CEE
-                brk    ; $5CEF
-                brk    ; $5CF0
-                brk    ; $5CF1
-                brk    ; $5CF2
-                brk    ; $5CF3
-                brk    ; $5CF4
-                brk    ; $5CF5
-                brk    ; $5CF6
-                brk    ; $5CF7
-                brk    ; $5CF8
-                brk    ; $5CF9
-                brk    ; $5CFA
-                brk    ; $5CFB
-                brk    ; $5CFC
-                brk    ; $5CFD
-                brk    ; $5CFE
-                brk    ; $5CFF
-                brk    ; $5D00
-                brk    ; $5D01
-                brk    ; $5D02
-                brk    ; $5D03
-                brk    ; $5D04
-                brk    ; $5D05
-                brk    ; $5D06
-                brk    ; $5D07
-                brk    ; $5D08
-;
-; === IStackPntr ===
-                brk    ; $5D09
-;
-; === ISearchDir ===
-                brk    ; $5D0A
-                brk    ; $5D0B
-                brk    ; $5D0C
-                brk    ; $5D0D
-                brk    ; $5D0E
+        ds 330        ; $5BC5  330 bytes $00 fill
 ;
 ; === SMoveMax ===
         dfb $F4        ; $5D0F  (data/65C02-bit)
@@ -12025,16 +11466,7 @@ IIcLoc             = $FBC0
                 rts    ; $674D
 ;
 ; === AutoFileExt ===
-                brk    ; $674E
-                brk    ; $674F
-                brk    ; $6750
-                brk    ; $6751
-                brk    ; $6752
-                brk    ; $6753
-;
-; === ShowExtension ===
-                brk    ; $6754
-                brk    ; $6755
+        ds 8        ; $674E  8 bytes $00 fill
 ;
 ; === VisitFile ===
                 lda #$00    ; $6756
@@ -12748,24 +12180,7 @@ IIcLoc             = $FBC0
                 rts    ; $6D70
 ;
 ; === MLIParams ===
-                brk    ; $6D71
-                brk    ; $6D72
-                brk    ; $6D73
-                brk    ; $6D74
-                brk    ; $6D75
-                brk    ; $6D76
-                brk    ; $6D77
-                brk    ; $6D78
-                brk    ; $6D79
-                brk    ; $6D7A
-                brk    ; $6D7B
-                brk    ; $6D7C
-                brk    ; $6D7D
-                brk    ; $6D7E
-                brk    ; $6D7F
-                brk    ; $6D80
-                brk    ; $6D81
-                brk    ; $6D82
+        ds 18        ; $6D71  18 bytes $00 fill
 ;
 ; === DefFileType ===
                 tsb $A2    ; $6D83
@@ -12839,17 +12254,7 @@ IIcLoc             = $FBC0
                 adc #$01    ; $6E00
                 sta $6DF1    ; $6E02
                 rts    ; $6E05
-                brk    ; $6E06
-                brk    ; $6E07
-                brk    ; $6E08
-                brk    ; $6E09
-                brk    ; $6E0A
-;
-; === Time ===
-                brk    ; $6E0B
-                brk    ; $6E0C
-                brk    ; $6E0D
-                brk    ; $6E0E
+        ds 9        ; $6E06  9 bytes $00 fill
 ;
 ; === GetSysDate ===
                 lda SysTheDate    ; $6E0F
@@ -13118,88 +12523,9 @@ IIcLoc             = $FBC0
                 rts    ; $7055
 ;
 ; === VolInfo ===
-                brk    ; $7056
-                brk    ; $7057
-                brk    ; $7058
-                brk    ; $7059
-                brk    ; $705A
-                brk    ; $705B
-                brk    ; $705C
-                brk    ; $705D
-                brk    ; $705E
-                brk    ; $705F
-                brk    ; $7060
-                brk    ; $7061
-                brk    ; $7062
-                brk    ; $7063
-                brk    ; $7064
-                brk    ; $7065
-                brk    ; $7066
-                brk    ; $7067
-                brk    ; $7068
-                brk    ; $7069
-                brk    ; $706A
-                brk    ; $706B
-                brk    ; $706C
-                brk    ; $706D
-                brk    ; $706E
-                brk    ; $706F
-                brk    ; $7070
-                brk    ; $7071
-                brk    ; $7072
-                brk    ; $7073
-                brk    ; $7074
-                brk    ; $7075
-                brk    ; $7076
-                brk    ; $7077
-                brk    ; $7078
-                brk    ; $7079
-                brk    ; $707A
-                brk    ; $707B
-                brk    ; $707C
+        ds 39        ; $7056  39 bytes $00 fill
                 jsr $0000    ; $707D
-                brk    ; $7080
-                brk    ; $7081
-                brk    ; $7082
-                brk    ; $7083
-                brk    ; $7084
-                brk    ; $7085
-                brk    ; $7086
-                brk    ; $7087
-                brk    ; $7088
-                brk    ; $7089
-                brk    ; $708A
-                brk    ; $708B
-                brk    ; $708C
-                brk    ; $708D
-                brk    ; $708E
-                brk    ; $708F
-                brk    ; $7090
-                brk    ; $7091
-                brk    ; $7092
-                brk    ; $7093
-                brk    ; $7094
-                brk    ; $7095
-                brk    ; $7096
-                brk    ; $7097
-                brk    ; $7098
-                brk    ; $7099
-                brk    ; $709A
-                brk    ; $709B
-                brk    ; $709C
-                brk    ; $709D
-                brk    ; $709E
-                brk    ; $709F
-                brk    ; $70A0
-                brk    ; $70A1
-                brk    ; $70A2
-                brk    ; $70A3
-                brk    ; $70A4
-                brk    ; $70A5
-                brk    ; $70A6
-                brk    ; $70A7
-                brk    ; $70A8
-                brk    ; $70A9
+        ds 42        ; $7080  42 bytes $00 fill
 ;
 ; === MakePath ===
                 ldx #$00    ; $70AA
@@ -13260,13 +12586,7 @@ IIcLoc             = $FBC0
                 brk    ; $7122
                 rts    ; $7123
         dfb $02        ; $7124  (data/65C02-bit)
-                brk    ; $7125
-;
-; === GblLength ===
-                brk    ; $7126
-                brk    ; $7127
-                brk    ; $7128
-                brk    ; $7129
+        ds 5        ; $7125  5 bytes $00 fill
 ;
 ; === CompFile ===
                 ldy ThePathname    ; $712A
@@ -13925,70 +13245,7 @@ IIcLoc             = $FBC0
                 rts    ; $76E3
 ;
 ; === Compiler ===
-                brk    ; $76E4
-                brk    ; $76E5
-                brk    ; $76E6
-                brk    ; $76E7
-                brk    ; $76E8
-                brk    ; $76E9
-                brk    ; $76EA
-                brk    ; $76EB
-                brk    ; $76EC
-                brk    ; $76ED
-                brk    ; $76EE
-                brk    ; $76EF
-                brk    ; $76F0
-                brk    ; $76F1
-                brk    ; $76F2
-                brk    ; $76F3
-                brk    ; $76F4
-                brk    ; $76F5
-                brk    ; $76F6
-                brk    ; $76F7
-                brk    ; $76F8
-                brk    ; $76F9
-                brk    ; $76FA
-                brk    ; $76FB
-                brk    ; $76FC
-                brk    ; $76FD
-                brk    ; $76FE
-                brk    ; $76FF
-                brk    ; $7700
-                brk    ; $7701
-                brk    ; $7702
-                brk    ; $7703
-                brk    ; $7704
-                brk    ; $7705
-                brk    ; $7706
-                brk    ; $7707
-                brk    ; $7708
-                brk    ; $7709
-                brk    ; $770A
-                brk    ; $770B
-                brk    ; $770C
-                brk    ; $770D
-                brk    ; $770E
-                brk    ; $770F
-                brk    ; $7710
-                brk    ; $7711
-                brk    ; $7712
-                brk    ; $7713
-                brk    ; $7714
-                brk    ; $7715
-                brk    ; $7716
-                brk    ; $7717
-                brk    ; $7718
-                brk    ; $7719
-                brk    ; $771A
-                brk    ; $771B
-                brk    ; $771C
-                brk    ; $771D
-                brk    ; $771E
-                brk    ; $771F
-                brk    ; $7720
-                brk    ; $7721
-                brk    ; $7722
-                brk    ; $7723
+        ds 64        ; $76E4  64 bytes $00 fill
 ;
 ; === Compile ===
                 jsr DSK:ChkExit    ; $7724
@@ -14121,25 +13378,7 @@ IIcLoc             = $FBC0
                 cpx $7831    ; $782A
                 bne $7802    ; $782D
                 rts    ; $782F
-                brk    ; $7830
-                brk    ; $7831
-;
-; === CommandChar ===
-                brk    ; $7832
-;
-; === LastCommand ===
-                brk    ; $7833
-;
-; === CommandVector ===
-                brk    ; $7834
-                brk    ; $7835
-;
-; === LastComVect ===
-                brk    ; $7836
-                brk    ; $7837
-;
-; === DisplayCode ===
-                brk    ; $7838
+        ds 9        ; $7830  9 bytes $00 fill
 ;
 ; === DispatchTab ===
                 sty $4F    ; $7839
@@ -14585,140 +13824,7 @@ IIcLoc             = $FBC0
         dfb $9B        ; $7BA6  (data/65C02-bit)
 ;
 ; === StringArgs ===
-                brk    ; $7BA7
-                brk    ; $7BA8
-                brk    ; $7BA9
-                brk    ; $7BAA
-                brk    ; $7BAB
-                brk    ; $7BAC
-                brk    ; $7BAD
-                brk    ; $7BAE
-                brk    ; $7BAF
-                brk    ; $7BB0
-                brk    ; $7BB1
-                brk    ; $7BB2
-                brk    ; $7BB3
-                brk    ; $7BB4
-                brk    ; $7BB5
-                brk    ; $7BB6
-                brk    ; $7BB7
-                brk    ; $7BB8
-                brk    ; $7BB9
-                brk    ; $7BBA
-                brk    ; $7BBB
-                brk    ; $7BBC
-                brk    ; $7BBD
-                brk    ; $7BBE
-                brk    ; $7BBF
-                brk    ; $7BC0
-                brk    ; $7BC1
-                brk    ; $7BC2
-                brk    ; $7BC3
-                brk    ; $7BC4
-                brk    ; $7BC5
-                brk    ; $7BC6
-                brk    ; $7BC7
-                brk    ; $7BC8
-                brk    ; $7BC9
-                brk    ; $7BCA
-                brk    ; $7BCB
-                brk    ; $7BCC
-                brk    ; $7BCD
-                brk    ; $7BCE
-                brk    ; $7BCF
-                brk    ; $7BD0
-                brk    ; $7BD1
-                brk    ; $7BD2
-                brk    ; $7BD3
-                brk    ; $7BD4
-                brk    ; $7BD5
-                brk    ; $7BD6
-                brk    ; $7BD7
-                brk    ; $7BD8
-                brk    ; $7BD9
-                brk    ; $7BDA
-                brk    ; $7BDB
-                brk    ; $7BDC
-                brk    ; $7BDD
-                brk    ; $7BDE
-                brk    ; $7BDF
-                brk    ; $7BE0
-                brk    ; $7BE1
-                brk    ; $7BE2
-                brk    ; $7BE3
-                brk    ; $7BE4
-                brk    ; $7BE5
-                brk    ; $7BE6
-                brk    ; $7BE7
-                brk    ; $7BE8
-                brk    ; $7BE9
-                brk    ; $7BEA
-                brk    ; $7BEB
-                brk    ; $7BEC
-                brk    ; $7BED
-                brk    ; $7BEE
-                brk    ; $7BEF
-                brk    ; $7BF0
-                brk    ; $7BF1
-                brk    ; $7BF2
-                brk    ; $7BF3
-                brk    ; $7BF4
-                brk    ; $7BF5
-                brk    ; $7BF6
-                brk    ; $7BF7
-                brk    ; $7BF8
-                brk    ; $7BF9
-                brk    ; $7BFA
-                brk    ; $7BFB
-                brk    ; $7BFC
-                brk    ; $7BFD
-                brk    ; $7BFE
-                brk    ; $7BFF
-                brk    ; $7C00
-                brk    ; $7C01
-                brk    ; $7C02
-                brk    ; $7C03
-                brk    ; $7C04
-                brk    ; $7C05
-                brk    ; $7C06
-                brk    ; $7C07
-                brk    ; $7C08
-                brk    ; $7C09
-                brk    ; $7C0A
-                brk    ; $7C0B
-                brk    ; $7C0C
-                brk    ; $7C0D
-                brk    ; $7C0E
-                brk    ; $7C0F
-                brk    ; $7C10
-                brk    ; $7C11
-                brk    ; $7C12
-                brk    ; $7C13
-                brk    ; $7C14
-                brk    ; $7C15
-                brk    ; $7C16
-                brk    ; $7C17
-                brk    ; $7C18
-                brk    ; $7C19
-                brk    ; $7C1A
-                brk    ; $7C1B
-                brk    ; $7C1C
-                brk    ; $7C1D
-                brk    ; $7C1E
-                brk    ; $7C1F
-                brk    ; $7C20
-                brk    ; $7C21
-                brk    ; $7C22
-                brk    ; $7C23
-                brk    ; $7C24
-                brk    ; $7C25
-                brk    ; $7C26
-;
-; === ArgCount ===
-                brk    ; $7C27
-;
-; === ArgIndex ===
-                brk    ; $7C28
+        ds 130        ; $7BA7  130 bytes $00 fill
 ;
 ; === InitStrArgs ===
                 lda #$00    ; $7C29
@@ -15625,48 +14731,7 @@ IIcLoc             = $FBC0
                 sbc ($E3,x)    ; $8326
         dfb $F3        ; $8328  (data/65C02-bit)
         dfb $AF        ; $8329  (data/65C02-bit)
-                brk    ; $832A
-                brk    ; $832B
-                brk    ; $832C
-                brk    ; $832D
-                brk    ; $832E
-                brk    ; $832F
-                brk    ; $8330
-                brk    ; $8331
-                brk    ; $8332
-                brk    ; $8333
-                brk    ; $8334
-                brk    ; $8335
-                brk    ; $8336
-                brk    ; $8337
-                brk    ; $8338
-                brk    ; $8339
-                brk    ; $833A
-                brk    ; $833B
-                brk    ; $833C
-                brk    ; $833D
-                brk    ; $833E
-                brk    ; $833F
-                brk    ; $8340
-                brk    ; $8341
-                brk    ; $8342
-                brk    ; $8343
-                brk    ; $8344
-                brk    ; $8345
-                brk    ; $8346
-                brk    ; $8347
-                brk    ; $8348
-                brk    ; $8349
-                brk    ; $834A
-                brk    ; $834B
-                brk    ; $834C
-                brk    ; $834D
-                brk    ; $834E
-                brk    ; $834F
-                brk    ; $8350
-                brk    ; $8351
-                brk    ; $8352
-                brk    ; $8353
+        ds 42        ; $832A  42 bytes $00 fill
         dfb $9F        ; $8354  (data/65C02-bit)
 ;
 ; === SetSysPath ===
@@ -15806,14 +14871,7 @@ IIcLoc             = $FBC0
                 rts    ; $846E
 ;
 ; === QueryFlag ===
-                brk    ; $846F
-;
-; === CaseReplace ===
-                brk    ; $8470
-                brk    ; $8471
-                brk    ; $8472
-                brk    ; $8473
-                brk    ; $8474
+        ds 6        ; $846F  6 bytes $00 fill
 ;
 ; === QueryReplace ===
                 lda #$FF    ; $8475
@@ -16193,16 +15251,7 @@ IIcLoc             = $FBC0
                 jsr SetGap    ; $87A3
                 lda #$01    ; $87A6
                 rts    ; $87A8
-                brk    ; $87A9
-                brk    ; $87AA
-;
-; === PrintOccurs ===
-                brk    ; $87AB
-                brk    ; $87AC
-                brk    ; $87AD
-                brk    ; $87AE
-                brk    ; $87AF
-                brk    ; $87B0
+        ds 8        ; $87A9  8 bytes $00 fill
 ;
 ; === IN:Occur ===
                 sta PrintOccurs    ; $87B1
@@ -16546,18 +15595,7 @@ IIcLoc             = $FBC0
                 jsr PointBackward    ; $8A98
                 jsr BegOfLine    ; $8A9B
                 rts    ; $8A9E
-                brk    ; $8A9F
-                brk    ; $8AA0
-                brk    ; $8AA1
-                brk    ; $8AA2
-                brk    ; $8AA3
-                brk    ; $8AA4
-;
-; === MacroExec ===
-                brk    ; $8AA5
-;
-; === MacroDef ===
-                brk    ; $8AA6
+        ds 8        ; $8A9F  8 bytes $00 fill
 ;
 ; === ViewKbdMacro ===
                 jsr OpenTypeout    ; $8AA7
@@ -16782,11 +15820,7 @@ IIcLoc             = $FBC0
                 rts    ; $8CAD
 ;
 ; === TheRegion ===
-                brk    ; $8CAE
-                brk    ; $8CAF
-                brk    ; $8CB0
-                brk    ; $8CB1
-                brk    ; $8CB2
+        ds 5        ; $8CAE  5 bytes $00 fill
 ;
 ; === OpenRegion ===
                 jsr SetGap    ; $8CB3
@@ -17103,53 +16137,7 @@ IIcLoc             = $FBC0
 ;
 ; === AutoNumber ===
                 ora ($DC,x)    ; $8F3B
-                brk    ; $8F3D
-;
-; === ContextBeg ===
-                brk    ; $8F3E
-                brk    ; $8F3F
-                brk    ; $8F40
-                brk    ; $8F41
-                brk    ; $8F42
-                brk    ; $8F43
-                brk    ; $8F44
-                brk    ; $8F45
-                brk    ; $8F46
-                brk    ; $8F47
-;
-; === ContextEnd ===
-                brk    ; $8F48
-                brk    ; $8F49
-                brk    ; $8F4A
-                brk    ; $8F4B
-                brk    ; $8F4C
-                brk    ; $8F4D
-                brk    ; $8F4E
-                brk    ; $8F4F
-                brk    ; $8F50
-                brk    ; $8F51
-                brk    ; $8F52
-                brk    ; $8F53
-;
-; === PInitStr ===
-                brk    ; $8F54
-                brk    ; $8F55
-                brk    ; $8F56
-                brk    ; $8F57
-                brk    ; $8F58
-                brk    ; $8F59
-                brk    ; $8F5A
-                brk    ; $8F5B
-                brk    ; $8F5C
-                brk    ; $8F5D
-;
-; === LeftMargin ===
-                brk    ; $8F5E
-;
-; === RightMargin ===
-                brk    ; $8F5F
-                brk    ; $8F60
-                brk    ; $8F61
+        ds 37        ; $8F3D  37 bytes $00 fill
                 lda PrinterSlot    ; $8F62
                 ora #$C0    ; $8F65
                 cmp $37    ; $8F67
@@ -17328,10 +16316,7 @@ IIcLoc             = $FBC0
                 lda #$00    ; $90D5
                 sta $8F61    ; $90D7
                 rts    ; $90DA
-                brk    ; $90DB
-                brk    ; $90DC
-                brk    ; $90DD
-                brk    ; $90DE
+        ds 4        ; $90DB  4 bytes $00 fill
                 sta $90DB    ; $90DF
                 stx $90DC    ; $90E2
                 sty $90DD    ; $90E5
@@ -17794,48 +16779,11 @@ IIcLoc             = $FBC0
                 cmp ($C7,x)    ; $945E
         dfb $D3        ; $9460  (data/65C02-bit)
                 tax    ; $9461
-                brk    ; $9462
-;
-; === TheTag ===
-                brk    ; $9463
-                brk    ; $9464
-                brk    ; $9465
-                brk    ; $9466
-                brk    ; $9467
-                brk    ; $9468
-                brk    ; $9469
-                brk    ; $946A
-                brk    ; $946B
-                brk    ; $946C
-                brk    ; $946D
-                brk    ; $946E
-                brk    ; $946F
-                brk    ; $9470
-                brk    ; $9471
-                brk    ; $9472
-                brk    ; $9473
-                brk    ; $9474
-                brk    ; $9475
-                brk    ; $9476
-                brk    ; $9477
-                brk    ; $9478
-                brk    ; $9479
-                brk    ; $947A
-                brk    ; $947B
-                brk    ; $947C
-                brk    ; $947D
-                brk    ; $947E
-                brk    ; $947F
-                brk    ; $9480
+        ds 31        ; $9462  31 bytes $00 fill
 ;
 ; === TagsFindFile ===
         dfb $FF        ; $9481  (data/65C02-bit)
-                brk    ; $9482
-                brk    ; $9483
-                brk    ; $9484
-                brk    ; $9485
-                brk    ; $9486
-                brk    ; $9487
+        ds 6        ; $9482  6 bytes $00 fill
 ;
 ; === GetTagBuff ===
                 ldy #$FF    ; $9488
