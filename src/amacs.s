@@ -836,8 +836,14 @@ IIcLoc             = $FBC0
         jmp FunctionRef    ; $101E
         jmp BindKey    ; $1021
         jmp PushTYI    ; $1024
-; ---- $1027-$1034  data  entry pointer block (CompList..C_XCharCount) ----
-        dfb $87,$59,$37,$9B,$6D,$3F,$84,$4F,$B8,$7D,$DE,$7D,$2A,$7E    ; $1027  .Y7.m?.O8}^}*~
+; ---- $1027-$1034  ptrtable  entry pointer block (CompList..C_XCharCount) ----
+        da  CompList        ; $1027  -> $5987
+        da  CommandNames    ; $1029  -> $9B37
+        da  CharIndex       ; $102B  -> $3F6D
+        da  ComTab          ; $102D  -> $4F84
+        da  C_XCharacters   ; $102F  -> $7DB8
+        da  C_XVectors      ; $1031  -> $7DDE
+        da  C_XCharCount    ; $1033  -> $7E2A
 ; ---- $1035-$111C  code ----
 ;
 ; === AMACSStack ===
@@ -14053,12 +14059,45 @@ L7DB3   lda #$F3    ; $7DB3
         dfb $8F,$96,$93,$98,$81,$BD,$BB,$C5,$82,$C2,$CB,$86,$C6,$B1,$B2,$CF    ; $7DB8  .....=;E.BK.F12O
         dfb $DE,$8C,$95,$83,$84,$FF,$94,$8E,$A8,$A9,$97,$C8,$89,$D6,$C3,$C1    ; $7DC8  ^.......().H.VCA
         dfb $91,$AE,$D2,$CD,$D0,$DC    ; $7DD8  ..RMP\
-; ---- $7DDE-$7E29  data  C_XVectors (38 handler addresses) ----
-        dfb $55,$39,$56,$67,$7D,$6A,$2B,$7E,$10,$1C,$48,$1C,$4A,$7E,$04,$8B    ; $7DDE  U9Vg}j+~..H.J~..
-        dfb $74,$48,$B1,$45,$1F,$4A,$BE,$6B,$3F,$7E,$3F,$13,$23,$12,$C1,$12    ; $7DEE  tH1E.J>k?~?.#.A.
-        dfb $7F,$13,$61,$8D,$75,$8D,$83,$8D,$54,$6B,$F0,$3A,$7D,$8A,$34,$7E    ; $7DFE  ..a.u...Tkp:}.4~
-        dfb $D9,$8B,$05,$8C,$CA,$69,$2F,$4D,$9D,$1B,$49,$97,$14,$1C,$08,$1C    ; $7E0E  Y...Ji/M..I.....
-        dfb $7B,$7E,$AC,$20,$31,$7E,$31,$7E,$31,$7E,$31,$7E    ; $7E1E  {~, 1~1~1~1~
+; ---- $7DDE-$7E29  ptrtable  C_XVectors (38 handler addresses) ----
+        da  DeleteLines     ; $7DDE  -> $3955
+        da  VisitFile       ; $7DE0  -> $6756
+        da  SaveFile        ; $7DE2  -> $6A7D
+        da  SwapMark        ; $7DE4  -> $7E2B
+        da  AutoMode        ; $7DE6  -> $1C10
+        da  PointInfo       ; $7DE8  -> $1C48
+        da  SetCommCol      ; $7DEA  -> $7E4A
+        da  DoLastMacro     ; $7DEC  -> $8B04
+        da  ListBuffers     ; $7DEE  -> $4874
+        da  SelectBuffer    ; $7DF0  -> $45B1
+        da  KillBuffer      ; $7DF2  -> $4A1F
+        da  FindFile        ; $7DF4  -> $6BBE
+        da  SetFillCol      ; $7DF6  -> $7E3F
+        da  OneWindow       ; $7DF8  -> $133F
+        da  TwoWindows      ; $7DFA  -> $1223
+        da  OtherWindow     ; $7DFC  -> $12C1
+        da  GrowWindow      ; $7DFE  -> $137F
+        da  LCaseRegion     ; $7E00  -> $8D61
+        da  UCaseRegion     ; $7E02  -> $8D75
+        da  CCaseRegion     ; $7E04  -> $8D83
+        da  FileLister      ; $7E06  -> $6B54
+        da  KillSentB       ; $7E08  -> $3AF0
+        da  XposeLines      ; $7E0A  -> $8A7D
+        da  SetGoalCol      ; $7E0C  -> $7E34
+        da  StartMacro      ; $7E0E  -> $8BD9
+        da  EndMacro        ; $7E10  -> $8C05
+        da  WriteFile       ; $7E12  -> $69CA
+        da  MarkBuffer      ; $7E14  -> $4D2F
+        da  SetTabsIndent   ; $7E16  -> $1B9D
+        da  VisitTags       ; $7E18  -> $9749
+        da  CapsMode        ; $7E1A  -> $1C14
+        da  AtomMode        ; $7E1C  -> $1C08
+        da  ToggleRO        ; $7E1E  -> $7E7B
+        da  SetFillPrefix   ; $7E20  -> $20AC
+        da  L7E31           ; $7E22  -> $7E31
+        da  L7E31           ; $7E24  -> $7E31
+        da  L7E31           ; $7E26  -> $7E31
+        da  L7E31           ; $7E28  -> $7E31
 ; ---- $7E2A-$7E2A  data  C_XCharCount ($26 = 38) ----
         dfb $26    ; $7E2A  &
 ; ---- $7E2B-$7F31  code ----
@@ -14066,7 +14105,7 @@ L7DB3   lda #$F3    ; $7DB3
 ; === SwapMark ===
         jsr SwapPointMark    ; $7E2B
         jsr SetGap    ; $7E2E
-        lda #$01    ; $7E31
+L7E31   lda #$01    ; $7E31
         rts    ; $7E33
 ;
 ; === SetGoalCol ===

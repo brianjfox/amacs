@@ -286,6 +286,10 @@ carved. Carved, all evidence-based and bounded by the next routine symbol:
   `FileTypeNames $7640` (14 `[type,3-char]` records, TXT..SYS).
 - Variable tables: `Variables $975D`, `VariableLink`, `VarList`,
   `VarDocList`, and the `CommandNames` table to EOF.
+- Pointer tables (`kind: ptrtable`) emit as annotated `da` words showing each
+  target by name: the entry pointer block `$1027` and `C_XVectors $7DDE` (the
+  38 extended-key handlers — DeleteLines, VisitFile, SaveFile, …). Their targets
+  are also seeded as local labels so indirectly-dispatched handlers get named.
 
 ### Needs Brian's confirmation / open questions
 - **AMACSStack $1035** — treated as a 1-byte saved-stack var (see `stx $1035`).

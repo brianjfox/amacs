@@ -2,7 +2,7 @@
   {
     "start": "1027",
     "end": "1035",
-    "kind": "data",
+    "kind": "ptrtable",
     "name": "entry pointer block (CompList..C_XCharCount)"
   },
   {
@@ -608,7 +608,7 @@
   {
     "start": "7DDE",
     "end": "7E2A",
-    "kind": "data",
+    "kind": "ptrtable",
     "name": "C_XVectors (38 handler addresses)"
   },
   {

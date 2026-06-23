@@ -243,6 +243,29 @@ def emit_data(out, data, start, end):
         i += len(chunk)
 
 
+def resolve(word, sym, labels):
+    """Name for an address word: original symbol, else local label, else hex."""
+    key = f"{word:04X}"
+    if key in sym:
+        return sym[key]
+    if key in labels:
+        return labels[key]
+    return f"${word:04X}"
+
+
+def emit_ptrtable(out, data, start, end, sym, labels):
+    """Emit a table of little-endian address words as `da' directives, each
+    annotated with the routine/label it points to. Round-trips like `dfb'."""
+    off = start - ORG
+    end_off = end - ORG
+    while off + 1 < end_off:
+        word = data[off] | (data[off + 1] << 8)
+        out.append(f"        da  {resolve(word, sym, labels):<16}; ${ORG + off:04X}  -> ${word:04X}")
+        off += 2
+    if off < end_off:  # stray trailing byte
+        out.append(f"        dfb ${data[off]:02X}        ; ${ORG + off:04X}")
+
+
 def disassemble(out, data, start, end, sym, aliases, labels, stats):
     """Linear-disassemble bytes [start,end) of the image into Merlin source.
     Emits a `; === Name ===' marker where an instruction starts at a known
@@ -375,8 +398,14 @@ def main(argv):
     # instruction and have no original symbol.
     instr_starts, targets = set(), set()
     for (s, e, kind) in spans:
-        if kind != "data":
+        if kind not in ("data", "ptrtable"):
             scan_code(data, s, e, instr_starts, targets)
+    # Pointer tables hold code entry points reached only by indirect dispatch;
+    # seed them as targets so their handlers get local labels too.
+    for (s, e, kind) in spans:
+        if kind == "ptrtable":
+            for off in range(s - ORG, e - ORG - 1, 2):
+                targets.add(data[off] | (data[off + 1] << 8))
     labels = {f"{a:04X}": f"L{a:04X}" for a in (targets & instr_starts)
               if f"{a:04X}" not in sym}
 
@@ -390,6 +419,8 @@ def main(argv):
         out.append(f"; ---- ${s:04X}-${e - 1:04X}  {tag} ----")
         if kind == "data":
             emit_data(out, data, s, e)
+        elif kind == "ptrtable":
+            emit_ptrtable(out, data, s, e, sym, labels)
         else:
             disassemble(out, data, s, e, sym, aliases, labels, stats)
 

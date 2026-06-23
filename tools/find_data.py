@@ -110,7 +110,11 @@ def main(argv):
             sys.stderr.write(f"ERROR: overlapping regions ${s1:04X}-${e1:04X} / ${s2:04X}\n")
             return 1
 
-    out = [{"start": f"{s:04X}", "end": f"{e:04X}", "kind": "data", "name": nm}
+    # Tables that are arrays of little-endian address words: emit as annotated
+    # `da' so each entry shows the routine it points to.
+    ptrtable_starts = {0x1027, 0x7DDE}
+    out = [{"start": f"{s:04X}", "end": f"{e:04X}",
+            "kind": "ptrtable" if s in ptrtable_starts else "data", "name": nm}
            for (s, e, nm) in regions]
     with open(out_path, "w") as f:
         json.dump(out, f, indent=2)
