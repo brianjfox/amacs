@@ -108,6 +108,24 @@ LEN = {
     "abs": 3, "abx": 3, "aby": 3, "ind": 3, "iax": 3,
 }
 
+# Soft switches that change which RAM bank subsequent code reads/writes or runs
+# in. Referencing these flips the memory map, so each site is flagged loudly in
+# the disassembly (CLAUDE.md: "Flag bank-switch sites prominently"). Behavior is
+# asserted from the hardware, not guessed.
+BANK_NOTES = {
+    0xC002: "BANK: read MAIN 48K (RAMRD off)",
+    0xC003: "BANK: read AUX 48K (RAMRD on)",
+    0xC004: "BANK: write MAIN 48K (RAMWR off)",
+    0xC005: "BANK: write AUX 48K (RAMWR on)",
+    0xC008: "BANK: main zero-page/stack (ALTZP off)",
+    0xC009: "BANK: aux zero-page/stack (ALTZP on)",
+    0xC054: "BANK: display page 1 / main (PAGE2 off)",
+    0xC055: "BANK: display page 2 / aux (PAGE2 on)",
+    0xC083: "BANK: language-card RAM bank 2 (read+write, BIT twice)",
+    0xC08B: "BANK: language-card RAM bank 1 (read+write, BIT twice)",
+    0xC08A: "BANK: language-card ROM (read)",
+}
+
 # Mnemonics that have a zero-page form, so an absolute operand < $100 must be
 # forced with the `:' suffix to stop Merlin shortening it to zero page.
 ZP_CAPABLE = {
@@ -216,7 +234,18 @@ def disassemble(out, data, start, end, sym, aliases, stats):
             stats["operands"] += 1
             if named:
                 stats["named"] += 1
-        out.append(f"        {fmt_instr(addr, out_mne, operand)}    ; ${addr:04X}")
+        # Referenced address (for bank-switch flagging).
+        if mode in ("abs", "abx", "aby", "ind", "iax"):
+            ref = b1 | (b2 << 8)
+        elif mode in ("zp", "zpx", "zpy", "izx", "izy", "izp"):
+            ref = b1
+        else:
+            ref = None
+        note = ""
+        if ref in BANK_NOTES:
+            note = f"   <== {BANK_NOTES[ref]}"
+            stats["bank"] += 1
+        out.append(f"        {fmt_instr(addr, out_mne, operand)}    ; ${addr:04X}{note}")
         i += n
 
 
@@ -282,7 +311,7 @@ def main(argv):
 
     out += [f"        org ${ORG:04X}", "        dsk AMACS.OBJ", ";"]
 
-    stats = {"instrs": 0, "operands": 0, "named": 0}
+    stats = {"instrs": 0, "operands": 0, "named": 0, "bank": 0}
     names = {(int(str(r["start"]), 16)): r.get("name", "") for r in regions}
     for (s, e, kind) in spans:
         nm = names.get(s, "")
@@ -301,7 +330,7 @@ def main(argv):
     pct = (100 * stats["named"] // stats["operands"]) if stats["operands"] else 0
     print(f"wrote {out_s}: {len(out)} lines, {len(data)} bytes, {len(spans)} regions; "
           f"{stats['instrs']} instrs, {stats['named']}/{stats['operands']} "
-          f"address operands named ({pct}%)")
+          f"address operands named ({pct}%), {stats['bank']} bank-switch sites flagged")
     return 0
 
 

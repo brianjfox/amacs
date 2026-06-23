@@ -882,22 +882,22 @@ IIcLoc             = $FBC0
 ; === TopBlink ===
                 ldx #$29    ; $1085
                 lda $00,x    ; $1087
-                sta UseAuxZP    ; $1089
+                sta UseAuxZP    ; $1089   <== BANK: aux zero-page/stack (ALTZP on)
                 sta $00,x    ; $108C
-                sta UseMainZP    ; $108E
+                sta UseMainZP    ; $108E   <== BANK: main zero-page/stack (ALTZP off)
                 dex    ; $1091
                 cpx #$1F    ; $1092
                 bne $1087    ; $1094
-                sta UseAuxZP    ; $1096
+                sta UseAuxZP    ; $1096   <== BANK: aux zero-page/stack (ALTZP on)
                 jsr GetBank1    ; $1099
                 jsr SetParens    ; $109C
-                sta UseMainZP    ; $109F
+                sta UseMainZP    ; $109F   <== BANK: main zero-page/stack (ALTZP off)
                 jsr GetBank2    ; $10A2
                 jmp BlinkCursor    ; $10A5
 ;
 ; === InitAMACS ===
-                lda RdWrBank2    ; $10A8
-                lda RdWrBank2    ; $10AB
+                lda RdWrBank2    ; $10A8   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
+                lda RdWrBank2    ; $10AB   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
                 jsr InitFiler    ; $10AE
                 jsr InitModeLine    ; $10B1
                 jsr InitBuffers    ; $10B4
@@ -923,10 +923,10 @@ IIcLoc             = $FBC0
                 sta TYI_PopIndex    ; $10E2
 ;
 ; === WarmBoot ===
-                lda RdRomBank    ; $10E5
+                lda RdRomBank    ; $10E5   <== BANK: language-card ROM (read)
                 jsr ResetTTY    ; $10E8
-                lda RdWrBank2    ; $10EB
-                lda RdWrBank2    ; $10EE
+                lda RdWrBank2    ; $10EB   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
+                lda RdWrBank2    ; $10EE   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
                 lda WindowBot    ; $10F1
                 sec    ; $10F3
                 sbc #$04    ; $10F4
@@ -3781,11 +3781,11 @@ IIcLoc             = $FBC0
                 lsr    ; $2707
                 tay    ; $2708
                 pla    ; $2709
-                sta Page2    ; $270A
+                sta Page2    ; $270A   <== BANK: display page 2 / aux (PAGE2 on)
                 bcc $2712    ; $270D
-                sta Page1    ; $270F
+                sta Page1    ; $270F   <== BANK: display page 1 / main (PAGE2 off)
                 sta (BASL),y    ; $2712
-                sta Page1    ; $2714
+                sta Page1    ; $2714   <== BANK: display page 1 / main (PAGE2 off)
                 ldy scrny    ; $2717
                 rts    ; $2719
 ;
@@ -3794,12 +3794,12 @@ IIcLoc             = $FBC0
                 tya    ; $271C
                 lsr    ; $271D
                 tay    ; $271E
-                sta Page2    ; $271F
+                sta Page2    ; $271F   <== BANK: display page 2 / aux (PAGE2 on)
                 bcc $2727    ; $2722
-                sta Page1    ; $2724
+                sta Page1    ; $2724   <== BANK: display page 1 / main (PAGE2 off)
                 lda (BASL),y    ; $2727
                 ldy scrny    ; $2729
-                sta Page1    ; $272B
+                sta Page1    ; $272B   <== BANK: display page 1 / main (PAGE2 off)
                 rts    ; $272E
 ;
 ; === KeyDownp ===
@@ -3859,10 +3859,10 @@ IIcLoc             = $FBC0
                 sbc #$1F    ; $2783
                 bit IIgsMode?    ; $2785
                 bpl $2799    ; $2788
-                sta UseAuxZP    ; $278A
+                sta UseAuxZP    ; $278A   <== BANK: aux zero-page/stack (ALTZP on)
                 jsr GetBank1    ; $278D
                 jsr CheckArrowKey    ; $2790
-                sta UseMainZP    ; $2793
+                sta UseMainZP    ; $2793   <== BANK: main zero-page/stack (ALTZP off)
                 jsr GetBank2    ; $2796
                 bit KeyClickp    ; $2799
                 bpl $27A6    ; $279C
@@ -5535,14 +5535,14 @@ IIcLoc             = $FBC0
                 bcs $3337    ; $335C
                 rts    ; $335E
                 ldy #$00    ; $335F
-                sty Page2    ; $3361
+                sty Page2    ; $3361   <== BANK: display page 2 / aux (PAGE2 on)
                 lda (BASL),y    ; $3364
                 sta ($2A),y    ; $3366
                 iny    ; $3368
                 cpy $3303    ; $3369
                 bcc $3364    ; $336C
                 dey    ; $336E
-                sty Page1    ; $336F
+                sty Page1    ; $336F   <== BANK: display page 1 / main (PAGE2 off)
                 lda (BASL),y    ; $3372
                 sta ($2A),y    ; $3374
                 dey    ; $3376
@@ -6862,11 +6862,11 @@ IIcLoc             = $FBC0
                 ldx CharIndex    ; $3DC4
                 lda #$9B    ; $3DC7
                 sta $0200,x    ; $3DC9
-                bit RdWrBank1    ; $3DCC
-                sta UseAuxZP    ; $3DCF
+                bit RdWrBank1    ; $3DCC   <== BANK: language-card RAM bank 1 (read+write, BIT twice)
+                sta UseAuxZP    ; $3DCF   <== BANK: aux zero-page/stack (ALTZP on)
                 jsr SI:CompleteSp    ; $3DD2
                 jsr GetBank2    ; $3DD5
-                sta UseMainZP    ; $3DD8
+                sta UseMainZP    ; $3DD8   <== BANK: main zero-page/stack (ALTZP off)
                 stx CharIndex    ; $3DDB
                 jmp TypeLine    ; $3DDE
 ;
@@ -6923,7 +6923,7 @@ IIcLoc             = $FBC0
                 jsr BackPath    ; $3E3F
                 bit $3E36    ; $3E42
                 bpl $3E73    ; $3E45
-                sta UseAuxZP    ; $3E47
+                sta UseAuxZP    ; $3E47   <== BANK: aux zero-page/stack (ALTZP on)
                 stx $02    ; $3E4A
                 jsr GetBank1    ; $3E4C
                 lda #$80    ; $3E4F
@@ -6940,9 +6940,9 @@ IIcLoc             = $FBC0
                 cmp $D180,y    ; $3E66
                 bne $3E73    ; $3E69
                 beq $3E5D    ; $3E6B
-                sta UseMainZP    ; $3E6D
+                sta UseMainZP    ; $3E6D   <== BANK: main zero-page/stack (ALTZP off)
                 jmp GetBank2    ; $3E70
-                sta UseAuxZP    ; $3E73
+                sta UseAuxZP    ; $3E73   <== BANK: aux zero-page/stack (ALTZP on)
                 jsr GetBank1    ; $3E76
                 ldy $02    ; $3E79
                 lda #$00    ; $3E7B
@@ -6954,14 +6954,14 @@ IIcLoc             = $FBC0
                 sta ($00),y    ; $3E88
                 bne $3E7F    ; $3E8A
                 sty $3E36    ; $3E8C
-                sta UseMainZP    ; $3E8F
+                sta UseMainZP    ; $3E8F   <== BANK: main zero-page/stack (ALTZP off)
                 jsr GetBank2    ; $3E92
-                sta UseAuxZP    ; $3E95
+                sta UseAuxZP    ; $3E95   <== BANK: aux zero-page/stack (ALTZP on)
                 lda #$C0    ; $3E98
                 sta $00    ; $3E9A
                 lda #$D1    ; $3E9C
                 sta $01    ; $3E9E
-                sta UseMainZP    ; $3EA0
+                sta UseMainZP    ; $3EA0   <== BANK: main zero-page/stack (ALTZP off)
                 jsr GetDirInfo    ; $3EA3
                 bcs $3EF7    ; $3EA6
                 jsr NextFile    ; $3EA8
@@ -6969,7 +6969,7 @@ IIcLoc             = $FBC0
                 lda FileInfo    ; $3EAD
                 and #$0F    ; $3EB0
                 sta $3F08    ; $3EB2
-                sta UseAuxZP    ; $3EB5
+                sta UseAuxZP    ; $3EB5   <== BANK: aux zero-page/stack (ALTZP on)
                 jsr GetBank1    ; $3EB8
                 ldy #$00    ; $3EBB
                 lda $707F,y    ; $3EBD
@@ -6997,26 +6997,26 @@ IIcLoc             = $FBC0
                 sta $00    ; $3EE8
                 bcc $3EEE    ; $3EEA
                 inc $01    ; $3EEC
-                sta UseMainZP    ; $3EEE
+                sta UseMainZP    ; $3EEE   <== BANK: main zero-page/stack (ALTZP off)
                 jsr GetBank2    ; $3EF1
                 jmp $3EA8    ; $3EF4
-                sta UseAuxZP    ; $3EF7
+                sta UseAuxZP    ; $3EF7   <== BANK: aux zero-page/stack (ALTZP on)
                 jsr GetBank1    ; $3EFA
                 ldy #$00    ; $3EFD
                 tya    ; $3EFF
                 sta ($00),y    ; $3F00
-                sta UseMainZP    ; $3F02
+                sta UseMainZP    ; $3F02   <== BANK: main zero-page/stack (ALTZP off)
                 jmp GetBank2    ; $3F05
                 brk    ; $3F08
 ;
 ; === GetBank1 ===
-                bit RdWrBank1    ; $3F09
-                bit RdWrBank1    ; $3F0C
+                bit RdWrBank1    ; $3F09   <== BANK: language-card RAM bank 1 (read+write, BIT twice)
+                bit RdWrBank1    ; $3F0C   <== BANK: language-card RAM bank 1 (read+write, BIT twice)
                 rts    ; $3F0F
 ;
 ; === GetBank2 ===
-                bit RdWrBank2    ; $3F10
-                bit RdWrBank2    ; $3F13
+                bit RdWrBank2    ; $3F10   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
+                bit RdWrBank2    ; $3F13   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
                 rts    ; $3F16
 ;
 ; === MustComplete ===
@@ -9011,12 +9011,12 @@ IIcLoc             = $FBC0
                 sta $4DE5    ; $4E48
                 lda $B1    ; $4E4B
                 ldx $B0    ; $4E4D
-                sta UseAuxZP    ; $4E4F
+                sta UseAuxZP    ; $4E4F   <== BANK: aux zero-page/stack (ALTZP on)
                 sta $B1    ; $4E52
                 stx $B0    ; $4E54
                 lda $4DE5    ; $4E56
                 sta ($B0),y    ; $4E59
-                sta UseMainZP    ; $4E5B
+                sta UseMainZP    ; $4E5B   <== BANK: main zero-page/stack (ALTZP off)
                 plp    ; $4E5E
                 jsr $4DE6    ; $4E5F
                 lda $B0    ; $4E62
@@ -9104,11 +9104,11 @@ IIcLoc             = $FBC0
                 ldy #$00    ; $4F19
                 ldx $B0    ; $4F1B
                 lda $B1    ; $4F1D
-                sta UseAuxZP    ; $4F1F
+                sta UseAuxZP    ; $4F1F   <== BANK: aux zero-page/stack (ALTZP on)
                 sta $B1    ; $4F22
                 stx $B0    ; $4F24
                 lda ($B0),y    ; $4F26
-                sta UseMainZP    ; $4F28
+                sta UseMainZP    ; $4F28   <== BANK: main zero-page/stack (ALTZP off)
                 jsr BuffInsert    ; $4F2B
                 bne $4F08    ; $4F2E
                 jsr $4DE6    ; $4F30
@@ -14603,8 +14603,8 @@ IIcLoc             = $FBC0
                 lda ClockPatch    ; $778D
                 sta ReadClock    ; $7790
                 jmp LoRamPoint    ; $7793
-                sta RdRomBank    ; $7796
-                sta RdRomBank    ; $7799
+                sta RdRomBank    ; $7796   <== BANK: language-card ROM (read)
+                sta RdRomBank    ; $7799   <== BANK: language-card ROM (read)
                 jsr MLI    ; $779C
                 dex    ; $779F
                 clc    ; $77A0
@@ -17175,12 +17175,12 @@ IIcLoc             = $FBC0
 ;
 ; === ViewKbdMacro ===
                 jsr OpenTypeout    ; $8AA7
-                sta UseAuxZP    ; $8AAA
+                sta UseAuxZP    ; $8AAA   <== BANK: aux zero-page/stack (ALTZP on)
                 lda #$00    ; $8AAD
                 sta $02    ; $8AAF
                 lda #$D6    ; $8AB1
                 sta $03    ; $8AB3
-                sta UseMainZP    ; $8AB5
+                sta UseMainZP    ; $8AB5   <== BANK: main zero-page/stack (ALTZP off)
                 lda $8A9F    ; $8AB8
                 sta $8B02    ; $8ABB
                 lda $8AA0    ; $8ABE
@@ -17189,16 +17189,16 @@ IIcLoc             = $FBC0
                 ora $8B03    ; $8AC7
                 beq $8AF6    ; $8ACA
                 ldy #$00    ; $8ACC
-                sta UseAuxZP    ; $8ACE
+                sta UseAuxZP    ; $8ACE   <== BANK: aux zero-page/stack (ALTZP on)
                 lda ($02),y    ; $8AD1
-                sta UseMainZP    ; $8AD3
+                sta UseMainZP    ; $8AD3   <== BANK: main zero-page/stack (ALTZP off)
                 jsr PrettyPrint    ; $8AD6
                 jsr PrintSpace    ; $8AD9
-                sta UseAuxZP    ; $8ADC
+                sta UseAuxZP    ; $8ADC   <== BANK: aux zero-page/stack (ALTZP on)
                 inc $02    ; $8ADF
                 bne $8AE5    ; $8AE1
                 inc $03    ; $8AE3
-                sta UseMainZP    ; $8AE5
+                sta UseMainZP    ; $8AE5   <== BANK: main zero-page/stack (ALTZP off)
                 lda $8B02    ; $8AE8
                 bne $8AF0    ; $8AEB
                 dec $8B03    ; $8AED
@@ -17232,14 +17232,14 @@ IIcLoc             = $FBC0
                 pha    ; $8B26
                 sty $8B66    ; $8B27
                 stx $8B65    ; $8B2A
-                sta UseAuxZP    ; $8B2D
+                sta UseAuxZP    ; $8B2D   <== BANK: aux zero-page/stack (ALTZP on)
                 ldy $8AA0    ; $8B30
                 cpy #$01    ; $8B33
                 bcc $8B47    ; $8B35
                 ldy $8A9F    ; $8B37
                 cpy #$FF    ; $8B3A
                 bcc $8B47    ; $8B3C
-                sta UseMainZP    ; $8B3E
+                sta UseMainZP    ; $8B3E   <== BANK: main zero-page/stack (ALTZP off)
                 jsr EndMacro    ; $8B41
                 jmp $8B5C    ; $8B44
                 ldy #$00    ; $8B47
@@ -17247,7 +17247,7 @@ IIcLoc             = $FBC0
                 inc $00    ; $8B4B
                 bne $8B51    ; $8B4D
                 inc $01    ; $8B4F
-                sta UseMainZP    ; $8B51
+                sta UseMainZP    ; $8B51   <== BANK: main zero-page/stack (ALTZP off)
                 inc $8A9F    ; $8B54
                 bne $8B5C    ; $8B57
                 inc $8AA0    ; $8B59
@@ -17270,15 +17270,15 @@ IIcLoc             = $FBC0
                 dec $8AA2    ; $8B7A
                 dec $8AA1    ; $8B7D
                 ldy #$00    ; $8B80
-                sta UseAuxZP    ; $8B82
+                sta UseAuxZP    ; $8B82   <== BANK: aux zero-page/stack (ALTZP on)
                 lda ($00),y    ; $8B85
-                sta UseMainZP    ; $8B87
+                sta UseMainZP    ; $8B87   <== BANK: main zero-page/stack (ALTZP off)
                 jsr PushTYI    ; $8B8A
-                sta UseAuxZP    ; $8B8D
+                sta UseAuxZP    ; $8B8D   <== BANK: aux zero-page/stack (ALTZP on)
                 inc $00    ; $8B90
                 bne $8B96    ; $8B92
                 inc $01    ; $8B94
-                sta UseMainZP    ; $8B96
+                sta UseMainZP    ; $8B96   <== BANK: main zero-page/stack (ALTZP off)
                 ldx $8B65    ; $8B99
                 ldy $8B66    ; $8B9C
                 rts    ; $8B9F
@@ -17289,12 +17289,12 @@ IIcLoc             = $FBC0
                 bne $8BB0    ; $8BAB
                 dec $8AA4    ; $8BAD
                 dec $8AA3    ; $8BB0
-                sta UseAuxZP    ; $8BB3
+                sta UseAuxZP    ; $8BB3   <== BANK: aux zero-page/stack (ALTZP on)
                 lda #$00    ; $8BB6
                 sta $00    ; $8BB8
                 lda #$D6    ; $8BBA
                 sta $01    ; $8BBC
-                sta UseMainZP    ; $8BBE
+                sta UseMainZP    ; $8BBE   <== BANK: main zero-page/stack (ALTZP off)
                 lda $8A9F    ; $8BC1
                 sta $8AA1    ; $8BC4
                 lda $8AA0    ; $8BC7
@@ -17313,12 +17313,12 @@ IIcLoc             = $FBC0
                 bmi $8BFC    ; $8BDC
                 lda #$FF    ; $8BDE
                 sta MacroDef    ; $8BE0
-                sta UseAuxZP    ; $8BE3
+                sta UseAuxZP    ; $8BE3   <== BANK: aux zero-page/stack (ALTZP on)
                 lda #$00    ; $8BE6
                 sta $00    ; $8BE8
                 lda #$D6    ; $8BEA
                 sta $01    ; $8BEC
-                sta UseMainZP    ; $8BEE
+                sta UseMainZP    ; $8BEE   <== BANK: main zero-page/stack (ALTZP off)
                 lda #$00    ; $8BF1
                 sta $8A9F    ; $8BF3
                 sta $8AA0    ; $8BF6
@@ -17835,13 +17835,13 @@ IIcLoc             = $FBC0
 ;
 ; === PrintOut ===
                 pha    ; $8FB9
-                lda RdRomBank    ; $8FBA
-                lda RdRomBank    ; $8FBD
+                lda RdRomBank    ; $8FBA   <== BANK: language-card ROM (read)
+                lda RdRomBank    ; $8FBD   <== BANK: language-card ROM (read)
                 pla    ; $8FC0
                 pha    ; $8FC1
                 jsr $8FCD    ; $8FC2
-                lda RdWrBank2    ; $8FC5
-                lda RdWrBank2    ; $8FC8
+                lda RdWrBank2    ; $8FC5   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
+                lda RdWrBank2    ; $8FC8   <== BANK: language-card RAM bank 2 (read+write, BIT twice)
                 pla    ; $8FCB
                 rts    ; $8FCC
                 jmp ($0036)    ; $8FCD

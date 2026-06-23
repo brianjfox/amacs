@@ -256,9 +256,14 @@ pseudo-instructions for now; flagged so we don't mistake them for real code.
   marks routine starts (`; === Name ===`). **37%** of address operands are named
   (4003/10678; the denominator is inflated by data still decoded as code, so
   real-code coverage is higher). Round-trips green. `make symbols && make disasm`.
-- Stage 4 (behavioral labels + bank-switch flags) — in progress (bank-switch
-  flagging next; behavioral naming needs Brian).
-- Stage 5 (comments/polish) — pending.
+- **Stage 4 (bank-switch flags) ✓ (mechanical half)** — every reference to an
+  aux-memory / alt-ZP / language-card soft switch is flagged inline
+  (`<== BANK: ...`), 63 sites. Behavior is asserted from the hardware, not
+  guessed. **Behavioral naming of anonymous routines is deferred to Brian** (the
+  intent-dependent part, per CLAUDE.md's division of labor).
+- Stage 5 (comments/polish) — partial: structural region headers, routine-start
+  markers, ASCII glosses on data, and bank-switch notes are in place. A full
+  readability/rationale pass waits on Brian's behavioral labels.
 
 ### Needs Brian's confirmation / open questions
 - **Data hiding in code spans.** Small data structures are still linear-decoded
