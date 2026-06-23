@@ -836,9 +836,9 @@ IIcLoc             = $FBC0
                 jmp FunctionRef    ; $101E
                 jmp BindKey    ; $1021
                 jmp PushTYI    ; $1024
-; ---- $1027-$1034  data  entry pointer block (CompList,CommandNames,CharIndex,ComTab,C_XCharacters,C_XVectors,C_XCharCount) ----
+; ---- $1027-$1034  data  entry pointer block (CompList..C_XCharCount) ----
         dfb $87,$59,$37,$9B,$6D,$3F,$84,$4F,$B8,$7D,$DE,$7D,$2A,$7E    ; $1027  .Y7.m?.O8}^}*~
-; ---- $1035-$7DB7  code ----
+; ---- $1035-$111C  code ----
 ;
 ; === AMACSStack ===
                 brk    ; $1035
@@ -946,28 +946,13 @@ IIcLoc             = $FBC0
                 cmp $E9E1    ; $1116
                 inc: $0000    ; $1119
                 brk    ; $111C
-;
-; === WindowOne ===
-                brk    ; $111D
-                bvc $1120    ; $111E
-                asl    ; $1120
-                brk    ; $1121
-                brk    ; $1122
-                brk    ; $1123
-                brk    ; $1124
-                brk    ; $1125
-;
-; === WindowTwo ===
-                brk    ; $1126
-                bvc $1134    ; $1127
-                trb $00    ; $1129
-                brk    ; $112B
-                brk    ; $112C
-                brk    ; $112D
-                brk    ; $112E
-;
-; === SelectedWind ===
-                brk    ; $112F
+; ---- $111D-$1125  data  WindowOne (9-byte window descriptor record) ----
+        dfb $00,$50,$00,$0A,$00,$00,$00,$00,$00    ; $111D  .P.......
+; ---- $1126-$112E  data  WindowTwo (9-byte window descriptor record) ----
+        dfb $00,$50,$0B,$14,$00,$00,$00,$00,$00    ; $1126  .P.......
+; ---- $112F-$112F  data  SelectedWind (current window index) ----
+        dfb $00    ; $112F  .
+; ---- $1130-$1457  code ----
 ;
 ; === GetSelWind ===
                 sta SelectedWind    ; $1130
@@ -1361,12 +1346,14 @@ IIcLoc             = $FBC0
                 lda ($F2),y    ; $1451
                 bpl $145C    ; $1453
                 jsr PrintMessage    ; $1455
-        dfb $CF        ; $1458  (data/65C02-bit)
-                inc $6000    ; $1459
+; ---- $1458-$145A  data  msg: On ----
+        dfb $CF,$EE,$00    ; $1458  On.
+; ---- $145B-$145E  code ----
+                rts    ; $145B
                 jsr PrintMessage    ; $145C
-        dfb $CF        ; $145F  (data/65C02-bit)
-                inc $E6    ; $1460
-                brk    ; $1462
+; ---- $145F-$1462  data  msg: Off ----
+        dfb $CF,$E6,$E6,$00    ; $145F  Off.
+; ---- $1463-$14F6  code ----
                 rts    ; $1463
                 lda $7A5C    ; $1464
                 bne $1480    ; $1467
@@ -1437,10 +1424,9 @@ IIcLoc             = $FBC0
                 sta $5725    ; $14EE
                 jsr OpenEchoArea    ; $14F1
                 jsr PrintMessage    ; $14F4
-                sta $E1D6    ; $14F7
-                cpx $E5F5    ; $14FA
-                tsx    ; $14FD
-                brk    ; $14FE
+; ---- $14F7-$14FE  data  msg: .Value: ----
+        dfb $8D,$D6,$E1,$EC,$F5,$E5,$BA,$00    ; $14F7  .Value:.
+; ---- $14FF-$1AC2  code ----
                 jsr ReadArgLine    ; $14FF
                 php    ; $1502
                 txa    ; $1503
@@ -2163,16 +2149,10 @@ IIcLoc             = $FBC0
                 sta $61    ; $1ABB
                 jsr NewEchoArea    ; $1ABD
                 jsr PrintMessage    ; $1AC0
-                bne $1AB4    ; $1AC3
-                sbc #$EE    ; $1AC5
-        dfb $F4        ; $1AC7  (data/65C02-bit)
-                ldy #$F0    ; $1AC8
-                sbc $F3,x    ; $1ACA
-                inx    ; $1ACC
-                sbc $E4    ; $1ACD
-                ldx $2000    ; $1ACF
-                plx    ; $1AD2
-        dfb $57        ; $1AD3  (data/65C02-bit)
+; ---- $1AC3-$1AD0  data  msg: Point pushed. ----
+        dfb $D0,$EF,$E9,$EE,$F4,$A0,$F0,$F5,$F3,$E8,$E5,$E4,$AE,$00    ; $1AC3  Point pushed..
+; ---- $1AD1-$1B38  code ----
+                jsr CloseEchoArea    ; $1AD1
                 rts    ; $1AD4
 ;
 ; === PrefixMeta ===
@@ -2227,9 +2207,9 @@ IIcLoc             = $FBC0
                 pha    ; $1B32
                 jsr NewEchoArea    ; $1B33
                 jsr PrintMessage    ; $1B36
-        dfb $C3        ; $1B39  (data/65C02-bit)
-                lda $A0D8    ; $1B3A
-                brk    ; $1B3D
+; ---- $1B39-$1B3D  data  msg: C-X ----
+        dfb $C3,$AD,$D8,$A0,$00    ; $1B39  C-X .
+; ---- $1B3E-$1C56  code ----
                 pla    ; $1B3E
                 jsr PrettyPrint    ; $1B3F
                 jsr PrUnDefined    ; $1B42
@@ -2389,43 +2369,36 @@ IIcLoc             = $FBC0
                 pha    ; $1C50
                 jsr NewEchoArea    ; $1C51
                 jsr PrintMessage    ; $1C54
-                cld    ; $1C57
-                ldy #$BD    ; $1C58
-                brk    ; $1C5A
+; ---- $1C57-$1C5A  data  msg: X = ----
+        dfb $D8,$A0,$BD,$00    ; $1C57  X =.
+; ---- $1C5B-$1C61  code ----
                 pla    ; $1C5B
                 jsr $1CC6    ; $1C5C
                 jsr PrintMessage    ; $1C5F
-                ldy $D9A0    ; $1C62
-                ldy #$BD    ; $1C65
-                brk    ; $1C67
+; ---- $1C62-$1C67  data  msg: , Y = ----
+        dfb $AC,$A0,$D9,$A0,$BD,$00    ; $1C62  , Y =.
+; ---- $1C68-$1C6E  code ----
                 pla    ; $1C68
                 jsr $1CC6    ; $1C69
                 jsr PrintMessage    ; $1C6C
-                ldy $A0A0    ; $1C6F
-        dfb $C3        ; $1C72  (data/65C02-bit)
-                iny    ; $1C73
-                ldy #$BD    ; $1C74
-                brk    ; $1C76
+; ---- $1C6F-$1C76  data  msg: ,  CH = ----
+        dfb $AC,$A0,$A0,$C3,$C8,$A0,$BD,$00    ; $1C6F  ,  CH =.
+; ---- $1C77-$1C83  code ----
                 iny    ; $1C77
                 jsr $D03F    ; $1C78
                 pha    ; $1C7B
                 eor #$80    ; $1C7C
                 jsr $1CC6    ; $1C7E
                 jsr PrintMessage    ; $1C81
-                ldy #$A8    ; $1C84
-                brk    ; $1C86
+; ---- $1C84-$1C86  data  msg:  ( ----
+        dfb $A0,$A8,$00    ; $1C84   (.
+; ---- $1C87-$1C8D  code ----
                 pla    ; $1C87
                 jsr PrettyPrint    ; $1C88
                 jsr PrintMessage    ; $1C8B
-                lda #$89    ; $1C8E
-                bne $1C81    ; $1C90
-                sbc #$EE    ; $1C92
-        dfb $F4        ; $1C94  (data/65C02-bit)
-                ldy #$E9    ; $1C95
-        dfb $F3        ; $1C97  (data/65C02-bit)
-                ldy #$E1    ; $1C98
-        dfb $F4        ; $1C9A  (data/65C02-bit)
-                ldy #$00    ; $1C9B
+; ---- $1C8E-$1C9C  data  msg: ).Point is at ----
+        dfb $A9,$89,$D0,$EF,$E9,$EE,$F4,$A0,$E9,$F3,$A0,$E1,$F4,$A0,$00    ; $1C8E  ).Point is at .
+; ---- $1C9D-$1CAC  code ----
                 sec    ; $1C9D
                 lda TheBuffer    ; $1C9E
                 sbc BuffTop    ; $1CA0
@@ -2434,9 +2407,9 @@ IIcLoc             = $FBC0
                 sbc $67    ; $1CA5
                 jsr PrintDec    ; $1CA7
                 jsr PrintMessage    ; $1CAA
-                ldy #$EF    ; $1CAD
-                inc $A0    ; $1CAF
-                brk    ; $1CB1
+; ---- $1CAD-$1CB1  data  msg:  of ----
+        dfb $A0,$EF,$E6,$A0,$00    ; $1CAD   of .
+; ---- $1CB2-$20D7  code ----
                 ldx SelectedBuff    ; $1CB2
                 jsr MySize    ; $1CB5
                 jsr PrintDec    ; $1CB8
@@ -2967,8 +2940,9 @@ IIcLoc             = $FBC0
                 sta FillPrefix,x    ; $20CF
                 jsr NewEchoArea    ; $20D2
                 jsr PrintMessage    ; $20D5
-                ldx $A0BD    ; $20D8
-                ldx #$00    ; $20DB
+; ---- $20D8-$20DC  data  msg: .= " ----
+        dfb $AE,$BD,$A0,$A2,$00    ; $20D8  .= ".
+; ---- $20DD-$214C  code ----
                 lda FillPrefix,y    ; $20DD
                 beq $20E8    ; $20E0
                 jsr CharOut    ; $20E2
@@ -3022,11 +2996,9 @@ IIcLoc             = $FBC0
                 jsr ZeroJustify    ; $2144
                 jsr PrintPages    ; $2147
                 jsr PrintMessage    ; $214A
-                sbc ($F6,x)    ; $214D
-                sbc ($E9,x)    ; $214F
-                cpx $E2E1    ; $2151
-                cpx $ACE5    ; $2154
-                ldy #$00    ; $2157
+; ---- $214D-$2158  data  msg: available, ----
+        dfb $E1,$F6,$E1,$E9,$EC,$E1,$E2,$EC,$E5,$AC,$A0,$00    ; $214D  available, .
+; ---- $2159-$2168  code ----
                 ldx SelectedBuff    ; $2159
                 jsr MySize    ; $215C
                 lsr    ; $215F
@@ -3034,13 +3006,10 @@ IIcLoc             = $FBC0
                 lda #$00    ; $2161
                 jsr PrintDec    ; $2163
                 jsr PrintMessage    ; $2166
-                ldy #$E9    ; $2169
-                inc $E3A0    ; $216B
-                sbc $F2,x    ; $216E
-                sbc ($E5)    ; $2170
-                inc $AEF4    ; $2172
-                sta $2000    ; $2175
-                sbc ($73)    ; $2178
+; ---- $2169-$2176  data  msg:  in current.. ----
+        dfb $A0,$E9,$EE,$A0,$E3,$F5,$F2,$F2,$E5,$EE,$F4,$AE,$8D,$00    ; $2169   in current...
+; ---- $2177-$3CE8  code ----
+                jsr DSK:DiskSpace    ; $2177
                 jsr CloseEchoArea    ; $217A
                 lda #$01    ; $217D
                 rts    ; $217F
@@ -6758,39 +6727,13 @@ IIcLoc             = $FBC0
                 lda #$3D    ; $3CE1
                 sta $2A98    ; $3CE3
                 jsr PrintMessage    ; $3CE6
-                cmp $F5EF,y    ; $3CE9
-                ldy #$E1    ; $3CEC
-                sbc ($E5)    ; $3CEE
-                ldy #$F4    ; $3CF0
-                sbc $E9F0,y    ; $3CF2
-                inc $A0E7    ; $3CF5
-        dfb $F4        ; $3CF8  (data/65C02-bit)
-                inx    ; $3CF9
-                sbc $A0    ; $3CFA
-                sbc ($F2,x)    ; $3CFC
-        dfb $E7        ; $3CFE  (data/65C02-bit)
-                sbc $ED,x    ; $3CFF
-                sbc $EE    ; $3D01
-        dfb $F4        ; $3D03  (data/65C02-bit)
-                ldy #$F4    ; $3D04
-        dfb $EF        ; $3D06  (data/65C02-bit)
-                ldy #$E1    ; $3D07
-                inc $C1A0    ; $3D09
-                cmp $C3C1    ; $3D0C
-        dfb $D3        ; $3D0F  (data/65C02-bit)
-                ldy #$E3    ; $3D10
-        dfb $EF        ; $3D12  (data/65C02-bit)
-                sbc $E1ED    ; $3D13
-                inc $AEE4    ; $3D16
-                sta $D48D    ; $3D19
-                inx    ; $3D1C
-                sbc $A0    ; $3D1D
-        dfb $E3        ; $3D1F  (data/65C02-bit)
-        dfb $EF        ; $3D20  (data/65C02-bit)
-                sbc $E1ED    ; $3D21
-                inc $A0E4    ; $3D24
-                sbc #$F3    ; $3D27
-                ldy #$00    ; $3D29
+; ---- $3CE9-$3D2A  data  msg: You are typing the argument to an AMACS ----
+        dfb $D9,$EF,$F5,$A0,$E1,$F2,$E5,$A0,$F4,$F9,$F0,$E9,$EE,$E7,$A0,$F4    ; $3CE9  You are typing t
+        dfb $E8,$E5,$A0,$E1,$F2,$E7,$F5,$ED,$E5,$EE,$F4,$A0,$F4,$EF,$A0,$E1    ; $3CF9  he argument to a
+        dfb $EE,$A0,$C1,$CD,$C1,$C3,$D3,$A0,$E3,$EF,$ED,$ED,$E1,$EE,$E4,$AE    ; $3D09  n AMACS command.
+        dfb $8D,$8D,$D4,$E8,$E5,$A0,$E3,$EF,$ED,$ED,$E1,$EE,$E4,$A0,$E9,$F3    ; $3D19  ..The command is
+        dfb $A0,$00    ; $3D29   .
+; ---- $3D2B-$3D41  code ----
                 lda CommandVector    ; $3D2B
                 sta FunPtr    ; $3D2E
                 lda $7835    ; $3D31
@@ -6799,36 +6742,25 @@ IIcLoc             = $FBC0
                 bne $3D76    ; $3D3A
                 jsr DCIStringOut    ; $3D3C
                 jsr PrintMessage    ; $3D3F
-        dfb $BB        ; $3D42  (data/65C02-bit)
-                ldy #$A0    ; $3D43
-                brk    ; $3D45
+; ---- $3D42-$3D45  data  msg: ; ----
+        dfb $BB,$A0,$A0,$00    ; $3D42  ;  .
+; ---- $3D46-$3D50  code ----
                 jsr DocRef    ; $3D46
                 lda WindowLft    ; $3D49
                 jsr DCIStringOut1    ; $3D4B
                 jsr PrintMessage    ; $3D4E
-                ldx $8D8D    ; $3D51
-                dec $F7EF    ; $3D54
-                ldy #$F4    ; $3D57
-                sbc $E5F0,y    ; $3D59
-                ldy #$F4    ; $3D5C
-                inx    ; $3D5E
-                sbc $A0    ; $3D5F
-                sbc ($F2,x)    ; $3D61
-        dfb $E7        ; $3D63  (data/65C02-bit)
-                sbc $ED,x    ; $3D64
-                sbc $EE    ; $3D66
-        dfb $F4        ; $3D68  (data/65C02-bit)
-                ldx: $008D    ; $3D69
+; ---- $3D51-$3D6B  data  msg: ...Now type the argument.. ----
+        dfb $AE,$8D,$8D,$CE,$EF,$F7,$A0,$F4,$F9,$F0,$E5,$A0,$F4,$E8,$E5,$A0    ; $3D51  ...Now type the 
+        dfb $E1,$F2,$E7,$F5,$ED,$E5,$EE,$F4,$AE,$8D,$00    ; $3D61  argument...
+; ---- $3D6C-$3D78  code ----
                 ldx $3CD1    ; $3D6C
                 txs    ; $3D6F
                 jsr CloseTypeout1    ; $3D70
                 jmp OpenEchoArea    ; $3D73
                 jsr PrintMessage    ; $3D76
-                inc $F4EF    ; $3D79
-                ldy #$EE    ; $3D7C
-                sbc ($ED,x)    ; $3D7E
-                sbc $E4    ; $3D80
-                brk    ; $3D82
+; ---- $3D79-$3D82  data  msg: not named ----
+        dfb $EE,$EF,$F4,$A0,$EE,$E1,$ED,$E5,$E4,$00    ; $3D79  not named.
+; ---- $3D83-$3F45  code ----
                 jmp $3D4E    ; $3D83
 ;
 ; === BufferRead ===
@@ -7049,8 +6981,9 @@ IIcLoc             = $FBC0
                 jsr PrintArgument    ; $3F3D
                 jsr PrintSpace    ; $3F40
                 jsr PrintMessage    ; $3F43
-                cmp $D8AD    ; $3F46
-                ldy #$00    ; $3F49
+; ---- $3F46-$3F4A  data  msg: M-X ----
+        dfb $CD,$AD,$D8,$A0,$00    ; $3F46  M-X .
+; ---- $3F4B-$3F7F  code ----
                 lda #$32    ; $3F4B
                 sta CompLineHelp    ; $3F4D
                 lda #$41    ; $3F50
@@ -7078,11 +7011,9 @@ IIcLoc             = $FBC0
                 sta $5988    ; $3F77
                 jsr NewEchoArea    ; $3F7A
                 jsr PrintMessage    ; $3F7D
-                dec $E1,x    ; $3F80
-                sbc ($E9)    ; $3F82
-                sbc ($E2,x)    ; $3F84
-                cpx $BAE5    ; $3F86
-                brk    ; $3F89
+; ---- $3F80-$3F89  data  msg: Variable: ----
+        dfb $D6,$E1,$F2,$E9,$E1,$E2,$EC,$E5,$BA,$00    ; $3F80  Variable:.
+; ---- $3F8A-$3F9E  code ----
                 jmp ReadComplete    ; $3F8A
 ;
 ; === ReadFunction ===
@@ -7092,10 +7023,9 @@ IIcLoc             = $FBC0
                 sta $5988    ; $3F96
                 jsr NewEchoArea    ; $3F99
                 jsr PrintMessage    ; $3F9C
-                dec $F5    ; $3F9F
-                inc $F4E3    ; $3FA1
-                sbc #$EF    ; $3FA4
-                inc: $00BA    ; $3FA6
+; ---- $3F9F-$3FA8  data  msg: Function: ----
+        dfb $C6,$F5,$EE,$E3,$F4,$E9,$EF,$EE,$BA,$00    ; $3F9F  Function:.
+; ---- $3FA9-$4153  code ----
 ;
 ; === ReadComplete ===
                 lda #$FF    ; $3FA9
@@ -7294,65 +7224,24 @@ IIcLoc             = $FBC0
                 lda CompCount    ; $414C
                 bne $417F    ; $414F
                 jsr PrintMessage    ; $4151
-        dfb $D4        ; $4154  (data/65C02-bit)
-                inx    ; $4155
-                sbc $F2    ; $4156
-                sbc $A0    ; $4158
-                sbc ($F2,x)    ; $415A
-                sbc $A0    ; $415C
-                inc $A0EF    ; $415E
-                beq $4152    ; $4161
-        dfb $F3        ; $4163  (data/65C02-bit)
-        dfb $F3        ; $4164  (data/65C02-bit)
-                sbc #$E2    ; $4165
-                cpx $A0E5    ; $4167
-        dfb $E3        ; $416A  (data/65C02-bit)
-        dfb $EF        ; $416B  (data/65C02-bit)
-                sbc $ECF0    ; $416C
-                sbc $F4    ; $416F
-                sbc #$EF    ; $4171
-                inc $AEF3    ; $4173
-                sta $2000    ; $4176
-                ora $202B,y    ; $4179
-                cld    ; $417C
-        dfb $57        ; $417D  (data/65C02-bit)
+; ---- $4154-$4177  data  msg: There are no possible completions.. ----
+        dfb $D4,$E8,$E5,$F2,$E5,$A0,$E1,$F2,$E5,$A0,$EE,$EF,$A0,$F0,$EF,$F3    ; $4154  There are no pos
+        dfb $F3,$E9,$E2,$EC,$E5,$A0,$E3,$EF,$ED,$F0,$EC,$E5,$F4,$E9,$EF,$EE    ; $4164  sible completion
+        dfb $F3,$AE,$8D,$00    ; $4174  s...
+; ---- $4178-$4188  code ----
+                jsr CloseTypeout1    ; $4178
+                jsr OpenEchoArea    ; $417B
                 rts    ; $417E
                 cmp #$01    ; $417F
                 beq $4186    ; $4181
                 jmp $41EA    ; $4183
                 jsr PrintMessage    ; $4186
-                sta $E8D4    ; $4189
-                sbc $A0    ; $418C
-        dfb $EF        ; $418E  (data/65C02-bit)
-                inc $F9EC    ; $418F
-                ldy #$F0    ; $4192
-        dfb $EF        ; $4194  (data/65C02-bit)
-        dfb $F3        ; $4195  (data/65C02-bit)
-        dfb $F3        ; $4196  (data/65C02-bit)
-                sbc #$E2    ; $4197
-                cpx $A0E5    ; $4199
-        dfb $E3        ; $419C  (data/65C02-bit)
-        dfb $EF        ; $419D  (data/65C02-bit)
-                sbc $ECF0    ; $419E
-                sbc $F4    ; $41A1
-                sbc #$EF    ; $41A3
-                inc $EFA0    ; $41A5
-                inc $A0    ; $41A8
-        dfb $F7        ; $41AA  (data/65C02-bit)
-                inx    ; $41AB
-                sbc ($F4,x)    ; $41AC
-                ldy #$F9    ; $41AE
-        dfb $EF        ; $41B0  (data/65C02-bit)
-                sbc $A0,x    ; $41B1
-                inx    ; $41B3
-                sbc ($F6,x)    ; $41B4
-                sbc $A0    ; $41B6
-        dfb $F4        ; $41B8  (data/65C02-bit)
-                sbc $E5F0,y    ; $41B9
-                cpx $A0    ; $41BC
-                sbc #$F3    ; $41BE
-                tsx    ; $41C0
-                sta: $008D    ; $41C1
+; ---- $4189-$41C3  data  msg: .The only possible completion of what yo ----
+        dfb $8D,$D4,$E8,$E5,$A0,$EF,$EE,$EC,$F9,$A0,$F0,$EF,$F3,$F3,$E9,$E2    ; $4189  .The only possib
+        dfb $EC,$E5,$A0,$E3,$EF,$ED,$F0,$EC,$E5,$F4,$E9,$EF,$EE,$A0,$EF,$E6    ; $4199  le completion of
+        dfb $A0,$F7,$E8,$E1,$F4,$A0,$F9,$EF,$F5,$A0,$E8,$E1,$F6,$E5,$A0,$F4    ; $41A9   what you have t
+        dfb $F9,$F0,$E5,$E4,$A0,$E9,$F3,$BA,$8D,$8D,$00    ; $41B9  yped is:...
+; ---- $41C4-$41EC  code ----
                 jsr PopCompPoint    ; $41C4
                 lda PrintCompDoc    ; $41C7
                 pha    ; $41CA
@@ -7370,37 +7259,12 @@ IIcLoc             = $FBC0
                 jsr PrintReturn    ; $41E4
                 jmp $4178    ; $41E7
                 jsr PrintMessage    ; $41EA
-        dfb $D4        ; $41ED  (data/65C02-bit)
-                inx    ; $41EE
-                sbc $A0    ; $41EF
-                beq $41E2    ; $41F1
-        dfb $F3        ; $41F3  (data/65C02-bit)
-        dfb $F3        ; $41F4  (data/65C02-bit)
-                sbc #$E2    ; $41F5
-                cpx $A0E5    ; $41F7
-        dfb $E3        ; $41FA  (data/65C02-bit)
-        dfb $EF        ; $41FB  (data/65C02-bit)
-                sbc $ECF0    ; $41FC
-                sbc $F4    ; $41FF
-                sbc #$EF    ; $4201
-                inc $A0F3    ; $4203
-        dfb $EF        ; $4206  (data/65C02-bit)
-                inc $A0    ; $4207
-        dfb $F7        ; $4209  (data/65C02-bit)
-                inx    ; $420A
-                sbc ($F4,x)    ; $420B
-                ldy #$F9    ; $420D
-        dfb $EF        ; $420F  (data/65C02-bit)
-                sbc $A0,x    ; $4210
-                inx    ; $4212
-                sbc ($F6,x)    ; $4213
-                sbc $A0    ; $4215
-        dfb $F4        ; $4217  (data/65C02-bit)
-                sbc $E5F0,y    ; $4218
-                cpx $A0    ; $421B
-                sbc ($F2,x)    ; $421D
-                sbc $BA    ; $421F
-                sta: $008D    ; $4221
+; ---- $41ED-$4223  data  msg: The possible completions of what you hav ----
+        dfb $D4,$E8,$E5,$A0,$F0,$EF,$F3,$F3,$E9,$E2,$EC,$E5,$A0,$E3,$EF,$ED    ; $41ED  The possible com
+        dfb $F0,$EC,$E5,$F4,$E9,$EF,$EE,$F3,$A0,$EF,$E6,$A0,$F7,$E8,$E1,$F4    ; $41FD  pletions of what
+        dfb $A0,$F9,$EF,$F5,$A0,$E8,$E1,$F6,$E5,$A0,$F4,$F9,$F0,$E5,$E4,$A0    ; $420D   you have typed 
+        dfb $E1,$F2,$E5,$BA,$8D,$8D,$00    ; $421D  are:...
+; ---- $4224-$488B  code ----
                 lda #$00    ; $4224
                 sta $425E    ; $4226
                 jsr PopCompPoint    ; $4229
@@ -8205,33 +8069,24 @@ IIcLoc             = $FBC0
                 stx $4828    ; $4883
                 stx $49A2    ; $4886
                 jsr PrintMessage    ; $4889
-                ldy #$A0    ; $488C
-        dfb $C2        ; $488E  (data/65C02-bit)
-                sbc $E6,x    ; $488F
-                inc $E5    ; $4891
-                sbc ($00)    ; $4893
+; ---- $488C-$4894  data  msg:   Buffer ----
+        dfb $A0,$A0,$C2,$F5,$E6,$E6,$E5,$F2,$00    ; $488C    Buffer.
+; ---- $4895-$489E  code ----
                 lda #$24    ; $4895
                 sta CH    ; $4897
                 sta TypeoutCH    ; $4899
                 jsr PrintMessage    ; $489C
-                dec $E9,x    ; $489F
-        dfb $F3        ; $48A1  (data/65C02-bit)
-                sbc #$F4    ; $48A2
-                sbc #$EE    ; $48A4
-        dfb $E7        ; $48A6  (data/65C02-bit)
-                ldy #$C6    ; $48A7
-                sbc #$EC    ; $48A9
-                sbc $00    ; $48AB
+; ---- $489F-$48AC  data  msg: Visiting File ----
+        dfb $D6,$E9,$F3,$E9,$F4,$E9,$EE,$E7,$A0,$C6,$E9,$EC,$E5,$00    ; $489F  Visiting File.
+; ---- $48AD-$48B6  code ----
                 lda #$43    ; $48AD
                 sta CH    ; $48AF
                 sta TypeoutCH    ; $48B1
                 jsr PrintMessage    ; $48B4
-        dfb $D3        ; $48B7  (data/65C02-bit)
-                sbc #$FA    ; $48B8
-                sbc $8D    ; $48BA
-                sta $AE00    ; $48BC
-                plp    ; $48BF
-                pha    ; $48C0
+; ---- $48B7-$48BD  data  msg: Size.. ----
+        dfb $D3,$E9,$FA,$E5,$8D,$8D,$00    ; $48B7  Size...
+; ---- $48BE-$4946  code ----
+                ldx $4828    ; $48BE
                 lda BuffActList,x    ; $48C1
                 bpl $492B    ; $48C4
                 inc $49A1    ; $48C6
@@ -8289,28 +8144,25 @@ IIcLoc             = $FBC0
                 jsr ZeroJustify    ; $493E
                 jsr PrintDec    ; $4941
                 jsr PrintMessage    ; $4944
-        dfb $EB        ; $4947  (data/65C02-bit)
-                ldy #$E9    ; $4948
-                inc $F5A0    ; $494A
-        dfb $F3        ; $494D  (data/65C02-bit)
-                sbc $A0    ; $494E
-        dfb $E2        ; $4950  (data/65C02-bit)
-                sbc: $00A0,y    ; $4951
+; ---- $4947-$4953  data  msg: k in use by ----
+        dfb $EB,$A0,$E9,$EE,$A0,$F5,$F3,$E5,$A0,$E2,$F9,$A0,$00    ; $4947  k in use by .
+; ---- $4954-$495E  code ----
                 lda #$00    ; $4954
                 ldx $49A1    ; $4956
                 jsr PrintDec    ; $4959
                 jsr PrintMessage    ; $495C
-                ldy #$E2    ; $495F
-                sbc $E6,x    ; $4961
-                inc $E5    ; $4963
-                sbc ($00)    ; $4965
+; ---- $495F-$4966  data  msg:  buffer ----
+        dfb $A0,$E2,$F5,$E6,$E6,$E5,$F2,$00    ; $495F   buffer.
+; ---- $4967-$4974  code ----
                 ldx $49A1    ; $4967
                 dex    ; $496A
                 beq $4972    ; $496B
                 lda #$F3    ; $496D
                 jsr CharOut    ; $496F
                 jsr PrintMessage    ; $4972
-                ldy: $00A0    ; $4975
+; ---- $4975-$4977  data  msg: , ----
+        dfb $AC,$A0,$00    ; $4975  , .
+; ---- $4978-$498C  code ----
                 sec    ; $4978
                 lda $42FB    ; $4979
                 sbc $42F9    ; $497C
@@ -8321,13 +8173,9 @@ IIcLoc             = $FBC0
                 lda #$00    ; $4985
                 jsr PrintDec    ; $4987
                 jsr PrintMessage    ; $498A
-        dfb $EB        ; $498D  (data/65C02-bit)
-                ldy #$F2    ; $498E
-                sbc $ED    ; $4990
-                sbc ($E9,x)    ; $4992
-                inc $EEE9    ; $4994
-        dfb $E7        ; $4997  (data/65C02-bit)
-                ldx: $008D    ; $4998
+; ---- $498D-$499A  data  msg: k remaining.. ----
+        dfb $EB,$A0,$F2,$E5,$ED,$E1,$E9,$EE,$E9,$EE,$E7,$AE,$8D,$00    ; $498D  k remaining...
+; ---- $499B-$4A49  code ----
                 jsr PrintDone    ; $499B
                 jmp UnPrepTO    ; $499E
                 brk    ; $49A1
@@ -8434,31 +8282,16 @@ IIcLoc             = $FBC0
                 bne $4A87    ; $4A42
                 jsr NewEchoArea    ; $4A44
                 jsr PrintMessage    ; $4A47
-        dfb $CB        ; $4A4A  (data/65C02-bit)
-                sbc #$EC    ; $4A4B
-                cpx $EEE9    ; $4A4D
-        dfb $E7        ; $4A50  (data/65C02-bit)
-                ldy #$F4    ; $4A51
-                inx    ; $4A53
-                sbc $A0    ; $4A54
-        dfb $E3        ; $4A56  (data/65C02-bit)
-                sbc $F2,x    ; $4A57
-                sbc ($E5)    ; $4A59
-                inc $A0F4    ; $4A5B
-        dfb $E2        ; $4A5E  (data/65C02-bit)
-                sbc $E6,x    ; $4A5F
-                inc $E5    ; $4A61
-                sbc ($AE)    ; $4A63
-                brk    ; $4A65
+; ---- $4A4A-$4A65  data  msg: Killing the current buffer. ----
+        dfb $CB,$E9,$EC,$EC,$E9,$EE,$E7,$A0,$F4,$E8,$E5,$A0,$E3,$F5,$F2,$F2    ; $4A4A  Killing the curr
+        dfb $E5,$EE,$F4,$A0,$E2,$F5,$E6,$E6,$E5,$F2,$AE,$00    ; $4A5A  ent buffer..
+; ---- $4A66-$4A6E  code ----
                 jsr DefBuffer    ; $4A66
                 stx $4B82    ; $4A69
                 jsr PrintMessage    ; $4A6C
-                ldy #$A0    ; $4A6F
-        dfb $D3        ; $4A71  (data/65C02-bit)
-                sbc $EC    ; $4A72
-                sbc $E3    ; $4A74
-        dfb $F4        ; $4A76  (data/65C02-bit)
-                brk    ; $4A77
+; ---- $4A6F-$4A77  data  msg:   Select ----
+        dfb $A0,$A0,$D3,$E5,$EC,$E5,$E3,$F4,$00    ; $4A6F    Select.
+; ---- $4A78-$4B5B  code ----
                 jsr $4B59    ; $4A78
                 bne $4A36    ; $4A7B
                 lda #$00    ; $4A7D
@@ -8564,17 +8397,15 @@ IIcLoc             = $FBC0
                 lda $00    ; $4B56
                 pha    ; $4B58
                 jsr PrintMessage    ; $4B59
-                ldy #$C2    ; $4B5C
-                sbc $E6,x    ; $4B5E
-                inc $E5    ; $4B60
-                sbc ($A0)    ; $4B62
-                tay    ; $4B64
-                brk    ; $4B65
+; ---- $4B5C-$4B65  data  msg:  Buffer ( ----
+        dfb $A0,$C2,$F5,$E6,$E6,$E5,$F2,$A0,$A8,$00    ; $4B5C   Buffer (.
+; ---- $4B66-$4B6E  code ----
                 ldx $4B82    ; $4B66
                 jsr PBuffName    ; $4B69
                 jsr PrintMessage    ; $4B6C
-                lda #$BA    ; $4B6F
-                brk    ; $4B71
+; ---- $4B6F-$4B71  data  msg: ): ----
+        dfb $A9,$BA,$00    ; $4B6F  ):.
+; ---- $4B72-$51CB  code ----
                 dec BufferRead    ; $4B72
                 jsr ReadLine    ; $4B75
                 php    ; $4B78
@@ -9497,46 +9328,21 @@ IIcLoc             = $FBC0
                 cmp #$B1    ; $51C5
                 bne $521C    ; $51C7
                 jsr PrintMessage    ; $51C9
-                sta $E8D4    ; $51CC
-                sbc $A0    ; $51CF
-                inc $E9    ; $51D1
-                cpx $A0E5    ; $51D3
-                ldx #$00    ; $51D6
+; ---- $51CC-$51D7  data  msg: .The file " ----
+        dfb $8D,$D4,$E8,$E5,$A0,$E6,$E9,$EC,$E5,$A0,$A2,$00    ; $51CC  .The file ".
+; ---- $51D8-$51E5  code ----
                 lda HelpHelpFile,y    ; $51D8
                 beq $51E3    ; $51DB
                 jsr CharOut    ; $51DD
                 iny    ; $51E0
                 bne $51D8    ; $51E1
                 jsr PrintMessage    ; $51E3
-                ldx #$A0    ; $51E6
-        dfb $E3        ; $51E8  (data/65C02-bit)
-                sbc ($EE,x)    ; $51E9
-        dfb $A7        ; $51EB  (data/65C02-bit)
-        dfb $F4        ; $51EC  (data/65C02-bit)
-                ldy #$E2    ; $51ED
-                sbc $A0    ; $51EF
-        dfb $EF        ; $51F1  (data/65C02-bit)
-                beq $51D9    ; $51F2
-                inc $E4E5    ; $51F4
-                ldx $A0A0    ; $51F7
-        dfb $C3        ; $51FA  (data/65C02-bit)
-                inx    ; $51FB
-                sbc $E3    ; $51FC
-        dfb $EB        ; $51FE  (data/65C02-bit)
-                ldy #$A2    ; $51FF
-        dfb $D3        ; $5201  (data/65C02-bit)
-                sbc $F4F3,y    ; $5202
-                sbc $ED    ; $5205
-                ldy #$C6    ; $5207
-                sbc #$EC    ; $5209
-                sbc $F3    ; $520B
-                ldy #$D0    ; $520D
-                sbc ($F4,x)    ; $520F
-                inx    ; $5211
-                ldx #$AE    ; $5212
-                sta $2000    ; $5214
-        dfb $0F        ; $5217  (data/65C02-bit)
-        dfb $2B        ; $5218  (data/65C02-bit)
+; ---- $51E6-$5215  data  msg: " can't be opened.  Check "System Files ----
+        dfb $A2,$A0,$E3,$E1,$EE,$A7,$F4,$A0,$E2,$E5,$A0,$EF,$F0,$E5,$EE,$E5    ; $51E6  " can't be opene
+        dfb $E4,$AE,$A0,$A0,$C3,$E8,$E5,$E3,$EB,$A0,$A2,$D3,$F9,$F3,$F4,$E5    ; $51F6  d.  Check "Syste
+        dfb $ED,$A0,$C6,$E9,$EC,$E5,$F3,$A0,$D0,$E1,$F4,$E8,$A2,$AE,$8D,$00    ; $5206  m Files Path"...
+; ---- $5216-$585A  code ----
+                jsr CloseTypeout    ; $5216
                 lda #$01    ; $5219
                 rts    ; $521B
                 ldy #$00    ; $521C
@@ -10354,13 +10160,9 @@ IIcLoc             = $FBC0
 ;
 ; === PrUnDefined ===
                 jsr PrintMessage    ; $5858
-                ldy #$E9    ; $585B
-        dfb $F3        ; $585D  (data/65C02-bit)
-                ldy #$F5    ; $585E
-                inc $E5E4    ; $5860
-                inc $E9    ; $5863
-                inc $E4E5    ; $5865
-                ldx: $008D    ; $5868
+; ---- $585B-$586A  data  msg:  is undefined.. ----
+        dfb $A0,$E9,$F3,$A0,$F5,$EE,$E4,$E5,$E6,$E9,$EE,$E5,$E4,$AE,$8D,$00    ; $585B   is undefined...
+; ---- $586B-$58C1  code ----
                 rts    ; $586B
 ;
 ; === PrettyPrint ===
@@ -10401,9 +10203,9 @@ IIcLoc             = $FBC0
                 jsr $58FD    ; $58BA
                 bne $58FA    ; $58BD
                 jsr PrintMessage    ; $58BF
-                cmp $F4E5    ; $58C2
-                sbc ($AD,x)    ; $58C5
-                brk    ; $58C7
+; ---- $58C2-$58C7  data  msg: Meta- ----
+        dfb $CD,$E5,$F4,$E1,$AD,$00    ; $58C2  Meta-.
+; ---- $58C8-$58F2  code ----
                 pla    ; $58C8
                 pla    ; $58C9
                 txa    ; $58CA
@@ -10427,10 +10229,9 @@ IIcLoc             = $FBC0
                 cmp #$04    ; $58EC
                 bcc $58FA    ; $58EE
                 jsr PrintMessage    ; $58F0
-                lda $F2C1    ; $58F3
-                sbc ($EF)    ; $58F6
-        dfb $F7        ; $58F8  (data/65C02-bit)
-                brk    ; $58F9
+; ---- $58F3-$58F9  data  msg: -Arrow ----
+        dfb $AD,$C1,$F2,$F2,$EF,$F7,$00    ; $58F3  -Arrow.
+; ---- $58FA-$5946  code ----
                 rts    ; $58FA
                 brk    ; $58FB
                 brk    ; $58FC
@@ -10472,10 +10273,10 @@ IIcLoc             = $FBC0
         dfb $EF        ; $5941  (data/65C02-bit)
         dfb $F7        ; $5942  (data/65C02-bit)
                 ror $6820    ; $5943
-                eor $EFC3,y    ; $5946
-                inc $F2F4    ; $5949
-        dfb $EF        ; $594C  (data/65C02-bit)
-                cpx: $00AD    ; $594D
+        dfb $59        ; $5946  (truncated)
+; ---- $5947-$594F  data  msg: Control- ----
+        dfb $C3,$EF,$EE,$F4,$F2,$EF,$EC,$AD,$00    ; $5947  Control-.
+; ---- $5950-$5956  code ----
                 rts    ; $5950
 ;
 ; === print_c_meta ===
@@ -10483,15 +10284,14 @@ IIcLoc             = $FBC0
 ;
 ; === print_meta ===
                 jsr PrintMessage    ; $5954
-                cmp $F4E5    ; $5957
-                sbc ($AD,x)    ; $595A
-                brk    ; $595C
+; ---- $5957-$595C  data  msg: Meta- ----
+        dfb $CD,$E5,$F4,$E1,$AD,$00    ; $5957  Meta-.
+; ---- $595D-$5960  code ----
                 rts    ; $595D
                 jsr PrintMessage    ; $595E
-        dfb $D3        ; $5961  (data/65C02-bit)
-                beq $5945    ; $5962
-        dfb $E3        ; $5964  (data/65C02-bit)
-                sbc $00    ; $5965
+; ---- $5961-$5966  data  msg: Space ----
+        dfb $D3,$F0,$E1,$E3,$E5,$00    ; $5961  Space.
+; ---- $5967-$5F92  code ----
                 rts    ; $5967
 ;
 ; === PrintMessage ===
@@ -11494,27 +11294,19 @@ IIcLoc             = $FBC0
                 lda $5DC8    ; $5F8B
                 bpl $5F9C    ; $5F8E
                 jsr PrintMessage    ; $5F90
-                dec $E1    ; $5F93
-                sbc #$EC    ; $5F95
-                sbc #$EE    ; $5F97
-        dfb $E7        ; $5F99  (data/65C02-bit)
-                ldy #$00    ; $5F9A
+; ---- $5F93-$5F9B  data  msg: Failing ----
+        dfb $C6,$E1,$E9,$EC,$E9,$EE,$E7,$A0,$00    ; $5F93  Failing .
+; ---- $5F9C-$5FA3  code ----
                 lda ISearchDir    ; $5F9C
                 bpl $5FAD    ; $5F9F
                 jsr PrintMessage    ; $5FA1
-                cmp ($E5)    ; $5FA4
-                inc $E5,x    ; $5FA6
-                sbc ($F3)    ; $5FA8
-                sbc $A0    ; $5FAA
-                brk    ; $5FAC
+; ---- $5FA4-$5FAC  data  msg: Reverse ----
+        dfb $D2,$E5,$F6,$E5,$F2,$F3,$E5,$A0,$00    ; $5FA4  Reverse .
+; ---- $5FAD-$5FAF  code ----
                 jsr PrintMessage    ; $5FAD
-                cmp #$AD    ; $5FB0
-        dfb $D3        ; $5FB2  (data/65C02-bit)
-                sbc $E1    ; $5FB3
-                sbc ($E3)    ; $5FB5
-                inx    ; $5FB7
-                tsx    ; $5FB8
-                brk    ; $5FB9
+; ---- $5FB0-$5FB9  data  msg: I-Search: ----
+        dfb $C9,$AD,$D3,$E5,$E1,$F2,$E3,$E8,$BA,$00    ; $5FB0  I-Search:.
+; ---- $5FBA-$637C  code ----
                 ldy #$00    ; $5FBA
                 cpy $5BF0    ; $5FBC
                 beq $5FCA    ; $5FBF
@@ -11968,30 +11760,26 @@ IIcLoc             = $FBC0
                 lda $621F    ; $6375
                 beq $6384    ; $6378
                 jsr PrintMessage    ; $637A
-        dfb $C2        ; $637D  (data/65C02-bit)
-                dex    ; $637E
-                ldy #$00    ; $637F
+; ---- $637D-$6380  data  msg: BJ ----
+        dfb $C2,$CA,$A0,$00    ; $637D  BJ .
+; ---- $6381-$638B  code ----
                 jmp $6390    ; $6381
                 lda $621E    ; $6384
                 beq $6390    ; $6387
                 jsr PrintMessage    ; $6389
-                cmp $CA    ; $638C
-                ldy #$00    ; $638E
+; ---- $638C-$638F  data  msg: EJ ----
+        dfb $C5,$CA,$A0,$00    ; $638C  EJ .
+; ---- $6390-$6397  code ----
                 bit ISearchDir    ; $6390
                 bpl $63A1    ; $6393
                 jsr PrintMessage    ; $6395
-                cmp ($E5)    ; $6398
-                inc $E5,x    ; $639A
-                sbc ($F3)    ; $639C
-                sbc $A0    ; $639E
-                brk    ; $63A0
+; ---- $6398-$63A0  data  msg: Reverse ----
+        dfb $D2,$E5,$F6,$E5,$F2,$F3,$E5,$A0,$00    ; $6398  Reverse .
+; ---- $63A1-$63A3  code ----
                 jsr PrintMessage    ; $63A1
-        dfb $D3        ; $63A4  (data/65C02-bit)
-                sbc $E1    ; $63A5
-                sbc ($E3)    ; $63A7
-                inx    ; $63A9
-                tsx    ; $63AA
-                brk    ; $63AB
+; ---- $63A4-$63AB  data  msg: Search: ----
+        dfb $D3,$E5,$E1,$F2,$E3,$E8,$BA,$00    ; $63A4  Search:.
+; ---- $63AC-$63D4  code ----
                 lda SearchString,y    ; $63AC
                 cpy $5BF0    ; $63AF
                 beq $63BA    ; $63B2
@@ -12012,14 +11800,9 @@ IIcLoc             = $FBC0
                 beq $63F3    ; $63CD
                 jsr NewEchoArea    ; $63CF
                 jsr PrintMessage    ; $63D2
-                cpy $E2E1    ; $63D5
-                sbc $EC    ; $63D8
-                ldy #$D3    ; $63DA
-                sbc $E1    ; $63DC
-                sbc ($E3)    ; $63DE
-                inx    ; $63E0
-                tsx    ; $63E1
-                brk    ; $63E2
+; ---- $63D5-$63E2  data  msg: Label Search: ----
+        dfb $CC,$E1,$E2,$E5,$EC,$A0,$D3,$E5,$E1,$F2,$E3,$E8,$BA,$00    ; $63D5  Label Search:.
+; ---- $63E3-$6539  code ----
                 jsr ReadArgLine    ; $63E3
                 php    ; $63E6
                 jsr CloseEchoArea    ; $63E7
@@ -12172,18 +11955,23 @@ IIcLoc             = $FBC0
                 cmp #$04    ; $6533
                 bcs $6540    ; $6535
                 jsr PrintMessage    ; $6537
-                ldx: $008D    ; $653A
+; ---- $653A-$653C  data  msg: .. ----
+        dfb $AE,$8D,$00    ; $653A  ...
+; ---- $653D-$6542  code ----
                 jmp $64CD    ; $653D
                 jsr PrintMessage    ; $6540
-                ldx $AEAE    ; $6543
-                sta $4C00    ; $6546
-                cmp $A564    ; $6549
-                ora ($48,x)    ; $654C
+; ---- $6543-$6547  data  msg: .... ----
+        dfb $AE,$AE,$AE,$8D,$00    ; $6543  .....
+; ---- $6548-$6553  code ----
+                jmp $64CD    ; $6548
+                lda $01    ; $654B
+                pha    ; $654D
                 lda $00    ; $654E
                 pha    ; $6550
                 jsr PrintMessage    ; $6551
-                cmp $D8AD    ; $6554
-                ldy #$00    ; $6557
+; ---- $6554-$6558  data  msg: M-X ----
+        dfb $CD,$AD,$D8,$A0,$00    ; $6554  M-X .
+; ---- $6559-$658C  code ----
                 pla    ; $6559
                 sta $00    ; $655A
                 pla    ; $655C
@@ -12210,7 +11998,9 @@ IIcLoc             = $FBC0
                 lda $6490    ; $6585
                 beq $6590    ; $6588
                 jsr PrintMessage    ; $658A
-                ldy: $00A0    ; $658D
+; ---- $658D-$658F  data  msg: , ----
+        dfb $AC,$A0,$00    ; $658D  , .
+; ---- $6590-$6689  code ----
                 lda #$98    ; $6590
                 jsr PrettyPrint    ; $6592
                 jsr PrintSpace    ; $6595
@@ -12331,40 +12121,25 @@ IIcLoc             = $FBC0
                 bne $666E    ; $6684
                 php    ; $6686
                 jsr PrintMessage    ; $6687
-                iny    ; $668A
-                sbc $F2    ; $668B
-                sbc $A0    ; $668D
-                sbc ($F2,x)    ; $668F
-                sbc $A0    ; $6691
-        dfb $F4        ; $6693  (data/65C02-bit)
-                inx    ; $6694
-                sbc $A0    ; $6695
-                brk    ; $6697
+; ---- $668A-$6697  data  msg: Here are the ----
+        dfb $C8,$E5,$F2,$E5,$A0,$E1,$F2,$E5,$A0,$F4,$E8,$E5,$A0,$00    ; $668A  Here are the .
+; ---- $6698-$669D  code ----
                 plp    ; $6698
                 bmi $66AA    ; $6699
                 jsr PrintMessage    ; $669B
-                inc $F5    ; $669E
-                inc $F4E3    ; $66A0
-                sbc #$EF    ; $66A3
-                inc $4C00    ; $66A5
-                ldx BuffTop,y    ; $66A8
+; ---- $669E-$66A6  data  msg: function ----
+        dfb $E6,$F5,$EE,$E3,$F4,$E9,$EF,$EE,$00    ; $669E  function.
+; ---- $66A7-$66AC  code ----
+                jmp $66B6    ; $66A7
                 jsr PrintMessage    ; $66AA
-                inc $E1,x    ; $66AD
-                sbc ($E9)    ; $66AF
-                sbc ($E2,x)    ; $66B1
-                cpx: $00E5    ; $66B3
+; ---- $66AD-$66B5  data  msg: variable ----
+        dfb $F6,$E1,$F2,$E9,$E1,$E2,$EC,$E5,$00    ; $66AD  variable.
+; ---- $66B6-$66B8  code ----
                 jsr PrintMessage    ; $66B6
-        dfb $F3        ; $66B9  (data/65C02-bit)
-                ldy #$F7    ; $66BA
-                inx    ; $66BC
-                sbc #$E3    ; $66BD
-                inx    ; $66BF
-                ldy #$E3    ; $66C0
-        dfb $EF        ; $66C2  (data/65C02-bit)
-                inc $E1F4    ; $66C3
-                sbc #$EE    ; $66C6
-                ldy #$A2    ; $66C8
-                brk    ; $66CA
+; ---- $66B9-$66CA  data  msg: s which contain " ----
+        dfb $F3,$A0,$F7,$E8,$E9,$E3,$E8,$A0,$E3,$EF,$EE,$F4,$E1,$E9,$EE,$A0    ; $66B9  s which contain 
+        dfb $A2,$00    ; $66C9  ".
+; ---- $66CB-$66DA  code ----
                 lda $0200,y    ; $66CB
                 cmp #$9B    ; $66CE
                 beq $66D8    ; $66D0
@@ -12372,8 +12147,9 @@ IIcLoc             = $FBC0
                 iny    ; $66D5
                 bne $66CB    ; $66D6
                 jsr PrintMessage    ; $66D8
-                ldx #$BA    ; $66DB
-                sta: $008D    ; $66DD
+; ---- $66DB-$66DF  data  msg: ":.. ----
+        dfb $A2,$BA,$8D,$8D,$00    ; $66DB  ":...
+; ---- $66E0-$66EB  code ----
                 rts    ; $66E0
 ;
 ; === GetAproArg ===
@@ -12381,13 +12157,9 @@ IIcLoc             = $FBC0
                 beq $6703    ; $66E4
                 jsr NewEchoArea    ; $66E6
                 jsr PrintMessage    ; $66E9
-        dfb $D3        ; $66EC  (data/65C02-bit)
-                sbc $E2,x    ; $66ED
-        dfb $F3        ; $66EF  (data/65C02-bit)
-        dfb $F4        ; $66F0  (data/65C02-bit)
-                sbc ($E9)    ; $66F1
-                inc $BAE7    ; $66F3
-                brk    ; $66F6
+; ---- $66EC-$66F6  data  msg: Substring: ----
+        dfb $D3,$F5,$E2,$F3,$F4,$F2,$E9,$EE,$E7,$BA,$00    ; $66EC  Substring:.
+; ---- $66F7-$67A0  code ----
                 jsr ReadArgLine    ; $66F7
                 php    ; $66FA
                 txa    ; $66FB
@@ -12489,25 +12261,11 @@ IIcLoc             = $FBC0
                 bpl $67CE    ; $6799
                 jsr NewEchoArea    ; $679B
                 jsr PrintMessage    ; $679E
-                ldy #$D4    ; $67A1
-                inx    ; $67A3
-                sbc $A0    ; $67A4
-                sbc $EE    ; $67A6
-        dfb $F4        ; $67A8  (data/65C02-bit)
-                sbc #$F2    ; $67A9
-                sbc $A0    ; $67AB
-                inc $E9    ; $67AD
-                cpx $A0E5    ; $67AF
-        dfb $E3        ; $67B2  (data/65C02-bit)
-                sbc ($EE,x)    ; $67B3
-        dfb $A7        ; $67B5  (data/65C02-bit)
-        dfb $F4        ; $67B6  (data/65C02-bit)
-                ldy #$E2    ; $67B7
-                sbc $A0    ; $67B9
-                cpx $E1EF    ; $67BB
-                cpx $E5    ; $67BE
-                cpx $A1    ; $67C0
-                brk    ; $67C2
+; ---- $67A1-$67C2  data  msg:  The entire file can't be loaded! ----
+        dfb $A0,$D4,$E8,$E5,$A0,$E5,$EE,$F4,$E9,$F2,$E5,$A0,$E6,$E9,$EC,$E5    ; $67A1   The entire file
+        dfb $A0,$E3,$E1,$EE,$A7,$F4,$A0,$E2,$E5,$A0,$EC,$EF,$E1,$E4,$E5,$E4    ; $67B1   can't be loaded
+        dfb $A1,$00    ; $67C1  !.
+; ---- $67C3-$67EB  code ----
                 jsr CloseEchoArea    ; $67C3
                 lda #$01    ; $67C6
                 jsr SetBuffFlag    ; $67C8
@@ -12526,12 +12284,9 @@ IIcLoc             = $FBC0
                 jsr SetFileDef    ; $67E3
                 jsr NewEchoArea    ; $67E6
                 jsr PrintMessage    ; $67E9
-                tay    ; $67EC
-                dec $F7E5    ; $67ED
-                ldy #$C6    ; $67F0
-                sbc #$EC    ; $67F2
-                sbc $A9    ; $67F4
-                brk    ; $67F6
+; ---- $67EC-$67F6  data  msg: (New File) ----
+        dfb $A8,$CE,$E5,$F7,$A0,$C6,$E9,$EC,$E5,$A9,$00    ; $67EC  (New File).
+; ---- $67F7-$682A  code ----
                 jsr CloseEchoArea    ; $67F7
                 jsr MakeModeLine    ; $67FA
                 lda BuffTop    ; $67FD
@@ -12558,32 +12313,16 @@ IIcLoc             = $FBC0
                 rts    ; $6824
                 jsr NewEchoArea    ; $6825
                 jsr PrintMessage    ; $6828
-        dfb $C2        ; $682B  (data/65C02-bit)
-                sbc $E6,x    ; $682C
-                inc $E5    ; $682E
-                sbc ($A0)    ; $6830
-                brk    ; $6832
+; ---- $682B-$6832  data  msg: Buffer ----
+        dfb $C2,$F5,$E6,$E6,$E5,$F2,$A0,$00    ; $682B  Buffer .
+; ---- $6833-$6838  code ----
                 jsr PrBuffName    ; $6833
                 jsr PrintMessage    ; $6836
-                ldy #$E8    ; $6839
-                sbc ($F3,x)    ; $683B
-                ldy #$E2    ; $683D
-                sbc $E5    ; $683F
-                inc $EDA0    ; $6841
-        dfb $EF        ; $6844  (data/65C02-bit)
-                cpx $E9    ; $6845
-                inc $E9    ; $6847
-                sbc $E4    ; $6849
-                ldx $A0A0    ; $684B
-        dfb $D3        ; $684E  (data/65C02-bit)
-                sbc ($F6,x)    ; $684F
-                sbc $A0    ; $6851
-                sbc #$F4    ; $6853
-                ldy #$E6    ; $6855
-                sbc #$F2    ; $6857
-        dfb $F3        ; $6859  (data/65C02-bit)
-        dfb $F4        ; $685A  (data/65C02-bit)
-                brk    ; $685B
+; ---- $6839-$685B  data  msg:  has been modified.  Save it first ----
+        dfb $A0,$E8,$E1,$F3,$A0,$E2,$E5,$E5,$EE,$A0,$ED,$EF,$E4,$E9,$E6,$E9    ; $6839   has been modifi
+        dfb $E5,$E4,$AE,$A0,$A0,$D3,$E1,$F6,$E5,$A0,$E9,$F4,$A0,$E6,$E9,$F2    ; $6849  ed.  Save it fir
+        dfb $F3,$F4,$00    ; $6859  st.
+; ---- $685C-$687A  code ----
                 jsr GetYOrNp    ; $685C
                 php    ; $685F
                 pha    ; $6860
@@ -12600,29 +12339,22 @@ IIcLoc             = $FBC0
                 jmp IN:SaveFile    ; $6872
                 jsr NewEchoArea    ; $6875
                 jsr PrintMessage    ; $6878
-                cmp ($E5)    ; $687B
-                sbc ($E4,x)    ; $687D
-                sbc #$EE    ; $687F
-        dfb $E7        ; $6881  (data/65C02-bit)
-                ldy #$00    ; $6882
+; ---- $687B-$6883  data  msg: Reading ----
+        dfb $D2,$E5,$E1,$E4,$E9,$EE,$E7,$A0,$00    ; $687B  Reading .
+; ---- $6884-$6889  code ----
                 jsr PrintPath    ; $6884
                 jsr PrintMessage    ; $6887
-        dfb $BB        ; $688A  (data/65C02-bit)
-                ldy #$A8    ; $688B
-                brk    ; $688D
+; ---- $688A-$688D  data  msg: ; ( ----
+        dfb $BB,$A0,$A8,$00    ; $688A  ; (.
+; ---- $688E-$689C  code ----
                 sty PD:Justify    ; $688E
                 lda $7127    ; $6891
                 ldx GblLength    ; $6894
                 jsr PrintDec    ; $6897
                 jsr PrintMessage    ; $689A
-                ldy #$E3    ; $689D
-                inx    ; $689F
-                sbc ($F2,x)    ; $68A0
-                sbc ($E3,x)    ; $68A2
-        dfb $F4        ; $68A4  (data/65C02-bit)
-                sbc $F2    ; $68A5
-        dfb $F3        ; $68A7  (data/65C02-bit)
-                lda #$00    ; $68A8
+; ---- $689D-$68A9  data  msg:  characters) ----
+        dfb $A0,$E3,$E8,$E1,$F2,$E1,$E3,$F4,$E5,$F2,$F3,$A9,$00    ; $689D   characters).
+; ---- $68AA-$696D  code ----
                 jsr CloseEchoArea    ; $68AA
                 jsr SetFileDef    ; $68AD
                 jsr ZapBuff    ; $68B0
@@ -12721,13 +12453,9 @@ IIcLoc             = $FBC0
                 jsr SetFileDef    ; $6965
                 jsr NewEchoArea    ; $6968
                 jsr PrintMessage    ; $696B
-        dfb $D7        ; $696E  (data/65C02-bit)
-                sbc ($E9)    ; $696F
-        dfb $F4        ; $6971  (data/65C02-bit)
-        dfb $F4        ; $6972  (data/65C02-bit)
-                sbc $EE    ; $6973
-                tsx    ; $6975
-                brk    ; $6976
+; ---- $696E-$6976  data  msg: Written: ----
+        dfb $D7,$F2,$E9,$F4,$F4,$E5,$EE,$BA,$00    ; $696E  Written:.
+; ---- $6977-$6991  code ----
                 jsr PrFileName    ; $6977
                 jsr ClrModified    ; $697A
                 jsr MakeModeLine    ; $697D
@@ -12739,20 +12467,10 @@ IIcLoc             = $FBC0
                 rts    ; $698B
                 jsr NewEchoArea    ; $698C
                 jsr PrintMessage    ; $698F
-                dec $E1    ; $6992
-                sbc #$EC    ; $6994
-                sbc $E4    ; $6996
-                lda ($A0,x)    ; $6998
-                cpy $F5    ; $699A
-                sbc ($E9)    ; $699C
-                inc $A0E7    ; $699E
-        dfb $F7        ; $69A1  (data/65C02-bit)
-                sbc ($E9)    ; $69A2
-        dfb $F4        ; $69A4  (data/65C02-bit)
-                sbc $A0    ; $69A5
-        dfb $EF        ; $69A7  (data/65C02-bit)
-                inc $A0    ; $69A8
-                brk    ; $69AA
+; ---- $6992-$69AA  data  msg: Failed! During write of ----
+        dfb $C6,$E1,$E9,$EC,$E5,$E4,$A1,$A0,$C4,$F5,$F2,$E9,$EE,$E7,$A0,$F7    ; $6992  Failed! During w
+        dfb $F2,$E9,$F4,$E5,$A0,$EF,$E6,$A0,$00    ; $69A2  rite of .
+; ---- $69AB-$6A0F  code ----
                 jsr PrFileName    ; $69AB
                 jsr Beep    ; $69AE
                 jmp $6986    ; $69B1
@@ -12802,7 +12520,9 @@ IIcLoc             = $FBC0
                 iny    ; $6A0A
                 bne $6A02    ; $6A0B
                 jsr PrintMessage    ; $6A0D
-                cmp: $00A0,x    ; $6A10
+; ---- $6A10-$6A12  data  msg: ] ----
+        dfb $DD,$A0,$00    ; $6A10  ] .
+; ---- $6A13-$6A8D  code ----
                 lda $6A7A    ; $6A13
                 sta $00    ; $6A16
                 lda $6A7B    ; $6A18
@@ -12864,34 +12584,21 @@ IIcLoc             = $FBC0
                 rts    ; $6A87
                 jsr NewEchoArea    ; $6A88
                 jsr PrintMessage    ; $6A8B
-                dec $A0EF    ; $6A8E
-        dfb $E3        ; $6A91  (data/65C02-bit)
-                inx    ; $6A92
-                sbc ($EE,x)    ; $6A93
-        dfb $E7        ; $6A95  (data/65C02-bit)
-                sbc $F3    ; $6A96
-                ldy #$EE    ; $6A98
-                sbc $E5    ; $6A9A
-                cpx $00    ; $6A9C
+; ---- $6A8E-$6A9D  data  msg: No changes need ----
+        dfb $CE,$EF,$A0,$E3,$E8,$E1,$EE,$E7,$E5,$F3,$A0,$EE,$E5,$E5,$E4,$00    ; $6A8E  No changes need.
+; ---- $6A9E-$6AA6  code ----
                 jsr AnyArgument?    ; $6A9E
                 php    ; $6AA1
                 bne $6AAA    ; $6AA2
                 jsr PrintMessage    ; $6AA4
-                sbc $E4    ; $6AA7
-                brk    ; $6AA9
+; ---- $6AA7-$6AA9  data  msg: ed ----
+        dfb $E5,$E4,$00    ; $6AA7  ed.
+; ---- $6AAA-$6AAC  code ----
                 jsr PrintMessage    ; $6AAA
-                ldy #$F4    ; $6AAD
-        dfb $EF        ; $6AAF  (data/65C02-bit)
-                ldy #$E2    ; $6AB0
-                sbc $A0    ; $6AB2
-        dfb $F7        ; $6AB4  (data/65C02-bit)
-                sbc ($E9)    ; $6AB5
-        dfb $F4        ; $6AB7  (data/65C02-bit)
-        dfb $F4        ; $6AB8  (data/65C02-bit)
-                sbc $EE    ; $6AB9
-                ldx $2000    ; $6ABB
-                plx    ; $6ABE
-        dfb $57        ; $6ABF  (data/65C02-bit)
+; ---- $6AAD-$6ABC  data  msg:  to be written. ----
+        dfb $A0,$F4,$EF,$A0,$E2,$E5,$A0,$F7,$F2,$E9,$F4,$F4,$E5,$EE,$AE,$00    ; $6AAD   to be written..
+; ---- $6ABD-$6B07  code ----
+                jsr CloseEchoArea    ; $6ABD
                 plp    ; $6AC0
                 beq $6A82    ; $6AC1
                 lda #$01    ; $6AC3
@@ -12931,17 +12638,10 @@ IIcLoc             = $FBC0
                 sbc $3A    ; $6B00
                 jsr NewEchoArea    ; $6B02
                 jsr PrintMessage    ; $6B05
-                cmp $F2    ; $6B08
-                sbc ($EF)    ; $6B0A
-                sbc ($A0)    ; $6B0C
-                sbc ($E5)    ; $6B0E
-                sbc ($E4,x)    ; $6B10
-                sbc #$EE    ; $6B12
-        dfb $E7        ; $6B14  (data/65C02-bit)
-                ldy #$E6    ; $6B15
-                sbc #$EC    ; $6B17
-                sbc $A1    ; $6B19
-                ldy #$00    ; $6B1B
+; ---- $6B08-$6B1C  data  msg: Error reading file! ----
+        dfb $C5,$F2,$F2,$EF,$F2,$A0,$F2,$E5,$E1,$E4,$E9,$EE,$E7,$A0,$E6,$E9    ; $6B08  Error reading fi
+        dfb $EC,$E5,$A1,$A0,$00    ; $6B18  le! .
+; ---- $6B1D-$6CC4  code ----
                 jsr Beep    ; $6B1D
                 jsr CloseEchoArea    ; $6B20
                 jmp $6AEE    ; $6B23
@@ -13157,14 +12857,9 @@ IIcLoc             = $FBC0
                 jsr $6CE9    ; $6CBC
                 jsr OpenEchoArea    ; $6CBF
                 jsr PrintMessage    ; $6CC2
-                sta $E5CE    ; $6CC5
-        dfb $F7        ; $6CC8  (data/65C02-bit)
-                ldy #$F0    ; $6CC9
-                sbc ($E5)    ; $6CCB
-                inc $E9    ; $6CCD
-                sed    ; $6CCF
-                tsx    ; $6CD0
-                brk    ; $6CD1
+; ---- $6CC5-$6CD1  data  msg: .New prefix: ----
+        dfb $8D,$CE,$E5,$F7,$A0,$F0,$F2,$E5,$E6,$E9,$F8,$BA,$00    ; $6CC5  .New prefix:.
+; ---- $6CD2-$6CEE  code ----
                 dec FileRead    ; $6CD2
                 jsr ReadArgLine    ; $6CD5
                 php    ; $6CD8
@@ -13180,15 +12875,10 @@ IIcLoc             = $FBC0
                 jsr DSK:SetPrefix    ; $6CE6
                 jsr NewEchoArea    ; $6CE9
                 jsr PrintMessage    ; $6CEC
-        dfb $C3        ; $6CEF  (data/65C02-bit)
-                sbc $F2,x    ; $6CF0
-                sbc ($E5)    ; $6CF2
-                inc $A0F4    ; $6CF4
-                beq $6CEB    ; $6CF7
-                sbc $E6    ; $6CF9
-                sbc #$F8    ; $6CFB
-                tsx    ; $6CFD
-                ldy #$00    ; $6CFE
+; ---- $6CEF-$6CFF  data  msg: Current prefix: ----
+        dfb $C3,$F5,$F2,$F2,$E5,$EE,$F4,$A0,$F0,$F2,$E5,$E6,$E9,$F8,$BA,$A0    ; $6CEF  Current prefix: 
+        dfb $00    ; $6CFF  .
+; ---- $6D00-$6EAA  code ----
                 ldx #$00    ; $6D00
                 lda PrefixName,x    ; $6D02
                 ora #$80    ; $6D05
@@ -13434,12 +13124,9 @@ IIcLoc             = $FBC0
                 ora $6E07    ; $6EA3
                 bne $6EB6    ; $6EA6
                 jsr PrintMessage    ; $6EA8
-        dfb $DB        ; $6EAB  (data/65C02-bit)
-                inc $A0EF    ; $6EAC
-                cpx $E1    ; $6EAF
-        dfb $F4        ; $6EB1  (data/65C02-bit)
-                sbc $DD    ; $6EB2
-                brk    ; $6EB4
+; ---- $6EAB-$6EB4  data  msg: [no date] ----
+        dfb $DB,$EE,$EF,$A0,$E4,$E1,$F4,$E5,$DD,$00    ; $6EAB  [no date].
+; ---- $6EB5-$742C  code ----
                 rts    ; $6EB5
                 ldx $6E0A    ; $6EB6
                 jsr ZeroJustify    ; $6EB9
@@ -14163,9 +13850,9 @@ IIcLoc             = $FBC0
                 dex    ; $7427
                 bne $741E    ; $7428
                 jsr PrintMessage    ; $742A
-                ldy #$E8    ; $742D
-                sbc ($F3,x)    ; $742F
-                ldy #$00    ; $7431
+; ---- $742D-$7432  data  msg:  has ----
+        dfb $A0,$E8,$E1,$F3,$A0,$00    ; $742D   has .
+; ---- $7433-$745E  code ----
                 ldy #$29    ; $7433
                 lda rm_FileBuffer,y    ; $7435
                 sta $7499    ; $7438
@@ -14184,28 +13871,17 @@ IIcLoc             = $FBC0
                 sbc $6D7A    ; $7456
                 jsr PrintPages    ; $7459
                 jsr PrintMessage    ; $745C
-                inc $F2    ; $745F
-                sbc $E5    ; $7461
-                ldy: $00A0    ; $7463
+; ---- $745F-$7465  data  msg: free, ----
+        dfb $E6,$F2,$E5,$E5,$AC,$A0,$00    ; $745F  free, .
+; ---- $7466-$7471  code ----
                 lda $6D7A    ; $7466
                 ldx $6D79    ; $7469
                 jsr PrintPages    ; $746C
                 jsr PrintMessage    ; $746F
-                sbc #$EE    ; $7472
-                ldy #$F5    ; $7474
-        dfb $F3        ; $7476  (data/65C02-bit)
-                sbc $AC    ; $7477
-                ldy #$E6    ; $7479
-        dfb $EF        ; $747B  (data/65C02-bit)
-                sbc ($A0)    ; $747C
-                sbc ($A0,x)    ; $747E
-        dfb $F4        ; $7480  (data/65C02-bit)
-        dfb $EF        ; $7481  (data/65C02-bit)
-        dfb $F4        ; $7482  (data/65C02-bit)
-                sbc ($EC,x)    ; $7483
-                ldy #$EF    ; $7485
-                inc $A0    ; $7487
-                brk    ; $7489
+; ---- $7472-$7489  data  msg: in use, for a total of ----
+        dfb $E9,$EE,$A0,$F5,$F3,$E5,$AC,$A0,$E6,$EF,$F2,$A0,$E1,$A0,$F4,$EF    ; $7472  in use, for a to
+        dfb $F4,$E1,$EC,$A0,$EF,$E6,$A0,$00    ; $7482  tal of .
+; ---- $748A-$74A6  code ----
                 lda $749A    ; $748A
                 ldx $7499    ; $748D
                 jsr PrintDec    ; $7490
@@ -14220,9 +13896,9 @@ IIcLoc             = $FBC0
                 sta $0101    ; $749E
                 jsr PrintDec    ; $74A1
                 jsr PrintMessage    ; $74A4
-                ldy #$F0    ; $74A7
-                sbc ($E7,x)    ; $74A9
-                sbc $00    ; $74AB
+; ---- $74A7-$74AC  data  msg:  page ----
+        dfb $A0,$F0,$E1,$E7,$E5,$00    ; $74A7   page.
+; ---- $74AD-$7514  code ----
                 ldx $0100    ; $74AD
                 lda $0101    ; $74B0
                 jsr Plurilize    ; $74B3
@@ -14268,23 +13944,21 @@ IIcLoc             = $FBC0
                 ldx $7077    ; $750C
                 jsr PrintDec    ; $750F
                 jsr PrintMessage    ; $7512
-                ldy #$E6    ; $7515
-                sbc #$EC    ; $7517
-                sbc $00    ; $7519
+; ---- $7515-$751A  data  msg:  file ----
+        dfb $A0,$E6,$E9,$EC,$E5,$00    ; $7515   file.
+; ---- $751B-$7526  code ----
                 lda $7078    ; $751B
                 ldx $7077    ; $751E
                 jsr Plurilize    ; $7521
                 jsr PrintMessage    ; $7524
-                ldy #$F0    ; $7527
-                sbc ($E5)    ; $7529
-        dfb $F3        ; $752B  (data/65C02-bit)
-                sbc $EE    ; $752C
-        dfb $F4        ; $752E  (data/65C02-bit)
-                ldy #$EF    ; $752F
-                inc: $00A0    ; $7531
+; ---- $7527-$7533  data  msg:  present on ----
+        dfb $A0,$F0,$F2,$E5,$F3,$E5,$EE,$F4,$A0,$EF,$EE,$A0,$00    ; $7527   present on .
+; ---- $7534-$7539  code ----
                 jsr PrintPath    ; $7534
                 jsr PrintMessage    ; $7537
-                sta: $008D    ; $753A
+; ---- $753A-$753C  data  msg: .. ----
+        dfb $8D,$8D,$00    ; $753A  ...
+; ---- $753D-$7B84  code ----
                 rts    ; $753D
 ;
 ; === HexListing ===
@@ -15129,10 +14803,9 @@ IIcLoc             = $FBC0
                 rts    ; $7B7E
                 jsr NewEchoArea    ; $7B7F
                 jsr PrintMessage    ; $7B82
-                cmp ($F2,x)    ; $7B85
-        dfb $E7        ; $7B87  (data/65C02-bit)
-                tsx    ; $7B88
-                brk    ; $7B89
+; ---- $7B85-$7B89  data  msg: Arg: ----
+        dfb $C1,$F2,$E7,$BA,$00    ; $7B85  Arg:.
+; ---- $7B8A-$7D22  code ----
                 lda #$AD    ; $7B8A
                 bit ArgSign    ; $7B8C
                 bpl $7B94    ; $7B8F
@@ -15423,11 +15096,9 @@ IIcLoc             = $FBC0
 ;
 ; === GetYOrNp ===
                 jsr PrintMessage    ; $7D20
-                ldy #$A8    ; $7D23
-                cmp $EFA0,y    ; $7D25
-                sbc ($A0)    ; $7D28
-                dec $BFA9    ; $7D2A
-                brk    ; $7D2D
+; ---- $7D23-$7D2D  data  msg:  (Y or N)? ----
+        dfb $A0,$A8,$D9,$A0,$EF,$F2,$A0,$CE,$A9,$BF,$00    ; $7D23   (Y or N)?.
+; ---- $7D2E-$7D99  code ----
                 jsr BlinkCursor    ; $7D2E
                 cmp #$87    ; $7D31
                 beq $7D47    ; $7D33
@@ -15487,9 +15158,10 @@ IIcLoc             = $FBC0
 ;
 ; === PrintDone ===
                 jsr PrintMessage    ; $7D97
-                sta $EFC4    ; $7D9A
-                inc $AEE5    ; $7D9D
-                sta $6000    ; $7DA0
+; ---- $7D9A-$7DA1  data  msg: .Done.. ----
+        dfb $8D,$C4,$EF,$EE,$E5,$AE,$8D,$00    ; $7D9A  .Done...
+; ---- $7DA2-$7DB7  code ----
+                rts    ; $7DA2
 ;
 ; === PrintReturn ===
                 lda #$8D    ; $7DA3
@@ -15519,7 +15191,7 @@ IIcLoc             = $FBC0
         dfb $7B,$7E,$AC,$20,$31,$7E,$31,$7E,$31,$7E,$31,$7E    ; $7E1E  {~, 1~1~1~1~
 ; ---- $7E2A-$7E2A  data  C_XCharCount ($26 = 38) ----
         dfb $26    ; $7E2A  &
-; ---- $7E2B-$9B36  code ----
+; ---- $7E2B-$7F31  code ----
 ;
 ; === SwapMark ===
                 jsr SwapPointMark    ; $7E2B
@@ -15668,31 +15340,27 @@ IIcLoc             = $FBC0
                 lda Argument    ; $7F29
                 jmp $7F48    ; $7F2C
                 jsr PrintMessage    ; $7F2F
-                sta $EECF    ; $7F32
-                ldy #$F7    ; $7F35
-                inx    ; $7F37
-                sbc ($F4,x)    ; $7F38
-                ldy #$EB    ; $7F3A
-                sbc $F9    ; $7F3C
-                tsx    ; $7F3E
-                brk    ; $7F3F
+; ---- $7F32-$7F3F  data  msg: .On what key: ----
+        dfb $8D,$CF,$EE,$A0,$F7,$E8,$E1,$F4,$A0,$EB,$E5,$F9,$BA,$00    ; $7F32  .On what key:.
+; ---- $7F40-$7F50  code ----
                 jsr ReadAltKey    ; $7F40
                 bne $7F48    ; $7F43
                 jmp $8082    ; $7F45
                 sta $7F0E    ; $7F48
                 jsr Home    ; $7F4B
                 jsr PrintMessage    ; $7F4E
-                bne $7F48    ; $7F51
-        dfb $F4        ; $7F53  (data/65C02-bit)
-                ldy #$00    ; $7F54
+; ---- $7F51-$7F55  data  msg: Put ----
+        dfb $D0,$F5,$F4,$A0,$00    ; $7F51  Put .
+; ---- $7F56-$7F65  code ----
                 lda $7F0C    ; $7F56
                 sta $00    ; $7F59
                 lda $7F0D    ; $7F5B
                 sta $01    ; $7F5E
                 jsr DCIStringOut    ; $7F60
                 jsr PrintMessage    ; $7F63
-                ldy #$EF    ; $7F66
-                inc: $00A0    ; $7F68
+; ---- $7F66-$7F6A  data  msg:  on ----
+        dfb $A0,$EF,$EE,$A0,$00    ; $7F66   on .
+; ---- $7F6B-$7FFB  code ----
                 lda $7F0E    ; $7F6B
                 jsr PrettyPrint    ; $7F6E
                 jsr ClearEOL    ; $7F71
@@ -15774,8 +15442,9 @@ IIcLoc             = $FBC0
                 sta $2A98    ; $7FF3
                 jsr NewEchoArea    ; $7FF6
                 jsr PrintMessage    ; $7FF9
-                cmp $BFAD    ; $7FFC
-                ldy #$00    ; $7FFF
+; ---- $7FFC-$8000  data  msg: M-? ----
+        dfb $CD,$AD,$BF,$A0,$00    ; $7FFC  M-? .
+; ---- $8001-$8047  code ----
                 jsr ReadAltKey    ; $8001
                 bne $8009    ; $8004
                 jmp $8082    ; $8006
@@ -15805,16 +15474,10 @@ IIcLoc             = $FBC0
 ;
 ; === PrFunDoc ===
                 jsr PrintMessage    ; $8045
-                ldy #$F2    ; $8048
-                sbc $EE,x    ; $804A
-        dfb $F3        ; $804C  (data/65C02-bit)
-                ldy #$F4    ; $804D
-                inx    ; $804F
-                sbc $A0    ; $8050
-                inc $F5    ; $8052
-                inc $F4E3    ; $8054
-                sbc #$EF    ; $8057
-                inc: $00A0    ; $8059
+; ---- $8048-$805B  data  msg:  runs the function ----
+        dfb $A0,$F2,$F5,$EE,$F3,$A0,$F4,$E8,$E5,$A0,$E6,$F5,$EE,$E3,$F4,$E9    ; $8048   runs the functi
+        dfb $EF,$EE,$A0,$00    ; $8058  on .
+; ---- $805C-$8071  code ----
                 tya    ; $805C
                 jsr DCIStringOut1    ; $805D
                 jsr PrintMessage    ; $8060
@@ -15824,8 +15487,9 @@ IIcLoc             = $FBC0
                 lda #$08    ; $806A
                 jsr DCIStringOut1    ; $806C
                 jsr PrintMessage    ; $806F
-                ldx $8D8D    ; $8072
-                brk    ; $8075
+; ---- $8072-$8075  data  msg: ... ----
+        dfb $AE,$8D,$8D,$00    ; $8072  ....
+; ---- $8076-$80AE  code ----
                 rts    ; $8076
                 brk    ; $8077
                 ldx $8077    ; $8078
@@ -15854,7 +15518,9 @@ IIcLoc             = $FBC0
                 beq $8078    ; $80A7
                 sta $7F0E    ; $80A9
                 jsr PrintMessage    ; $80AC
-                sta: $008D    ; $80AF
+; ---- $80AF-$80B1  data  msg: .. ----
+        dfb $8D,$8D,$00    ; $80AF  ...
+; ---- $80B2-$8396  code ----
                 lda $7F0E    ; $80B2
                 cmp #$AA    ; $80B5
                 beq $80E2    ; $80B7
@@ -16274,18 +15940,10 @@ IIcLoc             = $FBC0
 ; === Help ===
                 jsr NewEchoArea    ; $8391
                 jsr PrintMessage    ; $8394
-                cpy $EF    ; $8397
-        dfb $E3        ; $8399  (data/65C02-bit)
-                ldy #$A8    ; $839A
-        dfb $BF        ; $839C  (data/65C02-bit)
-                ldy #$E6    ; $839D
-        dfb $EF        ; $839F  (data/65C02-bit)
-                sbc ($A0)    ; $83A0
-                iny    ; $83A2
-                sbc $EC    ; $83A3
-                beq $8350    ; $83A5
-                tsx    ; $83A7
-                brk    ; $83A8
+; ---- $8397-$83A8  data  msg: Doc (? for Help): ----
+        dfb $C4,$EF,$E3,$A0,$A8,$BF,$A0,$E6,$EF,$F2,$A0,$C8,$E5,$EC,$F0,$A9    ; $8397  Doc (? for Help)
+        dfb $BA,$00    ; $83A7  :.
+; ---- $83A9-$8575  code ----
                 jsr BlinkCursor    ; $83A9
                 pha    ; $83AC
                 jsr CloseEchoArea    ; $83AD
@@ -16507,27 +16165,11 @@ IIcLoc             = $FBC0
                 jsr CursorOff    ; $856D
                 jsr NewEchoArea    ; $8570
                 jsr PrintMessage    ; $8573
-                cmp ($E5)    ; $8576
-                beq $8566    ; $8578
-                sbc ($E3,x)    ; $857A
-                sbc $A0    ; $857C
-        dfb $F4        ; $857E  (data/65C02-bit)
-                inx    ; $857F
-                sbc #$F3    ; $8580
-                ldy #$EF    ; $8582
-        dfb $E3        ; $8584  (data/65C02-bit)
-        dfb $E3        ; $8585  (data/65C02-bit)
-                sbc $F2,x    ; $8586
-                sbc $EE    ; $8588
-        dfb $E3        ; $858A  (data/65C02-bit)
-                sbc $A0    ; $858B
-                tay    ; $858D
-                cmp $CEAC,y    ; $858E
-                ldy $ACA1    ; $8591
-        dfb $C3        ; $8594  (data/65C02-bit)
-                lda $A9C7    ; $8595
-        dfb $BF        ; $8598  (data/65C02-bit)
-                brk    ; $8599
+; ---- $8576-$8599  data  msg: Replace this occurence (Y,N,!,C-G)? ----
+        dfb $D2,$E5,$F0,$EC,$E1,$E3,$E5,$A0,$F4,$E8,$E9,$F3,$A0,$EF,$E3,$E3    ; $8576  Replace this occ
+        dfb $F5,$F2,$E5,$EE,$E3,$E5,$A0,$A8,$D9,$AC,$CE,$AC,$A1,$AC,$C3,$AD    ; $8586  urence (Y,N,!,C-
+        dfb $C7,$A9,$BF,$00    ; $8596  G)?.
+; ---- $859A-$85E3  code ----
                 jsr BlinkCursor    ; $859A
                 pha    ; $859D
                 jsr CloseEchoArea    ; $859E
@@ -16562,14 +16204,9 @@ IIcLoc             = $FBC0
                 beq $85FF    ; $85DC
                 jsr NewEchoArea    ; $85DE
                 jsr PrintMessage    ; $85E1
-        dfb $D3        ; $85E4  (data/65C02-bit)
-                sbc $E1    ; $85E5
-                sbc ($E3)    ; $85E7
-                inx    ; $85E9
-                ldy #$E6    ; $85EA
-        dfb $EF        ; $85EC  (data/65C02-bit)
-                sbc ($BA)    ; $85ED
-                brk    ; $85EF
+; ---- $85E4-$85EF  data  msg: Search for: ----
+        dfb $D3,$E5,$E1,$F2,$E3,$E8,$A0,$E6,$EF,$F2,$BA,$00    ; $85E4  Search for:.
+; ---- $85F0-$8620  code ----
                 jsr ReadArgLine    ; $85F0
                 php    ; $85F3
                 txa    ; $85F4
@@ -16596,15 +16233,9 @@ IIcLoc             = $FBC0
                 beq $863E    ; $8619
                 jsr OpenEchoArea    ; $861B
                 jsr PrintMessage    ; $861E
-                sta $E5D2    ; $8621
-                beq $8612    ; $8624
-                sbc ($E3,x)    ; $8626
-                sbc $A0    ; $8628
-        dfb $F7        ; $862A  (data/65C02-bit)
-                sbc #$F4    ; $862B
-                inx    ; $862D
-                tsx    ; $862E
-                brk    ; $862F
+; ---- $8621-$862F  data  msg: .Replace with: ----
+        dfb $8D,$D2,$E5,$F0,$EC,$E1,$E3,$E5,$A0,$F7,$E9,$F4,$E8,$BA,$00    ; $8621  .Replace with:.
+; ---- $8630-$886A  code ----
                 jsr ReadArgLine    ; $8630
                 php    ; $8633
                 txa    ; $8634
@@ -16887,13 +16518,9 @@ IIcLoc             = $FBC0
                 ldx $87AE    ; $8862
                 jsr PrintDec    ; $8865
                 jsr PrintMessage    ; $8868
-                ldy #$EF    ; $886B
-        dfb $E3        ; $886D  (data/65C02-bit)
-        dfb $E3        ; $886E  (data/65C02-bit)
-                sbc $F2,x    ; $886F
-                sbc $EE    ; $8871
-        dfb $E3        ; $8873  (data/65C02-bit)
-                sbc $00    ; $8874
+; ---- $886B-$8875  data  msg:  occurence ----
+        dfb $A0,$EF,$E3,$E3,$F5,$F2,$E5,$EE,$E3,$E5,$00    ; $886B   occurence.
+; ---- $8876-$8943  code ----
                 lda $87AF    ; $8876
                 ldx $87AE    ; $8879
                 jsr Plurilize    ; $887C
@@ -16988,14 +16615,9 @@ IIcLoc             = $FBC0
                 beq $895D    ; $893C
                 jsr NewEchoArea    ; $893E
                 jsr PrintMessage    ; $8941
-        dfb $CF        ; $8944  (data/65C02-bit)
-        dfb $E3        ; $8945  (data/65C02-bit)
-        dfb $E3        ; $8946  (data/65C02-bit)
-                sbc $F2,x    ; $8947
-                sbc $EE    ; $8949
-        dfb $E3        ; $894B  (data/65C02-bit)
-                sbc $BA    ; $894C
-                brk    ; $894E
+; ---- $8944-$894E  data  msg: Occurence: ----
+        dfb $CF,$E3,$E3,$F5,$F2,$E5,$EE,$E3,$E5,$BA,$00    ; $8944  Occurence:.
+; ---- $894F-$8C4B  code ----
                 jsr ReadArgLine    ; $894F
                 php    ; $8952
                 txa    ; $8953
@@ -17366,48 +16988,21 @@ IIcLoc             = $FBC0
                 pha    ; $8C45
                 jsr NewEchoArea    ; $8C46
                 jsr PrintMessage    ; $8C49
-                cmp $F5EF,y    ; $8C4C
-                ldy #$E1    ; $8C4F
-                sbc ($E5)    ; $8C51
-                ldy #$E1    ; $8C53
-        dfb $E2        ; $8C55  (data/65C02-bit)
-        dfb $EF        ; $8C56  (data/65C02-bit)
-                sbc $F4,x    ; $8C57
-                ldy #$F4    ; $8C59
-        dfb $EF        ; $8C5B  (data/65C02-bit)
-                ldy #$E1    ; $8C5C
-        dfb $E3        ; $8C5E  (data/65C02-bit)
-        dfb $F4        ; $8C5F  (data/65C02-bit)
-                ldy #$EF    ; $8C60
-                inc: $00A0    ; $8C62
+; ---- $8C4C-$8C64  data  msg: You are about to act on ----
+        dfb $D9,$EF,$F5,$A0,$E1,$F2,$E5,$A0,$E1,$E2,$EF,$F5,$F4,$A0,$F4,$EF    ; $8C4C  You are about to
+        dfb $A0,$E1,$E3,$F4,$A0,$EF,$EE,$A0,$00    ; $8C5C   act on .
+; ---- $8C65-$8C70  code ----
                 sty PD:Justify    ; $8C65
                 pla    ; $8C68
                 tax    ; $8C69
                 pla    ; $8C6A
                 jsr PrintDec    ; $8C6B
                 jsr PrintMessage    ; $8C6E
-                ldy #$E3    ; $8C71
-                inx    ; $8C73
-                sbc ($F2,x)    ; $8C74
-                sbc ($E3,x)    ; $8C76
-        dfb $F4        ; $8C78  (data/65C02-bit)
-                sbc $F2    ; $8C79
-        dfb $F3        ; $8C7B  (data/65C02-bit)
-                ldy $E4A0    ; $8C7C
-        dfb $EF        ; $8C7F  (data/65C02-bit)
-                ldy #$F9    ; $8C80
-        dfb $EF        ; $8C82  (data/65C02-bit)
-                sbc $A0,x    ; $8C83
-        dfb $F7        ; $8C85  (data/65C02-bit)
-                sbc ($EE,x)    ; $8C86
-        dfb $F4        ; $8C88  (data/65C02-bit)
-                ldy #$F4    ; $8C89
-        dfb $EF        ; $8C8B  (data/65C02-bit)
-                ldy #$E3    ; $8C8C
-        dfb $EF        ; $8C8E  (data/65C02-bit)
-                inc $E9F4    ; $8C8F
-                inc $E5F5    ; $8C92
-                brk    ; $8C95
+; ---- $8C71-$8C95  data  msg:  characters, do you want to continue ----
+        dfb $A0,$E3,$E8,$E1,$F2,$E1,$E3,$F4,$E5,$F2,$F3,$AC,$A0,$E4,$EF,$A0    ; $8C71   characters, do 
+        dfb $F9,$EF,$F5,$A0,$F7,$E1,$EE,$F4,$A0,$F4,$EF,$A0,$E3,$EF,$EE,$F4    ; $8C81  you want to cont
+        dfb $E9,$EE,$F5,$E5,$00    ; $8C91  inue.
+; ---- $8C96-$8DC1  code ----
                 jsr GetYOrNp    ; $8C96
                 php    ; $8C99
                 pha    ; $8C9A
@@ -17564,14 +17159,10 @@ IIcLoc             = $FBC0
                 ldx LsInReg    ; $8DB9
                 jsr PrintDec    ; $8DBC
                 jsr PrintMessage    ; $8DBF
-                ldy #$EC    ; $8DC2
-                sbc #$EE    ; $8DC4
-                sbc $F3    ; $8DC6
-                ldy #$E9    ; $8DC8
-                inc $D2A0    ; $8DCA
-                sbc $E7    ; $8DCD
-                sbc #$EF    ; $8DCF
-                inc: $00AE    ; $8DD1
+; ---- $8DC2-$8DD3  data  msg:  lines in Region. ----
+        dfb $A0,$EC,$E9,$EE,$E5,$F3,$A0,$E9,$EE,$A0,$D2,$E5,$E7,$E9,$EF,$EE    ; $8DC2   lines in Region
+        dfb $AE,$00    ; $8DD2  ..
+; ---- $8DD4-$9200  code ----
                 jsr CloseEchoArea    ; $8DD4
                 lda #$01    ; $8DD7
                 rts    ; $8DD9
@@ -18114,11 +17705,9 @@ IIcLoc             = $FBC0
                 beq $9224    ; $91F9
                 jsr NewEchoArea    ; $91FB
                 jsr PrintMessage    ; $91FE
-                cpy $E2E9    ; $9201
-                sbc ($E1)    ; $9204
-                sbc ($F9)    ; $9206
-                tsx    ; $9208
-                brk    ; $9209
+; ---- $9201-$9209  data  msg: Library: ----
+        dfb $CC,$E9,$E2,$F2,$E1,$F2,$F9,$BA,$00    ; $9201  Library:.
+; ---- $920A-$92C5  code ----
                 jsr ReadArgLine    ; $920A
                 php    ; $920D
                 txa    ; $920E
@@ -18215,15 +17804,9 @@ IIcLoc             = $FBC0
                 beq SI:FlushLibs    ; $92BE
                 jsr NewEchoArea    ; $92C0
                 jsr PrintMessage    ; $92C3
-                dec $EC    ; $92C6
-                sbc $F3,x    ; $92C8
-                inx    ; $92CA
-                ldy #$EC    ; $92CB
-                sbc #$E2    ; $92CD
-                sbc ($E1)    ; $92CF
-                sbc ($E9)    ; $92D1
-                sbc $F3    ; $92D3
-                brk    ; $92D5
+; ---- $92C6-$92D5  data  msg: Flush libraries ----
+        dfb $C6,$EC,$F5,$F3,$E8,$A0,$EC,$E9,$E2,$F2,$E1,$F2,$E9,$E5,$F3,$00    ; $92C6  Flush libraries.
+; ---- $92D6-$94E5  code ----
                 jsr GetYOrNp    ; $92D6
                 php    ; $92D9
                 jsr CloseEchoArea    ; $92DA
@@ -18538,22 +18121,11 @@ IIcLoc             = $FBC0
                 beq $9506    ; $94DE
                 jsr NewEchoArea    ; $94E0
                 jsr PrintMessage    ; $94E3
-                cmp $F3E9    ; $94E6
-        dfb $F3        ; $94E9  (data/65C02-bit)
-                sbc #$EE    ; $94EA
-        dfb $E7        ; $94EC  (data/65C02-bit)
-                ldy #$E2    ; $94ED
-                sbc $E6,x    ; $94EF
-                inc $E5    ; $94F1
-                sbc ($A0)    ; $94F3
-                tax    ; $94F5
-        dfb $D4        ; $94F6  (data/65C02-bit)
-                cmp ($C7,x)    ; $94F7
-        dfb $D3        ; $94F9  (data/65C02-bit)
-                tax    ; $94FA
-                ldx $2000    ; $94FB
-                plx    ; $94FE
-        dfb $57        ; $94FF  (data/65C02-bit)
+; ---- $94E6-$94FC  data  msg: Missing buffer *TAGS*. ----
+        dfb $CD,$E9,$F3,$F3,$E9,$EE,$E7,$A0,$E2,$F5,$E6,$E6,$E5,$F2,$A0,$AA    ; $94E6  Missing buffer *
+        dfb $D4,$C1,$C7,$D3,$AA,$AE,$00    ; $94F6  TAGS*..
+; ---- $94FD-$96B8  code ----
+                jsr CloseEchoArea    ; $94FD
                 jsr Beep    ; $9500
                 lda #$01    ; $9503
                 rts    ; $9505
@@ -18754,15 +18326,10 @@ IIcLoc             = $FBC0
                 inx    ; $96B3
                 bne $96A9    ; $96B4
                 jsr PrintMessage    ; $96B6
-                ldy #$E3    ; $96B9
-                sbc ($EE,x)    ; $96BB
-                ldy #$E2    ; $96BD
-                sbc $A0    ; $96BF
-                inc $EF    ; $96C1
-                sbc $EE,x    ; $96C3
-                cpx $A0    ; $96C5
-                sbc #$EE    ; $96C7
-                ldy #$00    ; $96C9
+; ---- $96B9-$96CA  data  msg:  can be found in ----
+        dfb $A0,$E3,$E1,$EE,$A0,$E2,$E5,$A0,$E6,$EF,$F5,$EE,$E4,$A0,$E9,$EE    ; $96B9   can be found in
+        dfb $A0,$00    ; $96C9   .
+; ---- $96CB-$9706  code ----
                 lda $0200,y    ; $96CB
                 cmp #$8D    ; $96CE
                 beq $96D8    ; $96D0
@@ -18788,15 +18355,9 @@ IIcLoc             = $FBC0
                 jsr CharOut    ; $96FE
                 jsr $9739    ; $9701
                 jsr PrintMessage    ; $9704
-        dfb $A7        ; $9707  (data/65C02-bit)
-                ldy #$EE    ; $9708
-        dfb $EF        ; $970A  (data/65C02-bit)
-        dfb $F4        ; $970B  (data/65C02-bit)
-                ldy #$E6    ; $970C
-        dfb $EF        ; $970E  (data/65C02-bit)
-                sbc $EE,x    ; $970F
-                cpx $AE    ; $9711
-                brk    ; $9713
+; ---- $9707-$9713  data  msg: ' not found. ----
+        dfb $A7,$A0,$EE,$EF,$F4,$A0,$E6,$EF,$F5,$EE,$E4,$AE,$00    ; $9707  ' not found..
+; ---- $9714-$9B36  code ----
                 jsr CloseEchoArea    ; $9714
                 jsr Beep    ; $9717
                 lda #$01    ; $971A
@@ -19395,7 +18956,7 @@ IIcLoc             = $FBC0
                 ldy #$E9    ; $9B30
                 inc $E8A0    ; $9B32
                 sbc $78    ; $9B35
-; ---- $9B37-$A4F7  data  CommandNames (alphabetical command-name string table, runs to EOF) ----
+; ---- $9B37-$A4F7  data  CommandNames (command-name string table to EOF) ----
         dfb $C1,$E3,$E3,$F5,$ED,$F5,$EC,$E1,$F4,$E5,$A0,$CD,$E1,$F4,$E3,$E8    ; $9B37  Accumulate Match
         dfb $E9,$EE,$E7,$A0,$CC,$E9,$EE,$E5,$73,$71,$89,$45,$B5,$C1,$F0,$F0    ; $9B47  ing Linesq.E5App
         dfb $E5,$EE,$E4,$A0,$CE,$E5,$F8,$F4,$A0,$CB,$E9,$EC,$6C,$7E,$4F,$78    ; $9B57  end Next Kill~Ox

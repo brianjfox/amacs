@@ -15,7 +15,7 @@ SRC     := src/amacs.s
 REGIONS := src/regions.json
 SYMBOLS := src/symbols.json
 
-.PHONY: all check setup blob symbols disasm build verify clean
+.PHONY: all check setup blob symbols regions disasm build verify clean
 
 all: check
 
@@ -31,6 +31,11 @@ blob:
 # Rebuild the address->name table from LINK.OUTPUT.S + DEFS equates.
 symbols:
 	tools/build_symbols.py $(SYMBOLS)
+
+# Rebuild the code/data region map (structural tables, window records, and
+# auto-detected inline PrintMessage strings).
+regions:
+	tools/find_data.py $(GOLD) $(REGIONS)
 
 # Regenerate the disassembly from the binary + region map + symbol table.
 disasm:

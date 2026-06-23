@@ -1,7 +1,704 @@
 [
-  { "start": "1027", "end": "1035", "kind": "data", "name": "entry pointer block (CompList,CommandNames,CharIndex,ComTab,C_XCharacters,C_XVectors,C_XCharCount)" },
-  { "start": "7DB8", "end": "7DDE", "kind": "data", "name": "C_XCharacters (38 extended-key chars)" },
-  { "start": "7DDE", "end": "7E2A", "kind": "data", "name": "C_XVectors (38 handler addresses)" },
-  { "start": "7E2A", "end": "7E2B", "kind": "data", "name": "C_XCharCount ($26 = 38)" },
-  { "start": "9B37", "end": "A4F8", "kind": "data", "name": "CommandNames (alphabetical command-name string table, runs to EOF)" }
+  {
+    "start": "1027",
+    "end": "1035",
+    "kind": "data",
+    "name": "entry pointer block (CompList..C_XCharCount)"
+  },
+  {
+    "start": "111D",
+    "end": "1126",
+    "kind": "data",
+    "name": "WindowOne (9-byte window descriptor record)"
+  },
+  {
+    "start": "1126",
+    "end": "112F",
+    "kind": "data",
+    "name": "WindowTwo (9-byte window descriptor record)"
+  },
+  {
+    "start": "112F",
+    "end": "1130",
+    "kind": "data",
+    "name": "SelectedWind (current window index)"
+  },
+  {
+    "start": "1458",
+    "end": "145B",
+    "kind": "data",
+    "name": "msg: On"
+  },
+  {
+    "start": "145F",
+    "end": "1463",
+    "kind": "data",
+    "name": "msg: Off"
+  },
+  {
+    "start": "14F7",
+    "end": "14FF",
+    "kind": "data",
+    "name": "msg: .Value:"
+  },
+  {
+    "start": "1AC3",
+    "end": "1AD1",
+    "kind": "data",
+    "name": "msg: Point pushed."
+  },
+  {
+    "start": "1B39",
+    "end": "1B3E",
+    "kind": "data",
+    "name": "msg: C-X "
+  },
+  {
+    "start": "1C57",
+    "end": "1C5B",
+    "kind": "data",
+    "name": "msg: X ="
+  },
+  {
+    "start": "1C62",
+    "end": "1C68",
+    "kind": "data",
+    "name": "msg: , Y ="
+  },
+  {
+    "start": "1C6F",
+    "end": "1C77",
+    "kind": "data",
+    "name": "msg: ,  CH ="
+  },
+  {
+    "start": "1C84",
+    "end": "1C87",
+    "kind": "data",
+    "name": "msg:  ("
+  },
+  {
+    "start": "1C8E",
+    "end": "1C9D",
+    "kind": "data",
+    "name": "msg: ).Point is at "
+  },
+  {
+    "start": "1CAD",
+    "end": "1CB2",
+    "kind": "data",
+    "name": "msg:  of "
+  },
+  {
+    "start": "20D8",
+    "end": "20DD",
+    "kind": "data",
+    "name": "msg: .= \""
+  },
+  {
+    "start": "214D",
+    "end": "2159",
+    "kind": "data",
+    "name": "msg: available, "
+  },
+  {
+    "start": "2169",
+    "end": "2177",
+    "kind": "data",
+    "name": "msg:  in current.."
+  },
+  {
+    "start": "3CE9",
+    "end": "3D2B",
+    "kind": "data",
+    "name": "msg: You are typing the argument to an AMACS "
+  },
+  {
+    "start": "3D42",
+    "end": "3D46",
+    "kind": "data",
+    "name": "msg: ;  "
+  },
+  {
+    "start": "3D51",
+    "end": "3D6C",
+    "kind": "data",
+    "name": "msg: ...Now type the argument.."
+  },
+  {
+    "start": "3D79",
+    "end": "3D83",
+    "kind": "data",
+    "name": "msg: not named"
+  },
+  {
+    "start": "3F46",
+    "end": "3F4B",
+    "kind": "data",
+    "name": "msg: M-X "
+  },
+  {
+    "start": "3F80",
+    "end": "3F8A",
+    "kind": "data",
+    "name": "msg: Variable:"
+  },
+  {
+    "start": "3F9F",
+    "end": "3FA9",
+    "kind": "data",
+    "name": "msg: Function:"
+  },
+  {
+    "start": "4154",
+    "end": "4178",
+    "kind": "data",
+    "name": "msg: There are no possible completions.."
+  },
+  {
+    "start": "4189",
+    "end": "41C4",
+    "kind": "data",
+    "name": "msg: .The only possible completion of what yo"
+  },
+  {
+    "start": "41ED",
+    "end": "4224",
+    "kind": "data",
+    "name": "msg: The possible completions of what you hav"
+  },
+  {
+    "start": "488C",
+    "end": "4895",
+    "kind": "data",
+    "name": "msg:   Buffer"
+  },
+  {
+    "start": "489F",
+    "end": "48AD",
+    "kind": "data",
+    "name": "msg: Visiting File"
+  },
+  {
+    "start": "48B7",
+    "end": "48BE",
+    "kind": "data",
+    "name": "msg: Size.."
+  },
+  {
+    "start": "4947",
+    "end": "4954",
+    "kind": "data",
+    "name": "msg: k in use by "
+  },
+  {
+    "start": "495F",
+    "end": "4967",
+    "kind": "data",
+    "name": "msg:  buffer"
+  },
+  {
+    "start": "4975",
+    "end": "4978",
+    "kind": "data",
+    "name": "msg: , "
+  },
+  {
+    "start": "498D",
+    "end": "499B",
+    "kind": "data",
+    "name": "msg: k remaining.."
+  },
+  {
+    "start": "4A4A",
+    "end": "4A66",
+    "kind": "data",
+    "name": "msg: Killing the current buffer."
+  },
+  {
+    "start": "4A6F",
+    "end": "4A78",
+    "kind": "data",
+    "name": "msg:   Select"
+  },
+  {
+    "start": "4B5C",
+    "end": "4B66",
+    "kind": "data",
+    "name": "msg:  Buffer ("
+  },
+  {
+    "start": "4B6F",
+    "end": "4B72",
+    "kind": "data",
+    "name": "msg: ):"
+  },
+  {
+    "start": "51CC",
+    "end": "51D8",
+    "kind": "data",
+    "name": "msg: .The file \""
+  },
+  {
+    "start": "51E6",
+    "end": "5216",
+    "kind": "data",
+    "name": "msg: \" can't be opened.  Check \"System Files "
+  },
+  {
+    "start": "585B",
+    "end": "586B",
+    "kind": "data",
+    "name": "msg:  is undefined.."
+  },
+  {
+    "start": "58C2",
+    "end": "58C8",
+    "kind": "data",
+    "name": "msg: Meta-"
+  },
+  {
+    "start": "58F3",
+    "end": "58FA",
+    "kind": "data",
+    "name": "msg: -Arrow"
+  },
+  {
+    "start": "5947",
+    "end": "5950",
+    "kind": "data",
+    "name": "msg: Control-"
+  },
+  {
+    "start": "5957",
+    "end": "595D",
+    "kind": "data",
+    "name": "msg: Meta-"
+  },
+  {
+    "start": "5961",
+    "end": "5967",
+    "kind": "data",
+    "name": "msg: Space"
+  },
+  {
+    "start": "5F93",
+    "end": "5F9C",
+    "kind": "data",
+    "name": "msg: Failing "
+  },
+  {
+    "start": "5FA4",
+    "end": "5FAD",
+    "kind": "data",
+    "name": "msg: Reverse "
+  },
+  {
+    "start": "5FB0",
+    "end": "5FBA",
+    "kind": "data",
+    "name": "msg: I-Search:"
+  },
+  {
+    "start": "637D",
+    "end": "6381",
+    "kind": "data",
+    "name": "msg: BJ "
+  },
+  {
+    "start": "638C",
+    "end": "6390",
+    "kind": "data",
+    "name": "msg: EJ "
+  },
+  {
+    "start": "6398",
+    "end": "63A1",
+    "kind": "data",
+    "name": "msg: Reverse "
+  },
+  {
+    "start": "63A4",
+    "end": "63AC",
+    "kind": "data",
+    "name": "msg: Search:"
+  },
+  {
+    "start": "63D5",
+    "end": "63E3",
+    "kind": "data",
+    "name": "msg: Label Search:"
+  },
+  {
+    "start": "653A",
+    "end": "653D",
+    "kind": "data",
+    "name": "msg: .."
+  },
+  {
+    "start": "6543",
+    "end": "6548",
+    "kind": "data",
+    "name": "msg: ...."
+  },
+  {
+    "start": "6554",
+    "end": "6559",
+    "kind": "data",
+    "name": "msg: M-X "
+  },
+  {
+    "start": "658D",
+    "end": "6590",
+    "kind": "data",
+    "name": "msg: , "
+  },
+  {
+    "start": "668A",
+    "end": "6698",
+    "kind": "data",
+    "name": "msg: Here are the "
+  },
+  {
+    "start": "669E",
+    "end": "66A7",
+    "kind": "data",
+    "name": "msg: function"
+  },
+  {
+    "start": "66AD",
+    "end": "66B6",
+    "kind": "data",
+    "name": "msg: variable"
+  },
+  {
+    "start": "66B9",
+    "end": "66CB",
+    "kind": "data",
+    "name": "msg: s which contain \""
+  },
+  {
+    "start": "66DB",
+    "end": "66E0",
+    "kind": "data",
+    "name": "msg: \":.."
+  },
+  {
+    "start": "66EC",
+    "end": "66F7",
+    "kind": "data",
+    "name": "msg: Substring:"
+  },
+  {
+    "start": "67A1",
+    "end": "67C3",
+    "kind": "data",
+    "name": "msg:  The entire file can't be loaded!"
+  },
+  {
+    "start": "67EC",
+    "end": "67F7",
+    "kind": "data",
+    "name": "msg: (New File)"
+  },
+  {
+    "start": "682B",
+    "end": "6833",
+    "kind": "data",
+    "name": "msg: Buffer "
+  },
+  {
+    "start": "6839",
+    "end": "685C",
+    "kind": "data",
+    "name": "msg:  has been modified.  Save it first"
+  },
+  {
+    "start": "687B",
+    "end": "6884",
+    "kind": "data",
+    "name": "msg: Reading "
+  },
+  {
+    "start": "688A",
+    "end": "688E",
+    "kind": "data",
+    "name": "msg: ; ("
+  },
+  {
+    "start": "689D",
+    "end": "68AA",
+    "kind": "data",
+    "name": "msg:  characters)"
+  },
+  {
+    "start": "696E",
+    "end": "6977",
+    "kind": "data",
+    "name": "msg: Written:"
+  },
+  {
+    "start": "6992",
+    "end": "69AB",
+    "kind": "data",
+    "name": "msg: Failed! During write of "
+  },
+  {
+    "start": "6A10",
+    "end": "6A13",
+    "kind": "data",
+    "name": "msg: ] "
+  },
+  {
+    "start": "6A8E",
+    "end": "6A9E",
+    "kind": "data",
+    "name": "msg: No changes need"
+  },
+  {
+    "start": "6AA7",
+    "end": "6AAA",
+    "kind": "data",
+    "name": "msg: ed"
+  },
+  {
+    "start": "6AAD",
+    "end": "6ABD",
+    "kind": "data",
+    "name": "msg:  to be written."
+  },
+  {
+    "start": "6B08",
+    "end": "6B1D",
+    "kind": "data",
+    "name": "msg: Error reading file! "
+  },
+  {
+    "start": "6CC5",
+    "end": "6CD2",
+    "kind": "data",
+    "name": "msg: .New prefix:"
+  },
+  {
+    "start": "6CEF",
+    "end": "6D00",
+    "kind": "data",
+    "name": "msg: Current prefix: "
+  },
+  {
+    "start": "6EAB",
+    "end": "6EB5",
+    "kind": "data",
+    "name": "msg: [no date]"
+  },
+  {
+    "start": "742D",
+    "end": "7433",
+    "kind": "data",
+    "name": "msg:  has "
+  },
+  {
+    "start": "745F",
+    "end": "7466",
+    "kind": "data",
+    "name": "msg: free, "
+  },
+  {
+    "start": "7472",
+    "end": "748A",
+    "kind": "data",
+    "name": "msg: in use, for a total of "
+  },
+  {
+    "start": "74A7",
+    "end": "74AD",
+    "kind": "data",
+    "name": "msg:  page"
+  },
+  {
+    "start": "7515",
+    "end": "751B",
+    "kind": "data",
+    "name": "msg:  file"
+  },
+  {
+    "start": "7527",
+    "end": "7534",
+    "kind": "data",
+    "name": "msg:  present on "
+  },
+  {
+    "start": "753A",
+    "end": "753D",
+    "kind": "data",
+    "name": "msg: .."
+  },
+  {
+    "start": "7B85",
+    "end": "7B8A",
+    "kind": "data",
+    "name": "msg: Arg:"
+  },
+  {
+    "start": "7D23",
+    "end": "7D2E",
+    "kind": "data",
+    "name": "msg:  (Y or N)?"
+  },
+  {
+    "start": "7D9A",
+    "end": "7DA2",
+    "kind": "data",
+    "name": "msg: .Done.."
+  },
+  {
+    "start": "7DB8",
+    "end": "7DDE",
+    "kind": "data",
+    "name": "C_XCharacters (38 extended-key chars)"
+  },
+  {
+    "start": "7DDE",
+    "end": "7E2A",
+    "kind": "data",
+    "name": "C_XVectors (38 handler addresses)"
+  },
+  {
+    "start": "7E2A",
+    "end": "7E2B",
+    "kind": "data",
+    "name": "C_XCharCount ($26 = 38)"
+  },
+  {
+    "start": "7F32",
+    "end": "7F40",
+    "kind": "data",
+    "name": "msg: .On what key:"
+  },
+  {
+    "start": "7F51",
+    "end": "7F56",
+    "kind": "data",
+    "name": "msg: Put "
+  },
+  {
+    "start": "7F66",
+    "end": "7F6B",
+    "kind": "data",
+    "name": "msg:  on "
+  },
+  {
+    "start": "7FFC",
+    "end": "8001",
+    "kind": "data",
+    "name": "msg: M-? "
+  },
+  {
+    "start": "8048",
+    "end": "805C",
+    "kind": "data",
+    "name": "msg:  runs the function "
+  },
+  {
+    "start": "8072",
+    "end": "8076",
+    "kind": "data",
+    "name": "msg: ..."
+  },
+  {
+    "start": "80AF",
+    "end": "80B2",
+    "kind": "data",
+    "name": "msg: .."
+  },
+  {
+    "start": "8397",
+    "end": "83A9",
+    "kind": "data",
+    "name": "msg: Doc (? for Help):"
+  },
+  {
+    "start": "8576",
+    "end": "859A",
+    "kind": "data",
+    "name": "msg: Replace this occurence (Y,N,!,C-G)?"
+  },
+  {
+    "start": "85E4",
+    "end": "85F0",
+    "kind": "data",
+    "name": "msg: Search for:"
+  },
+  {
+    "start": "8621",
+    "end": "8630",
+    "kind": "data",
+    "name": "msg: .Replace with:"
+  },
+  {
+    "start": "886B",
+    "end": "8876",
+    "kind": "data",
+    "name": "msg:  occurence"
+  },
+  {
+    "start": "8944",
+    "end": "894F",
+    "kind": "data",
+    "name": "msg: Occurence:"
+  },
+  {
+    "start": "8C4C",
+    "end": "8C65",
+    "kind": "data",
+    "name": "msg: You are about to act on "
+  },
+  {
+    "start": "8C71",
+    "end": "8C96",
+    "kind": "data",
+    "name": "msg:  characters, do you want to continue"
+  },
+  {
+    "start": "8DC2",
+    "end": "8DD4",
+    "kind": "data",
+    "name": "msg:  lines in Region."
+  },
+  {
+    "start": "9201",
+    "end": "920A",
+    "kind": "data",
+    "name": "msg: Library:"
+  },
+  {
+    "start": "92C6",
+    "end": "92D6",
+    "kind": "data",
+    "name": "msg: Flush libraries"
+  },
+  {
+    "start": "94E6",
+    "end": "94FD",
+    "kind": "data",
+    "name": "msg: Missing buffer *TAGS*."
+  },
+  {
+    "start": "96B9",
+    "end": "96CB",
+    "kind": "data",
+    "name": "msg:  can be found in "
+  },
+  {
+    "start": "9707",
+    "end": "9714",
+    "kind": "data",
+    "name": "msg: ' not found."
+  },
+  {
+    "start": "9B37",
+    "end": "A4F8",
+    "kind": "data",
+    "name": "CommandNames (command-name string table to EOF)"
+  }
 ]
