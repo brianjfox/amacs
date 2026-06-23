@@ -6,6 +6,12 @@
     "name": "entry pointer block (CompList..C_XCharCount)"
   },
   {
+    "start": "111B",
+    "end": "111D",
+    "kind": "data",
+    "name": "TwoWindows? flag"
+  },
+  {
     "start": "111D",
     "end": "1126",
     "kind": "data",
@@ -40,6 +46,12 @@
     "end": "14FF",
     "kind": "data",
     "name": "msg: .Value:"
+  },
+  {
+    "start": "1585",
+    "end": "1587",
+    "kind": "data",
+    "name": "AutoPushPoint threshold"
   },
   {
     "start": "1AC3",
@@ -106,6 +118,12 @@
     "end": "2177",
     "kind": "data",
     "name": "msg:  in current.."
+  },
+  {
+    "start": "3BB0",
+    "end": "3BB1",
+    "kind": "data",
+    "name": "QuestionH? flag"
   },
   {
     "start": "3CE9",
@@ -246,6 +264,18 @@
     "name": "ComTab (command dispatch table)"
   },
   {
+    "start": "504E",
+    "end": "5080",
+    "kind": "data",
+    "name": "doc:ExitSafe documentation string"
+  },
+  {
+    "start": "5080",
+    "end": "5184",
+    "kind": "ptrtable",
+    "name": "char->command dispatch vectors (printable chars -> Insert)"
+  },
+  {
     "start": "51CC",
     "end": "51D8",
     "kind": "data",
@@ -268,6 +298,12 @@
     "end": "5538",
     "kind": "data",
     "name": "MinorNames (pointers into ModeNames)"
+  },
+  {
+    "start": "56FB",
+    "end": "56FD",
+    "kind": "data",
+    "name": "PreBlinkCount"
   },
   {
     "start": "585B",
@@ -316,6 +352,12 @@
     "end": "598C",
     "kind": "data",
     "name": "CompList / CompOffset / CompCount"
+  },
+  {
+    "start": "5BC8",
+    "end": "5BF1",
+    "kind": "data",
+    "name": "SearchDefault (default search-string buffer)"
   },
   {
     "start": "5F93",
@@ -424,6 +466,12 @@
     "end": "66F7",
     "kind": "data",
     "name": "msg: Substring:"
+  },
+  {
+    "start": "674E",
+    "end": "6756",
+    "kind": "data",
+    "name": "AutoFileExt / ShowExtension vars"
   },
   {
     "start": "67A1",
@@ -666,6 +714,12 @@
     "name": "msg: Doc (? for Help):"
   },
   {
+    "start": "846F",
+    "end": "8479",
+    "kind": "data",
+    "name": "QueryFlag / CaseReplace / QueryReplace flags"
+  },
+  {
     "start": "8576",
     "end": "859A",
     "kind": "data",
@@ -696,6 +750,18 @@
     "name": "msg: Occurence:"
   },
   {
+    "start": "8AA5",
+    "end": "8AA7",
+    "kind": "data",
+    "name": "MacroExec / MacroDef state flags"
+  },
+  {
+    "start": "8C2B",
+    "end": "8C2D",
+    "kind": "data",
+    "name": "RegionQSize (region-query threshold, default $01F4=500)"
+  },
+  {
     "start": "8C4C",
     "end": "8C65",
     "kind": "data",
@@ -724,6 +790,12 @@
     "end": "92D6",
     "kind": "data",
     "name": "msg: Flush libraries"
+  },
+  {
+    "start": "945C",
+    "end": "9481",
+    "kind": "data",
+    "name": "TheTag (*TAGS* buffer name + zeroed buffer)"
   },
   {
     "start": "94E6",

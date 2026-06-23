@@ -31,6 +31,11 @@ fi
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cp "$SRC" "$STAGE"
+# Stage the module sources too, so the master's `put modules/...' resolves
+# relative to the staged master.
+if [ -d "$REPO_ROOT/src/modules" ]; then
+    cp -R "$REPO_ROOT/src/modules" "$BUILD_DIR/modules"
+fi
 
 # Assemble. macro_dir is the build dir (so any future `use`/`put` of staged
 # includes resolves). Merlin writes the object named by `dsk` (AMACS.OBJ) here.

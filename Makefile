@@ -14,6 +14,7 @@ GOLD    := BIN/AMACS.OBJ
 SRC     := src/amacs.s
 REGIONS := src/regions.json
 SYMBOLS := src/symbols.json
+MODULES := src/modules.json
 
 .PHONY: all check setup blob symbols regions disasm build verify clean
 
@@ -37,9 +38,10 @@ symbols:
 regions:
 	tools/find_data.py $(GOLD) $(REGIONS)
 
-# Regenerate the disassembly from the binary + region map + symbol table.
+# Regenerate the disassembly, split into per-module files + a master that
+# `put's them in load order (src/modules.json defines the module boundaries).
 disasm:
-	tools/disasm.py $(GOLD) $(SRC) $(REGIONS) $(SYMBOLS)
+	tools/disasm.py $(GOLD) $(SRC) $(REGIONS) $(SYMBOLS) $(MODULES)
 
 build:
 	tools/build.sh

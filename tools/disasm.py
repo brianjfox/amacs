@@ -331,9 +331,38 @@ def disassemble(out, data, start, end, sym, aliases, labels, stats):
         i += n
 
 
+def equate_lines(sym, aliases):
+    """The symbol-equate block: every name used by an operand, defined once.
+    Also serves as a human-readable symbol map. Names verbatim from the
+    originals (LINK.OUTPUT.S + curated DEFS addresses)."""
+    out = ["; ===================== symbol equates ====================="]
+    for key in sorted(sym, key=lambda k: int(k, 16)):
+        v = int(key, 16)
+        # 2-digit value => Merlin types the symbol zero-page (needed for zp /
+        # zp-indirect operands); 4-digit => absolute.
+        vfmt = f"${v:02X}" if v < 0x100 else f"${v:04X}"
+        al = f"  ; = {', '.join(aliases[key])}" if key in aliases else ""
+        out.append(f"{sym[key]:<18} = {vfmt}{al}")
+    out.append("; ==========================================================")
+    return out
+
+
+def emit_span(out, data, s, e, kind, region_name, sym, aliases, labels, stats):
+    """Emit one [s,e) span (code / data / ptrtable) into `out`."""
+    tag = f"{kind}  {region_name}".rstrip()
+    out.append(f"; ---- ${s:04X}-${e - 1:04X}  {tag} ----")
+    if kind == "data":
+        emit_data(out, data, s, e)
+    elif kind == "ptrtable":
+        emit_ptrtable(out, data, s, e, sym, labels)
+    else:
+        disassemble(out, data, s, e, sym, aliases, labels, stats)
+
+
 def main(argv):
-    if len(argv) not in (3, 4, 5):
-        sys.stderr.write("usage: disasm.py INPUT.OBJ OUTPUT.s [regions.json] [symbols.json]\n")
+    if len(argv) not in (3, 4, 5, 6):
+        sys.stderr.write("usage: disasm.py INPUT.OBJ OUTPUT.s [regions.json] "
+                         "[symbols.json] [modules.json]\n")
         return 2
     src_obj, out_s = argv[1], argv[2]
     regions = []
@@ -341,10 +370,14 @@ def main(argv):
         with open(argv[3]) as f:
             regions = json.load(f)
     sym, aliases = {}, {}
-    if len(argv) == 5 and argv[4]:
+    if len(argv) >= 5 and argv[4]:
         with open(argv[4]) as f:
             sj = json.load(f)
         sym, aliases = sj.get("byaddr", {}), sj.get("aliases", {})
+    modules = []
+    if len(argv) == 6 and argv[5]:
+        with open(argv[5]) as f:
+            modules = json.load(f)
 
     with open(src_obj, "rb") as f:
         data = f.read()
@@ -363,8 +396,46 @@ def main(argv):
         cur = e
     if cur < end_addr:
         spans.append((cur, end_addr, "code"))
+    names = {(int(str(r["start"]), 16)): r.get("name", "") for r in regions}
 
-    out = [
+    # Pass A: scan code spans for instruction boundaries and control-flow
+    # targets; synthesize local labels for in-range targets without a symbol.
+    instr_starts, targets = set(), set()
+    for (s, e, kind) in spans:
+        if kind not in ("data", "ptrtable"):
+            scan_code(data, s, e, instr_starts, targets)
+    for (s, e, kind) in spans:        # pointer tables hold indirect code entries
+        if kind == "ptrtable":
+            for off in range(s - ORG, e - ORG - 1, 2):
+                targets.add(data[off] | (data[off + 1] << 8))
+    labels = {f"{a:04X}": f"L{a:04X}" for a in (targets & instr_starts)
+              if f"{a:04X}" not in sym}
+
+    stats = {"instrs": 0, "operands": 0, "named": 0, "bank": 0, "fill": 0,
+             "labels": len(labels)}
+
+    if modules:
+        rc = emit_modules(argv, data, end_addr, spans, names, sym, aliases,
+                          labels, modules, instr_starts, stats)
+        return rc
+
+    # ---- single-file mode ----
+    out = _file_header(data, end_addr)
+    out += equate_lines(sym, aliases) + [";"]
+    out += [f"        org ${ORG:04X}", "        dsk AMACS.OBJ", ";"]
+    for (s, e, kind) in spans:
+        emit_span(out, data, s, e, kind, names.get(s, ""), sym, aliases, labels, stats)
+    out_dir = os.path.dirname(out_s)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    with open(out_s, "w") as f:
+        f.write("\n".join(out) + "\n")
+    _print_stats(out_s, len(spans), data, stats)
+    return 0
+
+
+def _file_header(data, end_addr):
+    return [
         ";-*- Mode: Merlin -*-",
         ";",
         "; src/amacs.s -- AMACS main editor: reconstructed disassembly.",
@@ -376,64 +447,88 @@ def main(argv):
         ";",
     ]
 
-    # Symbol equates. Every name used by an operand must be defined; we emit the
-    # whole table (sorted by address) so it doubles as a symbol map. This is the
-    # original linker map + curated DEFS addresses, names verbatim.
-    if sym:
-        out.append("; ===================== symbol equates =====================")
-        for key in sorted(sym, key=lambda k: int(k, 16)):
-            v = int(key, 16)
-            # 2-digit value => Merlin types the symbol as zero-page (needed for
-            # zp / zp-indirect operands); 4-digit => absolute.
-            vfmt = f"${v:02X}" if v < 0x100 else f"${v:04X}"
-            al = f"  ; = {', '.join(aliases[key])}" if key in aliases else ""
-            out.append(f"{sym[key]:<18} = {vfmt}{al}")
-        out.append("; ==========================================================")
-        out.append(";")
 
-    out += [f"        org ${ORG:04X}", "        dsk AMACS.OBJ", ";"]
-
-    # Pass A: scan code spans for instruction boundaries and control-flow
-    # targets, then synthesize local labels for targets that hit a local
-    # instruction and have no original symbol.
-    instr_starts, targets = set(), set()
-    for (s, e, kind) in spans:
-        if kind not in ("data", "ptrtable"):
-            scan_code(data, s, e, instr_starts, targets)
-    # Pointer tables hold code entry points reached only by indirect dispatch;
-    # seed them as targets so their handlers get local labels too.
-    for (s, e, kind) in spans:
-        if kind == "ptrtable":
-            for off in range(s - ORG, e - ORG - 1, 2):
-                targets.add(data[off] | (data[off + 1] << 8))
-    labels = {f"{a:04X}": f"L{a:04X}" for a in (targets & instr_starts)
-              if f"{a:04X}" not in sym}
-
-    # Pass B: emit.
-    stats = {"instrs": 0, "operands": 0, "named": 0, "bank": 0, "fill": 0,
-             "labels": len(labels)}
-    names = {(int(str(r["start"]), 16)): r.get("name", "") for r in regions}
-    for (s, e, kind) in spans:
-        nm = names.get(s, "")
-        tag = f"{kind}  {nm}".rstrip()
-        out.append(f"; ---- ${s:04X}-${e - 1:04X}  {tag} ----")
-        if kind == "data":
-            emit_data(out, data, s, e)
-        elif kind == "ptrtable":
-            emit_ptrtable(out, data, s, e, sym, labels)
-        else:
-            disassemble(out, data, s, e, sym, aliases, labels, stats)
-
-    out_dir = os.path.dirname(out_s)
-    if out_dir:
-        os.makedirs(out_dir, exist_ok=True)
-    with open(out_s, "w") as f:
-        f.write("\n".join(out) + "\n")
+def _print_stats(where, nregions, data, stats):
     pct = (100 * stats["named"] // stats["operands"]) if stats["operands"] else 0
-    print(f"wrote {out_s}: {len(out)} lines, {len(data)} bytes, {len(spans)} regions; "
+    print(f"wrote {where}: {len(data)} bytes, {nregions} regions; "
           f"{stats['instrs']} instrs, {stats['named']}/{stats['operands']} "
           f"address operands named ({pct}%), {stats['labels']} local labels, "
           f"{stats['bank']} bank-switch sites flagged, {stats['fill']} fill runs collapsed")
+
+
+def emit_modules(argv, data, end_addr, spans, names, sym, aliases, labels,
+                 modules, instr_starts, stats):
+    """Module mode: split the address space at module boundaries and write one
+    Merlin source file per module, plus a master that `put`s them in order. The
+    concatenation of modules (in put order) reproduces the image, so the build
+    stays byte-identical."""
+    master_path = argv[2]
+    src_dir = os.path.dirname(master_path) or "."
+    mod_dir = os.path.join(src_dir, "modules")
+    os.makedirs(mod_dir, exist_ok=True)
+    # Clear stale module files (indices/names shift when boundaries change).
+    import glob
+    for old in glob.glob(os.path.join(mod_dir, "*.s")):
+        os.remove(old)
+
+    mods = sorted(modules, key=lambda m: int(str(m["start"]), 16))
+    bounds = [int(str(m["start"]), 16) for m in mods]
+    region_starts = {s for (s, _e, _k) in spans}
+
+    # Warn if a boundary doesn't fall on a clean instruction/region start (the
+    # build stays byte-identical regardless, but a stray boundary makes one
+    # line decode oddly).
+    for b in bounds:
+        if b != ORG and b not in instr_starts and b not in region_starts:
+            sys.stderr.write(f"WARNING: module boundary ${b:04X} is not an "
+                             f"instruction/region start\n")
+
+    # Split spans at module boundaries so each piece belongs to one module.
+    pieces = []
+    for (s, e, kind) in spans:
+        cuts = sorted({s, e} | {b for b in bounds if s < b < e})
+        for a, b in zip(cuts, cuts[1:]):
+            pieces.append((a, b, kind))
+
+    def module_index(addr):
+        idx = 0
+        for i, b in enumerate(bounds):
+            if addr >= b:
+                idx = i
+        return idx
+
+    # Group pieces per module and emit each module file.
+    put_lines = []
+    for i, m in enumerate(mods):
+        start = bounds[i]
+        end = bounds[i + 1] if i + 1 < len(mods) else end_addr
+        fname = f"{i:02d}_{m['name']}"
+        out = [
+            ";-*- Mode: Merlin -*-",
+            ";",
+            f"; src/modules/{fname}.s -- AMACS: {m.get('desc', m['name'])}",
+            f"; Address range ${start:04X}-${end - 1:04X}. GENERATED by tools/disasm.py.",
+            f"; `put' from src/amacs.s; symbols/labels are global across modules.",
+            ";",
+        ]
+        for (a, b, kind) in pieces:
+            if module_index(a) == i:
+                emit_span(out, data, a, b, kind, names.get(a, ""),
+                          sym, aliases, labels, stats)
+        with open(os.path.join(mod_dir, fname + ".s"), "w") as f:
+            f.write("\n".join(out) + "\n")
+        put_lines.append(f"        put modules/{fname}")
+
+    # Master file: header, equates, origin, then `put' each module in order.
+    master = _file_header(data, end_addr)
+    master += equate_lines(sym, aliases) + [";"]
+    master += [f"        org ${ORG:04X}", "        dsk AMACS.OBJ", ";",
+               "; ---- modules, in load order (byte layout = put order) ----"]
+    master += put_lines + [";"]
+    with open(master_path, "w") as f:
+        f.write("\n".join(master) + "\n")
+
+    _print_stats(f"{master_path} + {len(mods)} modules", len(spans), data, stats)
     return 0
 
 

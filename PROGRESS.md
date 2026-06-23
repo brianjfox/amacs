@@ -115,20 +115,32 @@ and/or **6502bench SourceGen** for the interactive label loop.
 
 ## 3. Verification harness — BUILT AND GREEN ✓
 
-The round-trip is stood up and proven end to end. Layout:
+The round-trip is stood up and proven end to end. The source is now split into
+**29 per-module files** under `src/modules/`, assembled via a master `src/amacs.s`
+that `put`s them in load order. Layout:
 
 ```
-src/amacs.s              reconstructed Merlin source (currently a byte blob)
+src/amacs.s              master: symbol equates + org + `put' each module
+src/modules/NN_name.s    one logical module per file (boot, window, buffer, ...)
+src/regions.json         code/data region map (generated, make regions)
+src/symbols.json         address->name table (generated, make symbols)
+src/modules.json         module boundary map (EDIT to re-cut modules)
 build/                   assembler output (gitignored)
-Makefile                 setup / blob / build / verify / check / clean
+Makefile                 setup / symbols / regions / disasm / build / verify / check
 tools/setup.sh           clone+build Merlin 32 into tools/merlin32/
-tools/make_blob_source.py generate src/amacs.s as verbatim HEX from the binary
-tools/build.sh           assemble src/amacs.s -> build/AMACS.OBJ (origin $1000)
+tools/build_symbols.py   build the address->name table
+tools/find_data.py       build the code/data region map
+tools/disasm.py          emit the per-module Merlin source + master
+tools/build.sh           stage src/ and assemble -> build/AMACS.OBJ (origin $1000)
 tools/verify.sh          byte-compare build vs BIN/AMACS.OBJ; report first diff
 tools/decode.py          decode a high-bit/CR Merlin .S file to ASCII
 ```
 
 Single commands: `make build`, `make verify`, `make check` (build+verify).
+Regenerate the source: `make symbols && make regions && make disasm`.
+To re-cut modules, edit `src/modules.json` (one line per boundary) and
+`make disasm` — the build stays byte-identical because modules are contiguous
+slices concatenated in `put` order.
 
 **Proof it works (this session):**
 - Positive: `make check` → `VERIFY OK ... (38136 bytes, origin $1000, last
@@ -261,6 +273,14 @@ pseudo-instructions for now; flagged so we don't mistake them for real code.
   (`<== BANK: ...`), 63 sites. Behavior is asserted from the hardware, not
   guessed. **Behavioral naming of anonymous routines is deferred to Brian** (the
   intent-dependent part, per CLAUDE.md's division of labor).
+- **Module split ✓ (project completion criterion)** — `src/amacs.s` is now a
+  master that `put`s 29 logical module files (`src/modules/NN_name.s`): entry,
+  boot, window, variable, edit, command, display, motion, minibuffer, buffer,
+  comtab, modeline, echoarea, completion, search, filer, dispatch, argument,
+  ctrlx, mode, replace, transpose, macro, region, hardcopy, library, tags,
+  vartables, cmdnames. Boundaries live in `src/modules.json` (easy to re-cut).
+  Every boundary lands on a clean instruction/region start; cold `make check`
+  reassembles byte-identical.
 - Stage 5 (comments/polish) — substantial: structural region headers,
   routine-start markers (`; === Name ===`), **synthetic local labels** (`Lxxxx`)
   on all branch/jmp/jsr targets so control flow is followable, ASCII glosses on

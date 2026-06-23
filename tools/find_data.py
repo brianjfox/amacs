@@ -36,6 +36,8 @@ STRUCTURAL = [
     # --- command/char/completion dispatch tables ---
     (0x3F6D, 0x3F70, "CharIndex (3 bytes)"),
     (0x4F84, 0x504E, "ComTab (command dispatch table)"),
+    (0x504E, 0x5080, "doc:ExitSafe documentation string"),
+    (0x5080, 0x5184, "char->command dispatch vectors (printable chars -> Insert)"),
     (0x5987, 0x598C, "CompList / CompOffset / CompCount"),
     # --- mode / key name tables ---
     (0x54F2, 0x5528, "ModeNames (major+minor mode name strings)"),
@@ -48,6 +50,19 @@ STRUCTURAL = [
     (0x7DB8, 0x7DDE, "C_XCharacters (38 extended-key chars)"),
     (0x7DDE, 0x7E2A, "C_XVectors (38 handler addresses)"),
     (0x7E2A, 0x7E2B, "C_XCharCount ($26 = 38)"),
+    # --- small data vars/buffers sitting between routines (often a module's
+    #     leading state, zero/flag-initialized) ---
+    (0x111B, 0x111D, "TwoWindows? flag"),
+    (0x1585, 0x1587, "AutoPushPoint threshold"),
+    (0x3BB0, 0x3BB1, "QuestionH? flag"),
+    (0x56FB, 0x56FD, "PreBlinkCount"),
+    (0x5BC8, 0x5BF1, "SearchDefault (default search-string buffer)"),
+    (0x674E, 0x6756, "AutoFileExt / ShowExtension vars"),
+    (0x846F, 0x8479, "QueryFlag / CaseReplace / QueryReplace flags"),
+    (0x8AA5, 0x8AA7, "MacroExec / MacroDef state flags"),
+    (0x8C2B, 0x8C2D, "RegionQSize (region-query threshold, default $01F4=500)"),
+    # --- tags buffer ---
+    (0x945C, 0x9481, "TheTag (*TAGS* buffer name + zeroed buffer)"),
     # --- settable-variable tables ---
     (0x975D, 0x9A6A, "Variables (variable-name + record table)"),
     (0x9A6A, 0x9A6D, "VariableLink"),
@@ -112,7 +127,7 @@ def main(argv):
 
     # Tables that are arrays of little-endian address words: emit as annotated
     # `da' so each entry shows the routine it points to.
-    ptrtable_starts = {0x1027, 0x7DDE}
+    ptrtable_starts = {0x1027, 0x5080, 0x7DDE}
     out = [{"start": f"{s:04X}", "end": f"{e:04X}",
             "kind": "ptrtable" if s in ptrtable_starts else "data", "name": nm}
            for (s, e, nm) in regions]
